@@ -66,6 +66,20 @@ If you want phone OTP login, set:
 
 5. Open `http://127.0.0.1:5000/index.html` if you are serving the static files through Flask-compatible hosting, or serve the root directory with your preferred static server while keeping the API available at `/api`.
 
+## Existing Neon Migration
+
+If your Neon database already contains the older mixed-case shop tables, run:
+
+```bash
+python scripts/migrate_neon_schema.py
+```
+
+This migration:
+
+- Backs up the old lowercase `users`, `products`, `orders`, and `installations` tables
+- Recreates the lowercase schema expected by the current Flask app
+- Imports the legacy `Products` catalog into the new `products` table
+
 ## Notes
 
 - The initial EcoFlow inventory is seeded from the prompt and can be replaced with the admin Excel upload.

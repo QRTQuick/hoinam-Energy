@@ -4,7 +4,12 @@ import json
 import os
 from dataclasses import dataclass, field
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -25,14 +30,22 @@ def _admin_email_set() -> set[str]:
 
 @dataclass(frozen=True)
 class Settings:
-    database_url: str = os.getenv("DATABASE_URL", "").strip()
-    default_currency: str = os.getenv("DEFAULT_CURRENCY", "NGN").strip() or "NGN"
+    database_url: str = field(default_factory=lambda: os.getenv("DATABASE_URL", "").strip())
+    default_currency: str = field(
+        default_factory=lambda: os.getenv("DEFAULT_CURRENCY", "NGN").strip() or "NGN"
+    )
     cors_origins: list[str] = field(default_factory=lambda: _env_list("CORS_ORIGINS"))
-    frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:5000").rstrip("/")
-    paystack_secret_key: str = os.getenv("PAYSTACK_SECRET_KEY", "").strip()
-    allow_demo_payments: bool = _env_flag("ALLOW_DEMO_PAYMENTS", default=False)
+    frontend_url: str = field(
+        default_factory=lambda: os.getenv("FRONTEND_URL", "http://localhost:5000").rstrip("/")
+    )
+    paystack_secret_key: str = field(default_factory=lambda: os.getenv("PAYSTACK_SECRET_KEY", "").strip())
+    allow_demo_payments: bool = field(
+        default_factory=lambda: _env_flag("ALLOW_DEMO_PAYMENTS", default=False)
+    )
     admin_emails: set[str] = field(default_factory=_admin_email_set)
-    firebase_credentials_json: str = os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
+    firebase_credentials_json: str = field(
+        default_factory=lambda: os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
+    )
 
     def firebase_credentials(self) -> dict[str, Any] | None:
         if not self.firebase_credentials_json:
