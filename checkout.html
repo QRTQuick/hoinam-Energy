@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Hoinam Energy</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Checkout</span>
+          <h1>Confirm delivery details and pay securely</h1>
+          <p>Payment is handled through Paystack and the backend verifies the transaction before order confirmation.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div id="checkout-status"></div>
+          <div class="checkout-grid">
+            <form class="panel form-grid" id="checkout-form">
+              <h3 class="field-full">Delivery details</h3>
+              <label class="field">
+                <span>Full name</span>
+                <input name="full_name" type="text" required>
+              </label>
+              <label class="field">
+                <span>Phone</span>
+                <input name="phone" type="tel" required>
+              </label>
+              <label class="field field-full">
+                <span>Address</span>
+                <textarea name="address" required></textarea>
+              </label>
+              <label class="field">
+                <span>City</span>
+                <input name="city" type="text" required>
+              </label>
+              <label class="field">
+                <span>State</span>
+                <input name="state" type="text" required>
+              </label>
+              <label class="field field-full">
+                <span>Order notes</span>
+                <textarea name="notes" placeholder="Access notes, preferred call-back time, or installation context"></textarea>
+              </label>
+              <div class="field field-full">
+                <button class="button button-full" type="submit">Continue to Paystack</button>
+              </div>
+            </form>
+
+            <aside id="checkout-summary"></aside>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+    <script src="/assets/js/site-config.js"></script>
+    <script type="module" src="/assets/js/pages/checkout.js"></script>
+  </body>
+</html>

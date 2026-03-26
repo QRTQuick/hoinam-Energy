@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Hoinam Energy</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Admin console</span>
+          <h1>Manage products, customers, payments, and installation workflow</h1>
+          <p>Role-based access is enforced by Firebase claims or the configured admin email allow-list.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="dashboard-grid" id="admin-stats"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container split-layout">
+          <form class="panel form-grid" id="product-form">
+            <h3 class="field-full">Create or update product</h3>
+            <input name="product_id" type="hidden">
+            <label class="field">
+              <span>Name</span>
+              <input name="name" type="text" required>
+            </label>
+            <label class="field">
+              <span>Category</span>
+              <input name="category" type="text" required>
+            </label>
+            <label class="field">
+              <span>Price</span>
+              <input name="price" type="number" min="0" required>
+            </label>
+            <label class="field">
+              <span>Stock</span>
+              <input name="stock" type="number" min="0" required>
+            </label>
+            <label class="field field-full">
+              <span>Summary</span>
+              <input name="summary" type="text">
+            </label>
+            <label class="field field-full">
+              <span>Description</span>
+              <textarea name="description"></textarea>
+            </label>
+            <label class="field field-full">
+              <span>Image URL</span>
+              <input name="image_url" type="url" placeholder="https://example.com/product.jpg">
+            </label>
+            <label class="field field-full">
+              <span>Highlights</span>
+              <input name="highlights" type="text" placeholder="Portable, Solar-ready, Home backup">
+            </label>
+            <label class="field">
+              <span><input name="featured" type="checkbox"> Featured</span>
+            </label>
+            <label class="field">
+              <span><input name="active" type="checkbox" checked> Active</span>
+            </label>
+            <div class="field field-full inline-actions">
+              <button class="button" type="submit">Save product</button>
+              <button class="button button-ghost" id="clear-product-form" type="button">Clear form</button>
+            </div>
+          </form>
+
+          <form class="panel form-grid" id="inventory-upload-form">
+            <h3 class="field-full">Upload inventory from Excel</h3>
+            <label class="field field-full">
+              <span>Excel file</span>
+              <input name="inventory_file" type="file" accept=".xlsx,.xls" required>
+            </label>
+            <p class="field-full muted">Accepted layout: name, stock, price, category, image_url, summary, description. A simple name + stock sheet also works.</p>
+            <div class="field field-full">
+              <button class="button button-full" type="submit">Upload inventory</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="panel">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Products</span>
+                <h2>Catalog management</h2>
+              </div>
+            </div>
+            <div class="table-wrap" id="admin-products"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="panel">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Users</span>
+                <h2>Customer accounts</h2>
+              </div>
+            </div>
+            <div class="table-wrap" id="admin-users"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="panel">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Orders</span>
+                <h2>Payments and order records</h2>
+              </div>
+            </div>
+            <div class="table-wrap" id="admin-orders"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="panel">
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow">Installations</span>
+                <h2>Assign installers and track status</h2>
+              </div>
+            </div>
+            <div class="table-wrap" id="admin-installations"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+    <script src="/assets/js/site-config.js"></script>
+    <script type="module" src="/assets/js/pages/admin.js"></script>
+  </body>
+</html>

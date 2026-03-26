@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Installation | Hoinam Energy</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Installation booking</span>
+          <h1>Request solar and backup installation support</h1>
+          <p>Share product context, site address, preferred date, and notes so the Hoinam Energy team can follow up.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <form class="panel form-grid" id="installation-form">
+            <h3 class="field-full">Installation request</h3>
+            <label class="field">
+              <span>Product</span>
+              <select id="product-id" name="product_id">
+                <option value="">General project inquiry</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Preferred date</span>
+              <input name="preferred_date" type="date">
+            </label>
+            <label class="field">
+              <span>Service type</span>
+              <select name="service_type">
+                <option value="Solar Installation">Solar Installation</option>
+                <option value="Backup Power Setup">Backup Power Setup</option>
+                <option value="Site Assessment">Site Assessment</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Phone</span>
+              <input name="phone" type="tel" required>
+            </label>
+            <label class="field field-full">
+              <span>Address</span>
+              <textarea name="address" required></textarea>
+            </label>
+            <label class="field">
+              <span>City</span>
+              <input name="city" type="text" required>
+            </label>
+            <label class="field">
+              <span>State</span>
+              <input name="state" type="text" required>
+            </label>
+            <label class="field field-full">
+              <span>Project notes</span>
+              <textarea name="notes" placeholder="Tell us about appliances, usage goals, roof access, or site constraints"></textarea>
+            </label>
+            <div class="field field-full">
+              <button class="button button-full" type="submit">Submit request</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+    <script src="/assets/js/site-config.js"></script>
+    <script type="module" src="/assets/js/pages/book-install.js"></script>
+  </body>
+</html>

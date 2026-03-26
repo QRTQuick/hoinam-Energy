@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Hoinam Energy</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <span class="eyebrow">Authentication</span>
+          <h1>Sign up or log in with email, Google, or phone number</h1>
+          <p>Firebase now powers email/password accounts, Google sign-up and login, plus phone number OTP access for Hoinam Energy customers.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div id="auth-config-note"></div>
+          <div class="auth-grid">
+            <form class="panel form-grid" id="login-form">
+              <h3 class="field-full">Sign in</h3>
+              <label class="field field-full">
+                <span>Email</span>
+                <input name="email" type="email" required>
+              </label>
+              <label class="field field-full">
+                <span>Password</span>
+                <input name="password" type="password" required>
+              </label>
+              <div class="field field-full">
+                <button class="button button-full" type="submit">Login</button>
+              </div>
+              <div class="field field-full">
+                <button class="button button-secondary button-full" data-google-auth type="button">Continue with Google</button>
+              </div>
+            </form>
+
+            <form class="panel form-grid" id="register-form">
+              <h3 class="field-full">Create account</h3>
+              <label class="field field-full">
+                <span>Full name</span>
+                <input name="full_name" type="text" required>
+              </label>
+              <label class="field field-full">
+                <span>Email</span>
+                <input name="email" type="email" required>
+              </label>
+              <label class="field field-full">
+                <span>Password</span>
+                <input name="password" type="password" minlength="6" required>
+              </label>
+              <div class="field field-full">
+                <button class="button button-full" type="submit">Register</button>
+              </div>
+              <div class="field field-full">
+                <button class="button button-secondary button-full" data-google-auth type="button">Sign up with Google</button>
+              </div>
+            </form>
+
+            <div class="panel form-grid hidden" id="phone-auth-card">
+              <h3 class="field-full">Phone sign up or login</h3>
+              <label class="field field-full">
+                <span>Full name</span>
+                <input id="phone-full-name" type="text" placeholder="Optional for first-time phone signup">
+              </label>
+              <label class="field field-full">
+                <span>Phone number</span>
+                <input id="phone-number" type="tel" placeholder="+2348012345678">
+              </label>
+              <p class="field-full muted">If this phone number is new, Firebase creates the account after OTP verification. If it already exists, the same flow logs the user in.</p>
+              <div class="field field-full">
+                <button class="button button-full" id="send-otp" type="button">Send OTP</button>
+              </div>
+              <label class="field field-full">
+                <span>OTP code</span>
+                <input id="otp-code" type="text" placeholder="123456">
+              </label>
+              <div class="field field-full">
+                <button class="button button-secondary button-full" id="verify-otp" type="button">Verify OTP</button>
+              </div>
+              <div class="field field-full">
+                <div id="recaptcha-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+    <script src="/assets/js/site-config.js"></script>
+    <script type="module" src="/assets/js/pages/login.js"></script>
+  </body>
+</html>
