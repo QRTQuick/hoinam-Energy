@@ -9,11 +9,10 @@ from openpyxl import load_workbook
 from sqlalchemy import desc, func
 
 from .config import get_settings
-from .database import close_session, get_session, init_database
+from .database import close_session, get_session
 from .firebase_auth import verify_id_token
 from .models import Installation, Order, Product, User
 from .payments import initialize_transaction, verify_transaction
-from .seed import seed_products
 from .services import apply_product_payload, calculate_order_items, sync_user_from_claims
 from .utils import generate_order_number, generate_payment_reference, slugify, to_decimal, to_minor_units
 
@@ -34,14 +33,6 @@ def create_app() -> Flask:
         resources={r"/api/*": {"origins": settings.cors_origins or "*"}},
         supports_credentials=True,
     )
-
-    init_database()
-    db = get_session()
-    try:
-        seed_products(db)
-    finally:
-        db.close()
-        close_session()
 
     @app.before_request
     def attach_session():
