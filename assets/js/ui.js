@@ -108,7 +108,7 @@ export function injectShell(activePage) {
       <header class="site-header">
         <div class="container nav-row">
           <a class="brand" href="/index.html">
-            <span class="brand-mark">HE</span>
+            <span class="brand-mark"><i class="fa-solid fa-solar-panel" aria-hidden="true"></i></span>
             <span class="brand-copy">
               <span>${company.name}</span>
               <small>${company.tagline}</small>

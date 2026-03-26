@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
 
 :root {
   --bg: #f6fbf5;
@@ -36,7 +37,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Manrope", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(255, 140, 0, 0.08), transparent 30%),
@@ -96,7 +97,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.9rem;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
   font-weight: 700;
   color: var(--heading);
 }
@@ -108,7 +109,7 @@ button {
   display: grid;
   place-items: center;
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   background:
     linear-gradient(135deg, rgba(255, 140, 0, 0.96), rgba(31, 122, 76, 1));
   box-shadow: 0 16px 24px rgba(31, 122, 76, 0.22);
@@ -121,7 +122,7 @@ button {
 }
 
 .brand-copy small {
-  font-family: "Manrope", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   color: var(--text-soft);
   font-size: 0.78rem;
   font-weight: 600;
@@ -204,7 +205,7 @@ button {
 .panel h3,
 .detail-copy h1,
 .cta-card h2 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
   color: var(--heading);
   letter-spacing: -0.03em;
   margin: 0;
@@ -308,6 +309,12 @@ button {
   color: white;
 }
 
+.solar-visual .badge {
+  background: rgba(255, 248, 234, 0.14);
+  color: #fff1cf;
+  border: 1px solid rgba(255, 241, 207, 0.16);
+}
+
 .solar-visual::before,
 .solar-visual::after {
   content: "";
@@ -332,9 +339,16 @@ button {
 }
 
 .solar-visual h3 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
   font-size: 1.8rem;
   margin: 0 0 0.8rem;
+  color: #fff3d7;
+  text-wrap: balance;
+  text-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.solar-visual > p {
+  color: rgba(247, 251, 248, 0.9);
 }
 
 .visual-pillars {
@@ -344,10 +358,39 @@ button {
 }
 
 .visual-pillars div {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0.85rem;
+  align-items: start;
   padding: 0.9rem 1rem;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.visual-pillars i {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #fff4d2;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.visual-pillars strong,
+.visual-pillars p {
+  grid-column: 2;
+}
+
+.visual-pillars strong {
+  color: #ffffff;
+}
+
+.visual-pillars p {
+  margin: 0.25rem 0 0;
+  color: rgba(244, 248, 246, 0.84);
 }
 
 .hero-stats,
@@ -436,7 +479,7 @@ button {
   place-items: center;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.24);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
   font-size: 1.35rem;
   font-weight: 700;
   z-index: 1;
@@ -521,7 +564,7 @@ button {
 }
 
 .price {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
   color: var(--heading);
   font-size: 1.4rem;
 }
@@ -538,7 +581,7 @@ button {
 .feature-card h3,
 .office-card h3 {
   margin: 0.6rem 0;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
 }
 
 .icon-burst {
@@ -547,8 +590,10 @@ button {
   border-radius: 18px;
   display: grid;
   place-items: center;
-  font-size: 1.35rem;
-  background: linear-gradient(135deg, rgba(255, 140, 0, 0.2), rgba(31, 122, 76, 0.16));
+  font-size: 1.2rem;
+  color: var(--primary-deep);
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.24), rgba(31, 122, 76, 0.18));
+  box-shadow: inset 0 0 0 1px rgba(31, 122, 76, 0.08);
 }
 
 .detail-layout,
@@ -691,7 +736,7 @@ th {
   display: grid;
   place-items: center;
   color: white;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Sora", sans-serif;
   font-weight: 700;
 }
 

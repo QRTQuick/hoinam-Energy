@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 
-from flask import Flask, g, jsonify, request
+from flask import Flask, g, jsonify, request, send_from_directory
 from flask_cors import CORS
 from openpyxl import load_workbook
 from sqlalchemy import desc, func
@@ -27,6 +28,7 @@ class ApiError(Exception):
 def create_app() -> Flask:
     settings = get_settings()
     app = Flask(__name__)
+    project_root = Path(__file__).resolve().parents[1]
     CORS(
         app,
         resources={r"/api/*": {"origins": settings.cors_origins or "*"}},
@@ -452,5 +454,16 @@ def create_app() -> Flask:
 
         db_session().commit()
         return json_success({"created": created, "updated": updated}, message="Inventory upload complete.")
+
+    @app.get("/")
+    def serve_index():
+        return send_from_directory(project_root, "index.html")
+
+    @app.get("/<path:path>")
+    def serve_frontend(path: str):
+        candidate = project_root / path
+        if candidate.is_file():
+            return send_from_directory(project_root, path)
+        raise ApiError("Page not found.", 404)
 
     return app
