@@ -93,6 +93,79 @@ export function renderOffices() {
     .join("");
 }
 
+function renderFooterOffices() {
+  const offices = window.HOINAM_CONFIG?.company?.offices || [];
+  return `
+    <article class="footer-panel">
+      <span class="badge"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Offices</span>
+      <h3>Office locations</h3>
+      <div class="footer-stack">
+        ${offices
+          .map(
+            (office) => `
+              <div class="footer-item">
+                <strong>${office.title}</strong>
+                <p class="muted">${office.address}</p>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderFooterFaq() {
+  const faqItems = window.HOINAM_CONFIG?.company?.faq || [];
+  return `
+    <article class="footer-panel">
+      <span class="badge"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> FAQ</span>
+      <h3>Common questions</h3>
+      <div class="footer-stack">
+        ${faqItems
+          .slice(0, 4)
+          .map(
+            (item) => `
+              <a class="footer-link" href="/about.html#faq">
+                <strong>${item.question}</strong>
+              </a>
+            `
+          )
+          .join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderFooterSocials() {
+  const socials = window.HOINAM_CONFIG?.company?.socials || [];
+  return `
+    <article class="footer-panel">
+      <span class="badge"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i> Socials</span>
+      <h3>Company socials</h3>
+      <div class="social-links">
+        ${socials
+          .map((social) =>
+            social.href
+              ? `
+                <a class="social-link" href="${social.href}" target="_blank" rel="noreferrer">
+                  <i class="${social.icon}" aria-hidden="true"></i>
+                  <span>${social.label}</span>
+                </a>
+              `
+              : `
+                <span class="social-link is-disabled">
+                  <i class="${social.icon}" aria-hidden="true"></i>
+                  <span>${social.label}</span>
+                </span>
+              `
+          )
+          .join("")}
+      </div>
+    </article>
+  `;
+}
+
 export function injectShell(activePage) {
   const company = window.HOINAM_CONFIG?.company || {
     name: "Hoinam Energy",
@@ -117,13 +190,15 @@ export function injectShell(activePage) {
           <button class="nav-toggle" type="button" aria-label="Toggle navigation">Menu</button>
           <nav class="site-nav" id="site-nav">
             <a class="nav-link ${active("home")}" href="/index.html">Home</a>
+            <a class="nav-link ${active("about")}" href="/about.html">About</a>
             <a class="nav-link ${active("products")}" href="/products.html">Products</a>
             <a class="nav-link ${active("install")}" href="/book-install.html">Book Installation</a>
             <a class="nav-link ${active("contact")}" href="/contact.html">Contact</a>
             <a class="nav-link ${active("dashboard")} hidden" data-dashboard-link href="/dashboard.html">Dashboard</a>
             <a class="nav-link ${active("admin")} hidden" data-admin-link href="/admin.html">Admin</a>
-            <a class="nav-pill ${active("cart")}" href="/cart.html">Cart <span data-cart-count>0</span></a>
-            <a class="nav-pill ${active("login")}" data-auth-link href="/login.html">Login</a>
+            <a class="nav-pill ${active("cart")}" href="/cart.html"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i> Cart <span data-cart-count>0</span></a>
+            <a class="nav-pill ${active("login")}" data-login-link href="/login.html"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Login</a>
+            <a class="nav-pill ${active("register")}" data-register-link href="/register.html"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Register</a>
             <button class="nav-pill button-ghost hidden" type="button" data-logout-button>Logout</button>
           </nav>
         </div>
@@ -135,15 +210,18 @@ export function injectShell(activePage) {
     footer.innerHTML = `
       <footer class="footer">
         <div class="container">
-          <div class="footer-grid">
-            <article class="office-card">
-              <span class="badge">About Hoinam</span>
+          <div class="footer-grid footer-grid-wide">
+            <article class="footer-panel">
+              <span class="badge"><i class="fa-solid fa-solar-panel" aria-hidden="true"></i> About Hoinam</span>
               <h3>${company.name}</h3>
-              <p class="muted">${company.tagline}. We combine EcoFlow product sales with installation planning for homes, offices, and commercial energy resilience.</p>
+              <p class="muted">${company.about || `${company.tagline}. We combine EcoFlow product sales with installation planning for homes, offices, and commercial energy resilience.`}</p>
+              <a class="button button-ghost" href="/about.html"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Read more</a>
             </article>
-            ${renderOffices()}
+            ${renderFooterOffices()}
+            ${renderFooterFaq()}
+            ${renderFooterSocials()}
           </div>
-          <p class="footer-note">Clean energy storefront, booking, and admin workflow for Hoinam Energy.</p>
+          <p class="footer-note">Clean energy storefront, booking, and admin workflow for Hoinam Energy. Update social links in <code>assets/js/site-config.js</code> when the official handles are ready.</p>
         </div>
       </footer>
     `;
@@ -173,12 +251,16 @@ export function refreshShell() {
   });
 
   const authLink = document.querySelector("[data-auth-link]");
+  const loginLink = document.querySelector("[data-login-link]");
+  const registerLink = document.querySelector("[data-register-link]");
   const logoutButton = document.querySelector("[data-logout-button]");
   const dashboardLink = document.querySelector("[data-dashboard-link]");
   const adminLink = document.querySelector("[data-admin-link]");
 
   if (profile) {
     authLink?.classList.add("hidden");
+    loginLink?.classList.add("hidden");
+    registerLink?.classList.add("hidden");
     logoutButton?.classList.remove("hidden");
     dashboardLink?.classList.remove("hidden");
     if (profile.role === "admin") {
@@ -188,6 +270,8 @@ export function refreshShell() {
     }
   } else {
     authLink?.classList.remove("hidden");
+    loginLink?.classList.remove("hidden");
+    registerLink?.classList.remove("hidden");
     logoutButton?.classList.add("hidden");
     dashboardLink?.classList.add("hidden");
     adminLink?.classList.add("hidden");

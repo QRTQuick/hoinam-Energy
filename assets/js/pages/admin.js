@@ -11,13 +11,43 @@ import {
   uploadInventory
 } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
-import { formatDate, formatMoney, showToast, statusBadge } from "../ui.js";
+import { formatDate, formatMoney, productMedia, showToast, statusBadge } from "../ui.js";
 
 let products = [];
 let installations = [];
+const MAX_PRODUCT_IMAGE_BYTES = 1.5 * 1024 * 1024;
 
 function field(form, name) {
   return form.elements.namedItem(name);
+}
+
+function setProductImagePreview(form, imageUrl = field(form, "image_url").value.trim()) {
+  const previewImage = document.getElementById("product-image-preview-image");
+  const previewPlaceholder = document.getElementById("product-image-preview-placeholder");
+  if (!previewImage || !previewPlaceholder) {
+    return;
+  }
+
+  if (imageUrl) {
+    previewImage.src = imageUrl;
+    previewImage.alt = `${field(form, "name").value.trim() || "Product"} preview`;
+    previewImage.classList.remove("hidden");
+    previewPlaceholder.classList.add("hidden");
+    return;
+  }
+
+  previewImage.removeAttribute("src");
+  previewImage.classList.add("hidden");
+  previewPlaceholder.classList.remove("hidden");
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Unable to read the selected image file."));
+    reader.readAsDataURL(file);
+  });
 }
 
 function productFormPayload(form) {
@@ -51,6 +81,8 @@ function populateProductForm(product) {
   field(form, "highlights").value = (product?.highlights || []).join(", ");
   field(form, "featured").checked = Boolean(product?.featured);
   field(form, "active").checked = product ? Boolean(product.active) : true;
+  field(form, "product_image_file").value = "";
+  setProductImagePreview(form, product?.image_url || "");
 }
 
 function renderProducts() {
@@ -72,8 +104,13 @@ function renderProducts() {
             (product) => `
               <tr>
                 <td>
-                  <strong>${product.name}</strong><br>
-                  <span class="muted">${product.summary || ""}</span>
+                  <div class="admin-product-cell">
+                    ${productMedia(product, "admin-product-media")}
+                    <div>
+                      <strong>${product.name}</strong><br>
+                      <span class="muted">${product.summary || ""}</span>
+                    </div>
+                  </div>
                 </td>
                 <td>${formatMoney(product.price, product.currency)}</td>
                 <td>${product.stock}</td>
@@ -219,19 +256,31 @@ async function loadAdminData() {
 
   document.getElementById("admin-stats").innerHTML = `
     <article class="stat-card">
-      <span>Revenue</span>
+      <div class="stat-card-head">
+        <i class="fa-solid fa-sack-dollar" aria-hidden="true"></i>
+        <span>Revenue</span>
+      </div>
       <strong>${formatMoney(stats.revenue, stats.currency)}</strong>
     </article>
     <article class="stat-card">
-      <span>Users</span>
+      <div class="stat-card-head">
+        <i class="fa-solid fa-users" aria-hidden="true"></i>
+        <span>Users</span>
+      </div>
       <strong>${stats.users}</strong>
     </article>
     <article class="stat-card">
-      <span>Orders</span>
+      <div class="stat-card-head">
+        <i class="fa-solid fa-cart-flatbed" aria-hidden="true"></i>
+        <span>Orders</span>
+      </div>
       <strong>${stats.orders}</strong>
     </article>
     <article class="stat-card">
-      <span>Installations</span>
+      <div class="stat-card-head">
+        <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+        <span>Installations</span>
+      </div>
       <strong>${stats.installations}</strong>
     </article>
   `;
@@ -250,6 +299,8 @@ async function init() {
 
   const productForm = document.getElementById("product-form");
   const inventoryForm = document.getElementById("inventory-upload-form");
+  const imageUrlInput = field(productForm, "image_url");
+  const productImageFileInput = field(productForm, "product_image_file");
 
   try {
     await loadAdminData();
@@ -257,6 +308,33 @@ async function init() {
   } catch (error) {
     showToast(error.message, "error");
   }
+
+  imageUrlInput.addEventListener("input", () => {
+    setProductImagePreview(productForm);
+  });
+
+  productImageFileInput.addEventListener("change", async () => {
+    const file = productImageFileInput.files?.[0];
+    if (!file) {
+      setProductImagePreview(productForm);
+      return;
+    }
+
+    if (file.size > MAX_PRODUCT_IMAGE_BYTES) {
+      productImageFileInput.value = "";
+      showToast("Choose an image smaller than 1.5 MB or paste a hosted image URL.", "error");
+      return;
+    }
+
+    try {
+      imageUrlInput.value = await readFileAsDataUrl(file);
+      setProductImagePreview(productForm);
+      showToast("Product image loaded into the form.", "success");
+    } catch (error) {
+      productImageFileInput.value = "";
+      showToast(error.message, "error");
+    }
+  });
 
   productForm.addEventListener("submit", async (event) => {
     event.preventDefault();

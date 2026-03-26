@@ -11,7 +11,7 @@
     <main>
       <section class="page-hero">
         <div class="container">
-          <span class="eyebrow">Admin console</span>
+          <span class="eyebrow"><i class="fa-solid fa-user-shield" aria-hidden="true"></i> Admin console</span>
           <h1>Manage products, customers, payments, and installation workflow</h1>
           <p>Role-based access is enforced by Firebase claims or the configured admin email allow-list.</p>
         </div>
@@ -26,7 +26,7 @@
       <section class="section">
         <div class="container split-layout">
           <form class="panel form-grid" id="product-form">
-            <h3 class="field-full">Create or update product</h3>
+            <h3 class="field-full"><i class="fa-solid fa-box-open" aria-hidden="true"></i> Create or update product</h3>
             <input name="product_id" type="hidden">
             <label class="field">
               <span>Name</span>
@@ -52,10 +52,28 @@
               <span>Description</span>
               <textarea name="description"></textarea>
             </label>
-            <label class="field field-full">
-              <span>Image URL</span>
-              <input name="image_url" type="url" placeholder="https://example.com/product.jpg">
-            </label>
+            <div class="field field-full image-input-stack">
+              <label class="field">
+                <span><i class="fa-solid fa-link" aria-hidden="true"></i> Image URL</span>
+                <input name="image_url" type="text" placeholder="https://example.com/product.jpg">
+              </label>
+              <label class="field">
+                <span><i class="fa-solid fa-image" aria-hidden="true"></i> Upload image file</span>
+                <input name="product_image_file" type="file" accept="image/*">
+              </label>
+            </div>
+            <div class="field field-full">
+              <div class="image-preview-card">
+                <div class="image-preview-frame">
+                  <img class="hidden" id="product-image-preview-image" alt="Product preview">
+                  <div class="image-preview-placeholder" id="product-image-preview-placeholder">
+                    <i class="fa-regular fa-image" aria-hidden="true"></i>
+                    <span>Product image preview appears here</span>
+                  </div>
+                </div>
+                <p class="muted upload-hint"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Paste a hosted image URL or upload a local file. Uploaded files are saved into the current product record for now, so use hosted URLs for large production images.</p>
+              </div>
+            </div>
             <label class="field field-full">
               <span>Highlights</span>
               <input name="highlights" type="text" placeholder="Portable, Solar-ready, Home backup">
@@ -67,20 +85,20 @@
               <span><input name="active" type="checkbox" checked> Active</span>
             </label>
             <div class="field field-full inline-actions">
-              <button class="button" type="submit">Save product</button>
-              <button class="button button-ghost" id="clear-product-form" type="button">Clear form</button>
+              <button class="button" type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save product</button>
+              <button class="button button-ghost" id="clear-product-form" type="button"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Clear form</button>
             </div>
           </form>
 
           <form class="panel form-grid" id="inventory-upload-form">
-            <h3 class="field-full">Upload inventory from Excel</h3>
+            <h3 class="field-full"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Upload inventory from Excel</h3>
             <label class="field field-full">
               <span>Excel file</span>
               <input name="inventory_file" type="file" accept=".xlsx,.xls" required>
             </label>
             <p class="field-full muted">Accepted layout: name, stock, price, category, image_url, summary, description. A simple name + stock sheet also works.</p>
             <div class="field field-full">
-              <button class="button button-full" type="submit">Upload inventory</button>
+              <button class="button button-full" type="submit"><i class="fa-solid fa-upload" aria-hidden="true"></i> Upload inventory</button>
             </div>
           </form>
         </div>
@@ -91,7 +109,7 @@
           <div class="panel">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Products</span>
+                <span class="eyebrow"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Products</span>
                 <h2>Catalog management</h2>
               </div>
             </div>
@@ -105,7 +123,7 @@
           <div class="panel">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Users</span>
+                <span class="eyebrow"><i class="fa-solid fa-users" aria-hidden="true"></i> Users</span>
                 <h2>Customer accounts</h2>
               </div>
             </div>
@@ -119,7 +137,7 @@
           <div class="panel">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Orders</span>
+                <span class="eyebrow"><i class="fa-solid fa-receipt" aria-hidden="true"></i> Orders</span>
                 <h2>Payments and order records</h2>
               </div>
             </div>
@@ -133,7 +151,7 @@
           <div class="panel">
             <div class="section-heading">
               <div>
-                <span class="eyebrow">Installations</span>
+                <span class="eyebrow"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> Installations</span>
                 <h2>Assign installers and track status</h2>
               </div>
             </div>

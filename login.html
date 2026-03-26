@@ -6,14 +6,14 @@
     <title>Login | Hoinam Energy</title>
     <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
-  <body>
+  <body data-page="login">
     <div id="site-header"></div>
     <main>
       <section class="page-hero">
         <div class="container">
-          <span class="eyebrow">Authentication</span>
-          <h1>Sign up or log in with email, Google, or phone number</h1>
-          <p>Firebase now powers email/password accounts, Google sign-up and login, plus phone number OTP access for Hoinam Energy customers.</p>
+          <span class="eyebrow"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Authentication</span>
+          <h1>Log in to place orders, pay, and track installations</h1>
+          <p>Use your Hoinam Energy account with email and password, Google, or phone number OTP to continue checkout and manage your energy projects.</p>
         </div>
       </section>
 
@@ -21,8 +21,8 @@
         <div class="container">
           <div id="auth-config-note"></div>
           <div class="auth-grid">
-            <form class="panel form-grid" id="login-form">
-              <h3 class="field-full">Sign in</h3>
+            <form class="panel form-grid auth-card" id="login-form">
+              <h3 class="field-full"><i class="fa-solid fa-user-lock" aria-hidden="true"></i> Sign in</h3>
               <label class="field field-full">
                 <span>Email</span>
                 <input name="email" type="email" required>
@@ -32,60 +32,51 @@
                 <input name="password" type="password" required>
               </label>
               <div class="field field-full">
-                <button class="button button-full" type="submit">Login</button>
+                <button class="button button-full" type="submit"><i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Login</button>
               </div>
               <div class="field field-full">
-                <button class="button button-secondary button-full" data-google-auth type="button">Continue with Google</button>
+                <button class="button button-secondary button-full" data-google-auth type="button"><i class="fa-brands fa-google" aria-hidden="true"></i> Continue with Google</button>
               </div>
+              <p class="field-full muted auth-switch">Need a new account? <a href="/register.html">Create one here</a>.</p>
             </form>
 
-            <form class="panel form-grid" id="register-form">
-              <h3 class="field-full">Create account</h3>
+            <div class="panel form-grid auth-card hidden" id="phone-auth-card">
+              <h3 class="field-full"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i> Phone login</h3>
               <label class="field field-full">
                 <span>Full name</span>
-                <input name="full_name" type="text" required>
-              </label>
-              <label class="field field-full">
-                <span>Email</span>
-                <input name="email" type="email" required>
-              </label>
-              <label class="field field-full">
-                <span>Password</span>
-                <input name="password" type="password" minlength="6" required>
-              </label>
-              <div class="field field-full">
-                <button class="button button-full" type="submit">Register</button>
-              </div>
-              <div class="field field-full">
-                <button class="button button-secondary button-full" data-google-auth type="button">Sign up with Google</button>
-              </div>
-            </form>
-
-            <div class="panel form-grid hidden" id="phone-auth-card">
-              <h3 class="field-full">Phone sign up or login</h3>
-              <label class="field field-full">
-                <span>Full name</span>
-                <input id="phone-full-name" type="text" placeholder="Optional for first-time phone signup">
+                <input id="phone-full-name" type="text" placeholder="Optional if this is your first phone sign-in">
               </label>
               <label class="field field-full">
                 <span>Phone number</span>
                 <input id="phone-number" type="tel" placeholder="+2348012345678">
               </label>
-              <p class="field-full muted">If this phone number is new, Firebase creates the account after OTP verification. If it already exists, the same flow logs the user in.</p>
+              <p class="field-full muted">The same OTP flow works for returning users and first-time sign-up with a phone number.</p>
               <div class="field field-full">
-                <button class="button button-full" id="send-otp" type="button">Send OTP</button>
+                <button class="button button-full" id="send-otp" type="button"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send OTP</button>
               </div>
               <label class="field field-full">
                 <span>OTP code</span>
                 <input id="otp-code" type="text" placeholder="123456">
               </label>
               <div class="field field-full">
-                <button class="button button-secondary button-full" id="verify-otp" type="button">Verify OTP</button>
+                <button class="button button-secondary button-full" id="verify-otp" type="button"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Verify OTP</button>
               </div>
               <div class="field field-full">
                 <div id="recaptcha-container"></div>
               </div>
             </div>
+
+            <article class="panel auth-side-card">
+              <span class="eyebrow"><i class="fa-solid fa-solar-panel" aria-hidden="true"></i> Account access</span>
+              <h3>Use one account across shopping, payment, and installation booking</h3>
+              <p class="muted">Customer sessions stay tied to Firebase authentication while your profile, orders, and bookings remain in Neon for the admin team.</p>
+              <div class="auth-side-list">
+                <div><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Resume cart and checkout from the same profile.</span></div>
+                <div><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Track installation requests after submitting a booking.</span></div>
+                <div><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Keep order records linked to verified customer access.</span></div>
+              </div>
+              <a class="button button-ghost" href="/register.html"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Create account</a>
+            </article>
           </div>
         </div>
       </section>

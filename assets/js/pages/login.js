@@ -38,14 +38,16 @@ async function completeAuthSuccess() {
 }
 
 async function init() {
-  const profile = await bootstrapPage("login");
+  const activePage = document.body.dataset.page || "login";
+  const profile = await bootstrapPage(activePage);
   if (profile) {
     redirectAfterAuth();
     return;
   }
 
-  if (!firebaseEnabled) {
-    document.getElementById("auth-config-note").innerHTML = `
+  const authConfigNote = document.getElementById("auth-config-note");
+  if (!firebaseEnabled && authConfigNote) {
+    authConfigNote.innerHTML = `
       <div class="empty-state">Add your Firebase web config to assets/js/site-config.js before using sign-in flows.</div>
     `;
   }
@@ -55,32 +57,36 @@ async function init() {
   const googleButtons = document.querySelectorAll("[data-google-auth]");
   const phoneCard = document.getElementById("phone-auth-card");
 
-  loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try {
-      await loginWithEmail({
-        email: loginForm.email.value.trim(),
-        password: loginForm.password.value
-      });
-      await completeAuthSuccess();
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        await loginWithEmail({
+          email: loginForm.email.value.trim(),
+          password: loginForm.password.value
+        });
+        await completeAuthSuccess();
+      } catch (error) {
+        showToast(error.message, "error");
+      }
+    });
+  }
 
-  registerForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try {
-      await registerWithEmail({
-        name: registerForm.full_name.value.trim(),
-        email: registerForm.email.value.trim(),
-        password: registerForm.password.value
-      });
-      await completeAuthSuccess();
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  });
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        await registerWithEmail({
+          name: registerForm.full_name.value.trim(),
+          email: registerForm.email.value.trim(),
+          password: registerForm.password.value
+        });
+        await completeAuthSuccess();
+      } catch (error) {
+        showToast(error.message, "error");
+      }
+    });
+  }
 
   googleButtons.forEach((button) => {
     button.addEventListener("click", async () => {
@@ -93,7 +99,7 @@ async function init() {
     });
   });
 
-  if (window.HOINAM_CONFIG?.enablePhoneAuth) {
+  if (window.HOINAM_CONFIG?.enablePhoneAuth && phoneCard) {
     phoneCard.classList.remove("hidden");
     document.getElementById("send-otp").addEventListener("click", async () => {
       try {
