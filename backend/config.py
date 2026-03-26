@@ -12,6 +12,13 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 
+def _normalize_database_url(value: str) -> str:
+    value = (value or "").strip()
+    if value.startswith("postgresql://"):
+        return value.replace("postgresql://", "postgresql+psycopg://", 1)
+    return value
+
+
 def _env_flag(name: str, default: bool = False) -> bool:
     value = os.getenv(name)
     if value is None:
@@ -30,7 +37,9 @@ def _admin_email_set() -> set[str]:
 
 @dataclass(frozen=True)
 class Settings:
-    database_url: str = field(default_factory=lambda: os.getenv("DATABASE_URL", "").strip())
+    database_url: str = field(
+        default_factory=lambda: _normalize_database_url(os.getenv("DATABASE_URL", ""))
+    )
     default_currency: str = field(
         default_factory=lambda: os.getenv("DEFAULT_CURRENCY", "NGN").strip() or "NGN"
     )

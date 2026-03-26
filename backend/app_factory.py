@@ -455,6 +455,16 @@ def create_app() -> Flask:
         candidate = project_root / path
         if candidate.is_file():
             return send_from_directory(project_root, path)
+
+        if not candidate.suffix:
+            html_candidate = project_root / f"{path}.html"
+            if html_candidate.is_file():
+                return send_from_directory(project_root, f"{path}.html")
+
+            index_candidate = project_root / path / "index.html"
+            if index_candidate.is_file():
+                return send_from_directory(project_root, f"{path}/index.html")
+
         raise ApiError("Page not found.", 404)
 
     return app
