@@ -8,7 +8,6 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPhoneNumber,
-  signInWithPopup,
   signInWithRedirect,
   signOut,
   updateProfile
@@ -72,28 +71,8 @@ export async function loginWithGoogle() {
   ensureFirebase();
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-
-  try {
-    const credential = await signInWithPopup(auth, provider);
-    return { flow: "popup", user: credential.user };
-  } catch (error) {
-    if (
-      [
-        "auth/popup-blocked",
-        "auth/web-storage-unsupported",
-        "auth/operation-not-supported-in-this-environment"
-      ].includes(error?.code)
-    ) {
-      await signInWithRedirect(auth, provider);
-      return { flow: "redirect", user: null };
-    }
-
-    if (error?.code === "auth/popup-closed-by-user") {
-      throw new Error("Google sign-in was closed before it finished. Please try again and complete the Google window.");
-    }
-
-    throw error;
-  }
+  await signInWithRedirect(auth, provider);
+  return { flow: "redirect", user: null };
 }
 
 export async function getGoogleRedirectResult() {

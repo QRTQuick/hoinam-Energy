@@ -1,66 +1,21 @@
-import { syncSession, updateProfile } from "../api.js";
+import { syncSession } from "../api.js";
 import { bootstrapPage, redirectAfterAuth } from "../app-shell.js";
 import {
   firebaseEnabled,
   getGoogleRedirectResult,
   loginWithEmail,
   loginWithGoogle,
-  logoutUser,
   registerWithEmail,
   waitForAuthReady
 } from "../firebase.js";
-import { clearCachedProfile } from "../store.js";
 import { showToast } from "../ui.js";
 
 const GOOGLE_REDIRECT_KEY = "hoinam_google_redirect";
-
-function normalizePhoneNumber(rawValue) {
-  const value = rawValue.trim().replace(/[^\d+]/g, "");
-  if (!value) {
-    throw new Error("Enter a phone number first.");
-  }
-  if (value.startsWith("+")) {
-    return value;
-  }
-  if (value.startsWith("0")) {
-    return `+234${value.slice(1)}`;
-  }
-  if (value.startsWith("234")) {
-    return `+${value}`;
-  }
-  throw new Error("Enter a valid phone number like +2348012345678 or 08012345678.");
-}
 
 async function completeAuthSuccess() {
   await syncSession();
   showToast("Authentication successful.", "success");
   redirectAfterAuth();
-}
-
-async function ensureGooglePhoneNumber(profile) {
-  if (profile?.phone) {
-    return profile;
-  }
-
-  while (true) {
-    const rawValue = window.prompt(
-      "Enter your phone number to finish Google sign-in. Use +2348012345678 or 08012345678."
-    );
-
-    if (rawValue === null) {
-      await logoutUser();
-      clearCachedProfile();
-      throw new Error("Phone number is required to continue with Google sign-in.");
-    }
-
-    try {
-      const phone = normalizePhoneNumber(rawValue);
-      const updatedProfile = await updateProfile({ phone });
-      return updatedProfile;
-    } catch (error) {
-      showToast(error.message, "error");
-    }
-  }
 }
 
 function sleep(ms) {
@@ -82,7 +37,6 @@ async function resumeGoogleRedirectIfNeeded() {
     for (let attempt = 0; attempt < 4; attempt += 1) {
       const profile = await syncSession();
       if (profile) {
-        await ensureGooglePhoneNumber(profile);
         window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
         showToast("Authentication successful.", "success");
         redirectAfterAuth();
@@ -157,17 +111,7 @@ async function init() {
     button.addEventListener("click", async () => {
       try {
         window.sessionStorage.setItem(GOOGLE_REDIRECT_KEY, "1");
-        const result = await loginWithGoogle();
-        if (result?.flow === "popup") {
-          const profile = await syncSession();
-          if (!profile) {
-            throw new Error("Google sign-in completed, but the user session could not be restored. Please try again.");
-          }
-          await ensureGooglePhoneNumber(profile);
-          window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
-          showToast("Authentication successful.", "success");
-          redirectAfterAuth();
-        }
+        await loginWithGoogle();
       } catch (error) {
         window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
         showToast(error.message, "error");

@@ -1,6 +1,89 @@
-import { getUserInstallations, getUserOrders } from "../api.js";
+import { getUserInstallations, getUserOrders, updateProfile } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { formatDate, formatMoney, showToast, statusBadge } from "../ui.js";
+
+function normalizePhoneNumber(rawValue) {
+  const value = rawValue.trim().replace(/[^\d+]/g, "");
+  if (!value) {
+    throw new Error("Enter your phone number first.");
+  }
+  if (value.startsWith("+")) {
+    return value;
+  }
+  if (value.startsWith("0")) {
+    return `+234${value.slice(1)}`;
+  }
+  if (value.startsWith("234")) {
+    return `+${value}`;
+  }
+  throw new Error("Enter a valid phone number like +2348012345678 or 08012345678.");
+}
+
+function renderPhoneCompletion(profile) {
+  const target = document.getElementById("profile-completion-slot");
+  if (!target) {
+    return;
+  }
+
+  if (profile?.phone) {
+    target.innerHTML = "";
+    return;
+  }
+
+  target.innerHTML = `
+    <article class="panel profile-completion-card">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Complete your profile</span>
+          <h2><i class="fa-solid fa-phone-volume" aria-hidden="true"></i> Add your phone number</h2>
+        </div>
+      </div>
+      <p class="panel-copy">
+        Your dashboard is ready. Add a reachable phone number so Hoinam Energy can confirm orders,
+        installation visits, and support follow-ups.
+      </p>
+      <form class="form-grid" id="profile-phone-form">
+        <div class="field">
+          <label for="profile-phone">Phone number</label>
+          <input
+            id="profile-phone"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            placeholder="+2348012345678 or 08012345678"
+            required
+          >
+        </div>
+        <div class="field profile-completion-actions">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+            Save phone number
+          </button>
+        </div>
+      </form>
+    </article>
+  `;
+
+  const form = document.getElementById("profile-phone-form");
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    try {
+      const phone = normalizePhoneNumber(form.phone.value);
+      const updatedProfile = await updateProfile({ phone });
+      renderPhoneCompletion(updatedProfile);
+      showToast("Phone number saved.", "success");
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
+}
 
 async function init() {
   const profile = await bootstrapPage("dashboard", { requireAuth: true });
@@ -10,6 +93,7 @@ async function init() {
 
   document.getElementById("profile-name").textContent = profile.full_name || "Customer";
   document.getElementById("profile-email").textContent = profile.email || "Signed in user";
+  renderPhoneCompletion(profile);
 
   try {
     const [orders, installations] = await Promise.all([getUserOrders(), getUserInstallations()]);
