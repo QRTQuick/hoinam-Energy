@@ -1,6 +1,37 @@
 import { logoutUser } from "./firebase.js";
 import { clearCachedProfile, getCachedProfile, getCartCount } from "./store.js";
 
+const THEME_KEY = "hoinam_theme";
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.classList.add("theme-dark");
+  } else {
+    root.classList.remove("theme-dark");
+  }
+
+  const toggle = document.querySelector("[data-theme-toggle]");
+  if (toggle) {
+    const isDark = theme === "dark";
+    toggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+    toggle.innerHTML = isDark
+      ? `<i class="fa-solid fa-sun" aria-hidden="true"></i><span>Light mode</span>`
+      : `<i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>`;
+  }
+}
+
+function initTheme() {
+  const saved = window.localStorage.getItem(THEME_KEY);
+  if (saved === "light" || saved === "dark") {
+    applyTheme(saved);
+    return;
+  }
+
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+  applyTheme(prefersDark ? "dark" : "light");
+}
+
 function initialsFromName(name = "") {
   return name
     .split(" ")
@@ -259,6 +290,9 @@ export function injectShell(activePage) {
           </a>
           <button class="nav-toggle" type="button" aria-label="Toggle navigation"><i class="fa-solid fa-bars" aria-hidden="true"></i> Menu</button>
           <nav class="site-nav" id="site-nav">
+            <button class="nav-pill nav-pill-toggle" type="button" data-theme-toggle aria-pressed="false">
+              <i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>
+            </button>
             <a class="nav-link ${active("home")}" href="/index.html"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
             <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
             <a class="nav-link ${active("products")}" href="/products.html"><i class="fa-solid fa-battery-three-quarters" aria-hidden="true"></i><span>Products</span></a>
@@ -314,6 +348,14 @@ export function injectShell(activePage) {
     renderCookieBanner(true);
   });
 
+  document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
+    const isDark = document.documentElement.classList.contains("theme-dark");
+    const next = isDark ? "light" : "dark";
+    window.localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+
+  initTheme();
   refreshShell();
   renderCookieBanner();
 }

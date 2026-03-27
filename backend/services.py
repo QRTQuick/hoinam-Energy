@@ -3,17 +3,31 @@ from __future__ import annotations
 from collections.abc import Iterable
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from .config import get_settings
 from .models import Product, User
 from .utils import slugify, to_decimal
 
 
+def ensure_unique_full_name(session, full_name: str | None, *, exclude_user_id: int | None = None) -> None:
+    if not full_name:
+        return
+
+    normalized = " ".join(full_name.split())
+    query = select(User).where(func.lower(User.full_name) == normalized.lower())
+    if exclude_user_id is not None:
+        query = query.where(User.id != exclude_user_id)
+
+    existing = session.execute(query).scalar_one_or_none()
+    if existing:
+        raise ValueError("Full name is already in use. Please use a different name.")
+
+
 def sync_user_from_claims(session, claims: dict) -> User:
     firebase_uid = claims["uid"]
     email = (claims.get("email") or "").strip().lower() or None
-    full_name = claims.get("name") or claims.get("display_name")
+    full_name = (claims.get("name") or claims.get("display_name") or "").strip() or None
     phone = claims.get("phone_number")
 
     user = session.execute(select(User).where(User.firebase_uid == firebase_uid)).scalar_one_or_none()
@@ -23,6 +37,7 @@ def sync_user_from_claims(session, claims: dict) -> User:
     role = "admin" if claims.get("admin") or (email and email in get_settings().admin_emails) else "user"
 
     if user is None:
+        ensure_unique_full_name(session, full_name)
         user = User(
             firebase_uid=firebase_uid,
             email=email,
@@ -34,7 +49,9 @@ def sync_user_from_claims(session, claims: dict) -> User:
     else:
         user.firebase_uid = firebase_uid
         user.email = email
-        user.full_name = full_name or user.full_name
+        if full_name and full_name != user.full_name:
+            ensure_unique_full_name(session, full_name, exclude_user_id=user.id)
+            user.full_name = full_name
         user.phone = phone or user.phone
         if role == "admin" or not user.role:
             user.role = role

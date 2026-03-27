@@ -13,7 +13,7 @@ from .database import close_session, get_session
 from .firebase_auth import verify_id_token
 from .models import Installation, Order, Product, User
 from .payments import initialize_transaction, verify_transaction
-from .services import apply_product_payload, calculate_order_items, sync_user_from_claims
+from .services import apply_product_payload, calculate_order_items, ensure_unique_full_name, sync_user_from_claims
 from .utils import generate_order_number, generate_payment_reference, slugify, to_decimal, to_minor_units
 
 
@@ -84,7 +84,10 @@ def create_app() -> Flask:
         except Exception as exc:
             raise ApiError(f"Unable to verify Firebase token: {exc}", 401) from exc
 
-        user = sync_user_from_claims(db_session(), claims)
+        try:
+            user = sync_user_from_claims(db_session(), claims)
+        except ValueError as exc:
+            raise ApiError(str(exc), 409) from exc
         g.current_user = user
 
         if admin and user.role != "admin":
@@ -175,7 +178,9 @@ def create_app() -> Flask:
 
         if "full_name" in payload:
             full_name = (payload.get("full_name") or "").strip()
-            user.full_name = full_name or user.full_name
+            if full_name:
+                ensure_unique_full_name(db_session(), full_name, exclude_user_id=user.id)
+                user.full_name = full_name
 
         db_session().commit()
         return json_success(user.to_dict())

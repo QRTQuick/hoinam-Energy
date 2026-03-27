@@ -16,6 +16,14 @@ async function completeAuthSuccess() {
   redirectAfterAuth();
 }
 
+function formatAuthError(error) {
+  const message = error?.message || "Unable to complete sign-in. Please try again.";
+  if (message.toLowerCase().includes("full name is already in use")) {
+    return "That full name is already in use. Please choose a different full name and try again.";
+  }
+  return message;
+}
+
 function sleep(ms) {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
@@ -33,7 +41,7 @@ async function handleGoogleRedirect() {
     const result = await getGoogleRedirectResult();
     hadRedirectResult = Boolean(result?.user);
   } catch (error) {
-    showToast(error.message, "error");
+    showToast(formatAuthError(error), "error");
     return false;
   }
 
@@ -89,7 +97,7 @@ async function init() {
         });
         await completeAuthSuccess();
       } catch (error) {
-        showToast(error.message, "error");
+        showToast(formatAuthError(error), "error");
       }
     });
   }
@@ -105,7 +113,7 @@ async function init() {
         });
         await completeAuthSuccess();
       } catch (error) {
-        showToast(error.message, "error");
+        showToast(formatAuthError(error), "error");
       }
     });
   }
@@ -115,7 +123,7 @@ async function init() {
       try {
         await loginWithGoogle();
       } catch (error) {
-        showToast(error.message, "error");
+        showToast(formatAuthError(error), "error");
       }
     });
   });
