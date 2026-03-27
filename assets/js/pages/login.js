@@ -1,18 +1,17 @@
-import { syncSession } from "../api.js";
+import { syncSession, updateProfile } from "../api.js";
 import { bootstrapPage, redirectAfterAuth } from "../app-shell.js";
 import {
-  buildPhoneVerifier,
   firebaseEnabled,
+  getGoogleRedirectResult,
   loginWithEmail,
   loginWithGoogle,
-  registerWithEmail,
-  requestPhoneOtp,
-  updateCurrentUserName
+  logoutUser,
+  registerWithEmail
 } from "../firebase.js";
+import { clearCachedProfile } from "../store.js";
 import { showToast } from "../ui.js";
 
-let confirmationResult = null;
-let verifier = null;
+const GOOGLE_REDIRECT_KEY = "hoinam_google_redirect";
 
 function normalizePhoneNumber(rawValue) {
   const value = rawValue.trim().replace(/[^\d+]/g, "");
@@ -37,12 +36,64 @@ async function completeAuthSuccess() {
   redirectAfterAuth();
 }
 
+async function ensureGooglePhoneNumber(profile) {
+  if (profile?.phone) {
+    return profile;
+  }
+
+  while (true) {
+    const rawValue = window.prompt(
+      "Enter your phone number to finish Google sign-in. Use +2348012345678 or 08012345678."
+    );
+
+    if (rawValue === null) {
+      await logoutUser();
+      clearCachedProfile();
+      throw new Error("Phone number is required to continue with Google sign-in.");
+    }
+
+    try {
+      const phone = normalizePhoneNumber(rawValue);
+      const updatedProfile = await updateProfile({ phone });
+      return updatedProfile;
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  }
+}
+
 async function init() {
   const activePage = document.body.dataset.page || "login";
+  const pendingGoogleRedirect = window.sessionStorage.getItem(GOOGLE_REDIRECT_KEY) === "1";
+
+  if (pendingGoogleRedirect && firebaseEnabled) {
+    try {
+      await getGoogleRedirectResult();
+    } catch (error) {
+      window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+      showToast(error.message, "error");
+    }
+  }
+
   const profile = await bootstrapPage(activePage);
   if (profile) {
+    if (pendingGoogleRedirect) {
+      try {
+        await ensureGooglePhoneNumber(profile);
+        showToast("Authentication successful.", "success");
+      } catch (error) {
+        window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+        showToast(error.message, "error");
+        return;
+      }
+      window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+    }
     redirectAfterAuth();
     return;
+  }
+
+  if (pendingGoogleRedirect) {
+    window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
   }
 
   const authConfigNote = document.getElementById("auth-config-note");
@@ -55,7 +106,6 @@ async function init() {
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
   const googleButtons = document.querySelectorAll("[data-google-auth]");
-  const phoneCard = document.getElementById("phone-auth-card");
 
   if (loginForm) {
     loginForm.addEventListener("submit", async (event) => {
@@ -91,47 +141,14 @@ async function init() {
   googleButtons.forEach((button) => {
     button.addEventListener("click", async () => {
       try {
+        window.sessionStorage.setItem(GOOGLE_REDIRECT_KEY, "1");
         await loginWithGoogle();
-        await completeAuthSuccess();
       } catch (error) {
+        window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
         showToast(error.message, "error");
       }
     });
   });
-
-  if (window.HOINAM_CONFIG?.enablePhoneAuth && phoneCard) {
-    phoneCard.classList.remove("hidden");
-    document.getElementById("send-otp").addEventListener("click", async () => {
-      try {
-        const phoneNumber = normalizePhoneNumber(document.getElementById("phone-number").value);
-        verifier = verifier || buildPhoneVerifier("recaptcha-container");
-        confirmationResult = await requestPhoneOtp(
-          phoneNumber,
-          verifier
-        );
-        showToast("OTP sent successfully.", "success");
-      } catch (error) {
-        showToast(error.message, "error");
-      }
-    });
-
-    document.getElementById("verify-otp").addEventListener("click", async () => {
-      try {
-        if (!confirmationResult) {
-          throw new Error("Send an OTP first.");
-        }
-        const otpCode = document.getElementById("otp-code").value.trim();
-        if (!otpCode) {
-          throw new Error("Enter the OTP code sent to the phone number.");
-        }
-        await confirmationResult.confirm(otpCode);
-        await updateCurrentUserName(document.getElementById("phone-full-name").value.trim());
-        await completeAuthSuccess();
-      } catch (error) {
-        showToast(error.message, "error");
-      }
-    });
-  }
 }
 
 init();

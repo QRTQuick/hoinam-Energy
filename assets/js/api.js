@@ -58,6 +58,16 @@ export async function syncSession() {
   return profile;
 }
 
+export async function updateProfile(payload) {
+  const profile = await apiFetch("/profile", {
+    method: "PUT",
+    authRequired: true,
+    body: payload
+  });
+  setCachedProfile(profile);
+  return profile;
+}
+
 export function listProducts() {
   return apiFetch("/products");
 }

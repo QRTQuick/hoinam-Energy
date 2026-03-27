@@ -162,6 +162,24 @@ def create_app() -> Flask:
         user = authenticate()
         return json_success(user.to_dict())
 
+    @app.put("/api/profile")
+    def update_profile():
+        user = authenticate()
+        payload = request.get_json(silent=True) or {}
+
+        if "phone" in payload:
+            phone = (payload.get("phone") or "").strip()
+            if not phone:
+                raise ApiError("Phone number is required.", 400)
+            user.phone = phone
+
+        if "full_name" in payload:
+            full_name = (payload.get("full_name") or "").strip()
+            user.full_name = full_name or user.full_name
+
+        db_session().commit()
+        return json_success(user.to_dict())
+
     @app.get("/api/products")
     def list_products():
         products = (

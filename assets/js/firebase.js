@@ -3,11 +3,12 @@ import {
   GoogleAuthProvider,
   RecaptchaVerifier,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPhoneNumber,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -69,8 +70,13 @@ export async function loginWithEmail({ email, password }) {
 export async function loginWithGoogle() {
   ensureFirebase();
   const provider = new GoogleAuthProvider();
-  const credential = await signInWithPopup(auth, provider);
-  return credential.user;
+  await signInWithRedirect(auth, provider);
+  return null;
+}
+
+export async function getGoogleRedirectResult() {
+  ensureFirebase();
+  return getRedirectResult(auth);
 }
 
 export async function updateCurrentUserName(name) {
