@@ -1,12 +1,16 @@
 (function () {
   const origin = window.location.origin;
+  const hostname = window.location.hostname;
+  const useCustomAuthDomain =
+    hostname.endsWith(".vercel.app") || hostname === "hoinam-energy.vercel.app" || hostname === "hoinamenergy.com";
+  const authDomain = useCustomAuthDomain ? hostname : "hoinam-energy-workspace.firebaseapp.com";
 
   window.HOINAM_CONFIG = {
     apiBaseUrl: `${origin}/api`,
     enablePhoneAuth: true,
     firebase: {
       apiKey: "AIzaSyBMUFz5qgyl_RKK5IuPvB-9infl_FoM3_8",
-      authDomain: "hoinam-energy-workspace.firebaseapp.com",
+      authDomain,
       projectId: "hoinam-energy-workspace",
       appId: "1:285359013809:web:b6036979397c4ced0ec790",
       messagingSenderId: "285359013809",

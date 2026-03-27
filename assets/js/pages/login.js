@@ -10,8 +10,6 @@ import {
 } from "../firebase.js";
 import { showToast } from "../ui.js";
 
-const GOOGLE_REDIRECT_KEY = "hoinam_google_redirect";
-
 async function completeAuthSuccess() {
   await syncSession();
   showToast("Authentication successful.", "success");
@@ -24,38 +22,43 @@ function sleep(ms) {
   });
 }
 
-async function resumeGoogleRedirectIfNeeded() {
-  const pendingGoogleRedirect = window.sessionStorage.getItem(GOOGLE_REDIRECT_KEY) === "1";
-  if (!pendingGoogleRedirect || !firebaseEnabled) {
+async function handleGoogleRedirect() {
+  if (!firebaseEnabled) {
     return false;
   }
 
+  let hadRedirectResult = false;
+
   try {
-    await getGoogleRedirectResult();
-    await waitForAuthReady();
-
-    for (let attempt = 0; attempt < 4; attempt += 1) {
-      const profile = await syncSession();
-      if (profile) {
-        window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
-        showToast("Authentication successful.", "success");
-        redirectAfterAuth();
-        return true;
-      }
-      await sleep(250);
-    }
-
-    throw new Error("Google sign-in completed, but the session could not be restored yet. Please try again.");
+    const result = await getGoogleRedirectResult();
+    hadRedirectResult = Boolean(result?.user);
   } catch (error) {
-    window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
     showToast(error.message, "error");
     return false;
   }
+
+  const user = await waitForAuthReady();
+  if (!user && !hadRedirectResult) {
+    return false;
+  }
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const profile = await syncSession();
+    if (profile) {
+      showToast("Authentication successful.", "success");
+      redirectAfterAuth();
+      return true;
+    }
+    await sleep(250);
+  }
+
+  showToast("Google sign-in completed, but the session could not be restored yet. Please try again.", "error");
+  return false;
 }
 
 async function init() {
   const activePage = document.body.dataset.page || "login";
-  if (await resumeGoogleRedirectIfNeeded()) {
+  if (await handleGoogleRedirect()) {
     return;
   }
 
@@ -110,10 +113,8 @@ async function init() {
   googleButtons.forEach((button) => {
     button.addEventListener("click", async () => {
       try {
-        window.sessionStorage.setItem(GOOGLE_REDIRECT_KEY, "1");
         await loginWithGoogle();
       } catch (error) {
-        window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
         showToast(error.message, "error");
       }
     });
