@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .env
 .env.example
+hoinam-energy-workspace-firebase-adminsdk-fbsvc-6bdb65b85e.json
 .venv/
 venv/
 dist/
