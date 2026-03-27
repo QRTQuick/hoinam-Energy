@@ -1,5 +1,5 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 :root {
   --bg: #f6fbf5;
@@ -23,6 +23,9 @@
   --radius-md: 18px;
   --radius-sm: 12px;
   --max-width: 1180px;
+  --font-body: "Manrope", sans-serif;
+  --font-heading: "Outfit", sans-serif;
+  --font-ui: "Space Grotesk", sans-serif;
 }
 
 *,
@@ -37,7 +40,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(255, 140, 0, 0.08), transparent 30%),
@@ -93,9 +96,9 @@ button {
 }
 
 .nav-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
   min-height: 84px;
 }
@@ -104,7 +107,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.9rem;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--heading);
 }
@@ -129,7 +132,7 @@ button {
 }
 
 .brand-copy small {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-ui);
   color: var(--text-soft);
   font-size: 0.78rem;
   font-weight: 600;
@@ -143,6 +146,9 @@ button {
   border-radius: 999px;
   padding: 0.8rem 1rem;
   box-shadow: var(--shadow);
+  justify-self: end;
+  font-family: var(--font-ui);
+  font-weight: 700;
 }
 
 .site-nav {
@@ -150,15 +156,27 @@ button {
   align-items: center;
   gap: 0.4rem;
   flex-wrap: wrap;
+  justify-self: end;
+  justify-content: flex-end;
+  padding: 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(31, 122, 76, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56);
 }
 
 .nav-link,
 .nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   padding: 0.75rem 1rem;
   border-radius: 999px;
   font-weight: 700;
+  font-family: var(--font-ui);
   color: var(--text-soft);
-  transition: 180ms ease;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  position: relative;
 }
 
 .nav-link:hover,
@@ -166,6 +184,13 @@ button {
 .nav-link.is-active {
   background: rgba(31, 122, 76, 0.08);
   color: var(--primary-deep);
+  transform: translateY(-1px);
+}
+
+.nav-link.is-active,
+.nav-pill.is-active {
+  background: linear-gradient(135deg, rgba(31, 122, 76, 0.12), rgba(255, 140, 0, 0.12));
+  box-shadow: inset 0 0 0 1px rgba(31, 122, 76, 0.1);
 }
 
 .nav-pill {
@@ -173,8 +198,33 @@ button {
   border: 1px solid rgba(31, 122, 76, 0.1);
 }
 
+.nav-link i,
 .nav-pill i {
   font-size: 0.92rem;
+  width: 1rem;
+  text-align: center;
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.nav-link:hover i,
+.nav-pill:hover i,
+.nav-link.is-active i,
+.nav-pill.is-active i {
+  transform: scale(1.08);
+  color: var(--primary);
+}
+
+.nav-pill [data-cart-count] {
+  min-width: 1.55rem;
+  height: 1.55rem;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 140, 0, 1), rgba(31, 122, 76, 0.95));
+  color: white;
+  font-size: 0.74rem;
+  box-shadow: 0 10px 24px rgba(31, 122, 76, 0.2);
 }
 
 .page-hero,
@@ -204,6 +254,7 @@ button {
   background: rgba(31, 122, 76, 0.1);
   color: var(--primary);
   font-weight: 800;
+  font-family: var(--font-ui);
   letter-spacing: 0.03em;
   text-transform: uppercase;
   font-size: 0.74rem;
@@ -220,7 +271,7 @@ button {
 .panel h3,
 .detail-copy h1,
 .cta-card h2 {
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   color: var(--heading);
   letter-spacing: -0.03em;
   margin: 0;
@@ -259,6 +310,8 @@ button {
   border-radius: 999px;
   padding: 0.95rem 1.3rem;
   font-weight: 800;
+  font-family: var(--font-ui);
+  letter-spacing: -0.01em;
   background: var(--primary);
   color: white;
   box-shadow: 0 18px 35px rgba(31, 122, 76, 0.22);
@@ -283,6 +336,10 @@ button {
   background: rgba(31, 122, 76, 0.08);
   color: var(--primary-deep);
   box-shadow: none;
+}
+
+.button-ghost:hover {
+  background: rgba(31, 122, 76, 0.14);
 }
 
 .button-danger {
@@ -378,7 +435,7 @@ button {
 }
 
 .solar-visual h3 {
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.8rem;
   margin: 0 0 0.8rem;
   color: #fff3d7;
@@ -457,6 +514,7 @@ button {
   display: block;
   color: var(--text-soft);
   font-weight: 700;
+  font-family: var(--font-ui);
   font-size: 0.92rem;
 }
 
@@ -479,6 +537,7 @@ button {
 .stat-card strong {
   display: block;
   margin-top: 0.45rem;
+  font-family: var(--font-heading);
   font-size: 1.95rem;
   color: var(--heading);
 }
@@ -488,9 +547,9 @@ button {
 }
 
 .section-heading {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -524,6 +583,7 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 520ms ease, filter 520ms ease;
 }
 
 .product-media .fallback-mark {
@@ -534,18 +594,18 @@ button {
   place-items: center;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.24);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.35rem;
   font-weight: 700;
   z-index: 1;
 }
 
 .product-card-body {
-  display: flex;
+  display: grid;
   flex: 1;
-  flex-direction: column;
   gap: 0.8rem;
   padding: 1.3rem;
+  grid-template-rows: auto auto 1fr auto;
 }
 
 .chip-row,
@@ -565,6 +625,8 @@ button {
   padding: 0.38rem 0.75rem;
   font-size: 0.82rem;
   font-weight: 800;
+  font-family: var(--font-ui);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .chip,
@@ -612,14 +674,14 @@ button {
 }
 
 .product-meta {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
 }
 
 .price {
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   color: var(--heading);
   font-size: 1.4rem;
 }
@@ -636,7 +698,7 @@ button {
 .feature-card h3,
 .office-card h3 {
   margin: 0.6rem 0;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
 }
 
 .panel h3 i {
@@ -653,6 +715,7 @@ button {
   color: var(--primary-deep);
   background: linear-gradient(135deg, rgba(255, 140, 0, 0.24), rgba(31, 122, 76, 0.18));
   box-shadow: inset 0 0 0 1px rgba(31, 122, 76, 0.08);
+  transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
 }
 
 .detail-layout,
@@ -751,6 +814,7 @@ button {
 
 label {
   font-weight: 800;
+  font-family: var(--font-ui);
   color: var(--heading);
 }
 
@@ -763,7 +827,7 @@ textarea {
   padding: 0.95rem 1rem;
   background: rgba(255, 255, 255, 0.88);
   color: var(--text);
-  transition: border-color 180ms ease, box-shadow 180ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
 }
 
 textarea {
@@ -777,6 +841,13 @@ textarea:focus {
   outline: none;
   border-color: rgba(31, 122, 76, 0.45);
   box-shadow: 0 0 0 4px rgba(31, 122, 76, 0.1);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(31, 122, 76, 0.28);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .image-preview-card {
@@ -848,9 +919,18 @@ td {
   vertical-align: top;
 }
 
+tbody tr {
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+tbody tr:hover {
+  background: rgba(31, 122, 76, 0.035);
+}
+
 th {
   font-size: 0.84rem;
   color: var(--text-soft);
+  font-family: var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -914,7 +994,7 @@ th {
   display: grid;
   place-items: center;
   color: white;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
 }
 
@@ -1005,7 +1085,7 @@ th {
   justify-content: space-between;
   gap: 1rem;
   cursor: pointer;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   color: var(--heading);
   font-weight: 700;
 }
@@ -1072,7 +1152,7 @@ th {
 
 .footer-panel h3 {
   margin: 0;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   color: var(--heading);
 }
 
@@ -1096,6 +1176,7 @@ th {
   border-radius: 18px;
   background: rgba(31, 122, 76, 0.05);
   border: 1px solid rgba(31, 122, 76, 0.08);
+  font-family: var(--font-ui);
   transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
@@ -1121,6 +1202,8 @@ th {
   border: 1px solid rgba(31, 122, 76, 0.08);
   color: var(--primary-deep);
   font-weight: 700;
+  font-family: var(--font-ui);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
 .social-link i {
@@ -1175,14 +1258,15 @@ th {
 }
 
 .search-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
   gap: 0.85rem;
-  flex-wrap: wrap;
+  align-items: end;
   margin-bottom: 1rem;
 }
 
 .search-row .field {
-  flex: 1 1 240px;
+  min-width: 0;
 }
 
 .auth-grid,
@@ -1192,8 +1276,8 @@ th {
 }
 
 .cta-card {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem;
   align-items: center;
   background:
@@ -1239,6 +1323,29 @@ th {
   opacity: 1;
 }
 
+.interactive-card:hover .icon-burst {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 18px 30px rgba(31, 122, 76, 0.14), inset 0 0 0 1px rgba(31, 122, 76, 0.08);
+}
+
+.interactive-card:hover .chip,
+.interactive-card:hover .badge,
+.interactive-card:hover .stock-pill,
+.interactive-card:hover .status-badge {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(18, 45, 28, 0.08);
+}
+
+.interactive-card:hover .product-media img {
+  transform: scale(1.06);
+  filter: saturate(1.04);
+}
+
+.social-link:not(.is-disabled):hover,
+.footer-link:hover {
+  box-shadow: 0 18px 28px rgba(18, 45, 28, 0.08);
+}
+
 .mini-meta {
   display: flex;
   gap: 0.7rem;
@@ -1270,8 +1377,14 @@ th {
 }
 
 @media (max-width: 980px) {
+  .nav-row {
+    grid-template-columns: auto auto;
+  }
+
   .nav-toggle {
     display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
   }
 
   .site-nav {
@@ -1293,6 +1406,7 @@ th {
     display: flex;
   }
 
+  .section-heading,
   .hero-grid,
   .detail-layout,
   .split-layout,
@@ -1301,6 +1415,11 @@ th {
   }
 
   .footer-grid-wide {
+    grid-template-columns: 1fr;
+  }
+
+  .search-row,
+  .cta-card {
     grid-template-columns: 1fr;
   }
 }

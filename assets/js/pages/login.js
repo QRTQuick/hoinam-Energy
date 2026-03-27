@@ -6,7 +6,8 @@ import {
   loginWithEmail,
   loginWithGoogle,
   logoutUser,
-  registerWithEmail
+  registerWithEmail,
+  waitForAuthReady
 } from "../firebase.js";
 import { clearCachedProfile } from "../store.js";
 import { showToast } from "../ui.js";
@@ -62,38 +63,52 @@ async function ensureGooglePhoneNumber(profile) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+async function resumeGoogleRedirectIfNeeded() {
+  const pendingGoogleRedirect = window.sessionStorage.getItem(GOOGLE_REDIRECT_KEY) === "1";
+  if (!pendingGoogleRedirect || !firebaseEnabled) {
+    return false;
+  }
+
+  try {
+    await getGoogleRedirectResult();
+    await waitForAuthReady();
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const profile = await syncSession();
+      if (profile) {
+        await ensureGooglePhoneNumber(profile);
+        window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+        showToast("Authentication successful.", "success");
+        redirectAfterAuth();
+        return true;
+      }
+      await sleep(250);
+    }
+
+    throw new Error("Google sign-in completed, but the session could not be restored yet. Please try again.");
+  } catch (error) {
+    window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+    showToast(error.message, "error");
+    return false;
+  }
+}
+
 async function init() {
   const activePage = document.body.dataset.page || "login";
-  const pendingGoogleRedirect = window.sessionStorage.getItem(GOOGLE_REDIRECT_KEY) === "1";
-
-  if (pendingGoogleRedirect && firebaseEnabled) {
-    try {
-      await getGoogleRedirectResult();
-    } catch (error) {
-      window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
-      showToast(error.message, "error");
-    }
+  if (await resumeGoogleRedirectIfNeeded()) {
+    return;
   }
 
   const profile = await bootstrapPage(activePage);
   if (profile) {
-    if (pendingGoogleRedirect) {
-      try {
-        await ensureGooglePhoneNumber(profile);
-        showToast("Authentication successful.", "success");
-      } catch (error) {
-        window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
-        showToast(error.message, "error");
-        return;
-      }
-      window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
-    }
     redirectAfterAuth();
     return;
-  }
-
-  if (pendingGoogleRedirect) {
-    window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
   }
 
   const authConfigNote = document.getElementById("auth-config-note");

@@ -53,7 +53,7 @@ export function renderProductCard(product) {
         <p class="product-summary">${product.summary || "Reliable solar and backup power from Hoinam Energy."}</p>
         <div class="product-meta">
           <strong class="price">${formatMoney(product.price, product.currency)}</strong>
-          <a class="button button-ghost" href="/product-detail.html?id=${product.id}">View</a>
+          <a class="button button-ghost" href="/product-detail.html?id=${product.id}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
         </div>
       </div>
     </article>
@@ -187,15 +187,15 @@ export function injectShell(activePage) {
               <small>${company.tagline}</small>
             </span>
           </a>
-          <button class="nav-toggle" type="button" aria-label="Toggle navigation">Menu</button>
+          <button class="nav-toggle" type="button" aria-label="Toggle navigation"><i class="fa-solid fa-bars" aria-hidden="true"></i> Menu</button>
           <nav class="site-nav" id="site-nav">
-            <a class="nav-link ${active("home")}" href="/index.html">Home</a>
-            <a class="nav-link ${active("about")}" href="/about.html">About</a>
-            <a class="nav-link ${active("products")}" href="/products.html">Products</a>
-            <a class="nav-link ${active("install")}" href="/book-install.html">Book Installation</a>
-            <a class="nav-link ${active("contact")}" href="/contact.html">Contact</a>
-            <a class="nav-link ${active("dashboard")} hidden" data-dashboard-link href="/dashboard.html">Dashboard</a>
-            <a class="nav-link ${active("admin")} hidden" data-admin-link href="/admin.html">Admin</a>
+            <a class="nav-link ${active("home")}" href="/index.html"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
+            <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
+            <a class="nav-link ${active("products")}" href="/products.html"><i class="fa-solid fa-battery-three-quarters" aria-hidden="true"></i><span>Products</span></a>
+            <a class="nav-link ${active("install")}" href="/book-install.html"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Install</span></a>
+            <a class="nav-link ${active("contact")}" href="/contact.html"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contact</span></a>
+            <a class="nav-link ${active("dashboard")} hidden" data-dashboard-link href="/dashboard.html"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Dashboard</span></a>
+            <a class="nav-link ${active("admin")} hidden" data-admin-link href="/admin.html"><i class="fa-solid fa-user-shield" aria-hidden="true"></i><span>Admin</span></a>
             <a class="nav-pill ${active("cart")}" href="/cart.html"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i> Cart <span data-cart-count>0</span></a>
             <a class="nav-pill ${active("login")}" data-login-link href="/login.html"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Login</a>
             <a class="nav-pill ${active("register")}" data-register-link href="/register.html"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Register</a>
@@ -221,7 +221,6 @@ export function injectShell(activePage) {
             ${renderFooterFaq()}
             ${renderFooterSocials()}
           </div>
-          <p class="footer-note">Clean energy storefront, booking, and admin workflow for Hoinam Energy. Update social links in <code>assets/js/site-config.js</code> when the official handles are ready.</p>
         </div>
       </footer>
     `;
