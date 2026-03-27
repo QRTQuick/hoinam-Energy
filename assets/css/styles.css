@@ -83,6 +83,13 @@ button {
   backdrop-filter: blur(18px);
   background: rgba(246, 251, 245, 0.84);
   border-bottom: 1px solid rgba(31, 122, 76, 0.08);
+  transition: background 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.site-header.is-scrolled {
+  background: rgba(246, 251, 245, 0.96);
+  border-bottom-color: rgba(31, 122, 76, 0.14);
+  box-shadow: 0 18px 40px rgba(18, 45, 28, 0.08);
 }
 
 .nav-row {
@@ -309,6 +316,26 @@ button {
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(231, 245, 235, 0.96)),
     var(--surface);
   overflow: hidden;
+}
+
+.hero-card::after,
+.cta-card::after,
+.product-card::after,
+.feature-card::after,
+.office-card::after,
+.stat-card::after,
+.footer-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  background: radial-gradient(
+    circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    rgba(255, 255, 255, 0.28),
+    transparent 42%
+  );
 }
 
 .solar-visual {
@@ -967,6 +994,50 @@ th {
   line-height: 1.35;
 }
 
+.faq-card[open] {
+  border-color: rgba(31, 122, 76, 0.22);
+}
+
+.faq-toggle {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  font-family: "Sora", sans-serif;
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.faq-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.faq-toggle i {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--primary-deep);
+  background: rgba(31, 122, 76, 0.08);
+  transition: transform 220ms ease, background 220ms ease;
+}
+
+.faq-card[open] .faq-toggle i {
+  transform: rotate(45deg);
+  background: rgba(255, 140, 0, 0.18);
+}
+
+.faq-answer {
+  overflow: hidden;
+}
+
+.faq-answer p {
+  margin: 0.9rem 0 0;
+}
+
 
 .footer {
   padding: 3rem 0 2rem;
@@ -1133,6 +1204,39 @@ th {
 .cta-card p,
 .cta-card h2 {
   color: white;
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+  transition:
+    opacity 520ms ease var(--reveal-delay, 0ms),
+    transform 520ms ease var(--reveal-delay, 0ms);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.interactive-card {
+  position: relative;
+  transform:
+    perspective(1200px)
+    rotateX(var(--tilt-rotate-x, 0deg))
+    rotateY(var(--tilt-rotate-y, 0deg))
+    translateY(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  will-change: transform;
+}
+
+.interactive-card:hover {
+  box-shadow: 0 28px 70px rgba(18, 45, 28, 0.16);
+  border-color: rgba(31, 122, 76, 0.22);
+}
+
+.interactive-card:hover::after {
+  opacity: 1;
 }
 
 .mini-meta {

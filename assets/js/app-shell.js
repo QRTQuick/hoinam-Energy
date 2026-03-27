@@ -1,10 +1,12 @@
 import { syncSession } from "./api.js";
 import { waitForAuthReady } from "./firebase.js";
+import { refreshInteractions } from "./interactions.js";
 import { clearCachedProfile, getCachedProfile } from "./store.js";
 import { injectShell, refreshShell, showToast } from "./ui.js";
 
 export async function bootstrapPage(activePage, options = {}) {
   injectShell(activePage);
+  refreshInteractions();
 
   let profile = getCachedProfile();
 

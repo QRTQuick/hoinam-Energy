@@ -1,5 +1,6 @@
 import { listProducts } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
+import { refreshInteractions } from "../interactions.js";
 import { renderProductCard, showToast } from "../ui.js";
 
 let allProducts = [];
@@ -17,10 +18,12 @@ function renderProducts() {
 
   if (!filtered.length) {
     target.innerHTML = `<div class="empty-state">No products match your search yet.</div>`;
+    refreshInteractions(target);
     return;
   }
 
   target.innerHTML = filtered.map(renderProductCard).join("");
+  refreshInteractions(target);
 }
 
 async function init() {

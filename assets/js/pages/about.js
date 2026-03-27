@@ -1,4 +1,5 @@
 import { bootstrapPage } from "../app-shell.js";
+import { refreshInteractions } from "../interactions.js";
 import { renderOffices } from "../ui.js";
 
 function renderFaqCards() {
@@ -6,10 +7,15 @@ function renderFaqCards() {
   return faqItems
     .map(
       (item) => `
-        <article class="panel faq-card">
-          <h3>${item.question}</h3>
-          <p class="muted">${item.answer}</p>
-        </article>
+        <details class="panel faq-card">
+          <summary class="faq-toggle">
+            <span>${item.question}</span>
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+          </summary>
+          <div class="faq-answer">
+            <p class="muted">${item.answer}</p>
+          </div>
+        </details>
       `
     )
     .join("");
@@ -54,14 +60,17 @@ async function init() {
 
   if (officeTarget) {
     officeTarget.innerHTML = renderOffices();
+    refreshInteractions(officeTarget);
   }
 
   if (faqTarget) {
     faqTarget.innerHTML = renderFaqCards();
+    refreshInteractions(faqTarget);
   }
 
   if (socialTarget) {
     socialTarget.innerHTML = renderSocialCards();
+    refreshInteractions(socialTarget);
   }
 }
 
