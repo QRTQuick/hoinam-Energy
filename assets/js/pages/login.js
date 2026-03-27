@@ -157,7 +157,17 @@ async function init() {
     button.addEventListener("click", async () => {
       try {
         window.sessionStorage.setItem(GOOGLE_REDIRECT_KEY, "1");
-        await loginWithGoogle();
+        const result = await loginWithGoogle();
+        if (result?.flow === "popup") {
+          const profile = await syncSession();
+          if (!profile) {
+            throw new Error("Google sign-in completed, but the user session could not be restored. Please try again.");
+          }
+          await ensureGooglePhoneNumber(profile);
+          window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
+          showToast("Authentication successful.", "success");
+          redirectAfterAuth();
+        }
       } catch (error) {
         window.sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
         showToast(error.message, "error");

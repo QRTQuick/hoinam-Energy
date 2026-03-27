@@ -1,12 +1,15 @@
 (function () {
   const origin = window.location.origin;
+  const hostname = window.location.hostname;
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(hostname);
+  const firebaseAuthDomain = isLocalHost ? "hoinam-energy-workspace.firebaseapp.com" : window.location.host;
 
   window.HOINAM_CONFIG = {
     apiBaseUrl: `${origin}/api`,
     enablePhoneAuth: true,
     firebase: {
       apiKey: "AIzaSyBMUFz5qgyl_RKK5IuPvB-9infl_FoM3_8",
-      authDomain: "hoinam-energy-workspace.firebaseapp.com",
+      authDomain: firebaseAuthDomain,
       projectId: "hoinam-energy-workspace",
       appId: "1:285359013809:web:b6036979397c4ced0ec790",
       messagingSenderId: "285359013809",
