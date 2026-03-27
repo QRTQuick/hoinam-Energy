@@ -724,6 +724,72 @@ button {
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
 }
 
+.catalog-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.35fr) minmax(0, 1fr);
+  gap: 1.6rem;
+  align-items: start;
+}
+
+.catalog-sidebar {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 120px;
+}
+
+.catalog-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.catalog-sidebar-head h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.filter-group {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.catalog-main {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.catalog-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.results-count {
+  font-weight: 700;
+  font-family: var(--font-ui);
+  color: var(--text-soft);
+}
+
+.chip-button {
+  border: 0;
+  background: rgba(31, 122, 76, 0.09);
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.chip-button.is-active {
+  background: rgba(31, 122, 76, 0.16);
+  color: var(--primary-deep);
+  box-shadow: inset 0 0 0 1px rgba(31, 122, 76, 0.14);
+}
+
 .detail-copy,
 .detail-card {
   display: flex;
@@ -734,6 +800,73 @@ button {
 .detail-card .product-media {
   min-height: 360px;
   border-radius: calc(var(--radius-lg) - 8px);
+}
+
+.step-grid,
+.trust-grid,
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.step-card,
+.trust-card,
+.testimonial-card {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.step-card .icon-burst {
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  font-size: 1.35rem;
+}
+
+.trust-card h3,
+.testimonial-card strong {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.trust-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.testimonial-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.testimonial-card p {
+  margin: 0.2rem 0 0.6rem;
+  color: var(--text-soft);
+  font-size: 0.98rem;
+}
+
+.quote-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 140, 0, 0.14);
+  color: var(--primary-deep);
+}
+
+.testimonial-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.92rem;
+  color: var(--text-soft);
+}
+
+.testimonial-meta strong {
+  color: var(--heading);
 }
 
 .list-reset {
@@ -1198,7 +1331,28 @@ th {
   transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
+.footer-button {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  background: rgba(31, 122, 76, 0.05);
+  border: 1px solid rgba(31, 122, 76, 0.08);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  text-align: left;
+  color: var(--heading);
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
 .footer-link:hover {
+  transform: translateY(-1px);
+  background: rgba(31, 122, 76, 0.08);
+  border-color: rgba(31, 122, 76, 0.16);
+}
+
+.footer-button:hover {
   transform: translateY(-1px);
   background: rgba(31, 122, 76, 0.08);
   border-color: rgba(31, 122, 76, 0.16);
@@ -1237,6 +1391,60 @@ th {
 .social-link.is-disabled {
   opacity: 0.58;
   pointer-events: none;
+}
+
+.cookie-banner {
+  position: fixed;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+}
+
+.cookie-card {
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: calc(var(--radius-lg) - 6px);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(31, 122, 76, 0.16);
+  box-shadow: 0 26px 60px rgba(18, 45, 28, 0.22);
+  backdrop-filter: blur(14px);
+}
+
+.cookie-card h3 {
+  margin: 0.6rem 0 0.4rem;
+  font-family: var(--font-heading);
+}
+
+.cookie-actions {
+  display: grid;
+  gap: 0.7rem;
+  align-content: center;
+  justify-items: stretch;
+}
+
+.trust-compliance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.trust-compliance-card {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.trust-compliance-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-family: var(--font-heading);
 }
 
 .footer-note {
@@ -1428,7 +1636,23 @@ th {
   .hero-grid,
   .detail-layout,
   .split-layout,
-  .checkout-grid {
+  .checkout-grid,
+  .step-grid,
+  .trust-grid,
+  .testimonial-grid,
+  .trust-compliance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-sidebar {
+    position: static;
+  }
+
+  .cookie-card {
     grid-template-columns: 1fr;
   }
 

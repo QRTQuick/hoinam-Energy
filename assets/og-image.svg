@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f7a4c"/>
+      <stop offset="100%" stop-color="#ff8c00"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#f6fbf5"/>
+  <rect width="1200" height="630" fill="url(#bg)" opacity="0.18"/>
+  <rect x="80" y="80" width="1040" height="470" rx="48" fill="white" opacity="0.96"/>
+  <g fill="#0f261b" font-family="Outfit, Arial, sans-serif">
+    <text x="140" y="210" font-size="56" font-weight="700">Hoinam Energy</text>
+    <text x="140" y="280" font-size="28" font-weight="500">EcoFlow solar power systems and installation booking</text>
+  </g>
+  <g fill="#1f7a4c" font-family="Space Grotesk, Arial, sans-serif" font-size="22">
+    <text x="140" y="360">Portable power stations · Solar panels · Installations</text>
+    <text x="140" y="400">Aba · Port Harcourt · Lagos</text>
+  </g>
+  <circle cx="1040" cy="430" r="70" fill="#1f7a4c" opacity="0.9"/>
+  <circle cx="1040" cy="430" r="52" fill="#ff8c00" opacity="0.9"/>
+</svg>

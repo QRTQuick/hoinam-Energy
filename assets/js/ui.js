@@ -166,6 +166,76 @@ function renderFooterSocials() {
   `;
 }
 
+function renderFooterLegal() {
+  return `
+    <article class="footer-panel">
+      <span class="badge"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> Legal</span>
+      <h3>Privacy and cookies</h3>
+      <div class="footer-stack">
+        <a class="footer-link" href="/privacy.html">
+          <strong>Privacy policy</strong>
+        </a>
+        <a class="footer-link" href="/cookies.html">
+          <strong>Cookie policy</strong>
+        </a>
+        <button class="footer-button" type="button" data-cookie-open>
+          <strong>Cookie preferences</strong>
+        </button>
+        <a class="footer-link" href="/about.html#faq">
+          <strong>Support & FAQs</strong>
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+function renderCookieBanner(force = false) {
+  const existing = document.querySelector(".cookie-banner");
+  if (existing) {
+    if (force) {
+      existing.remove();
+    } else {
+      return;
+    }
+  }
+
+  const consent = window.localStorage.getItem("hoinam_cookie_consent");
+  if (consent && !force) {
+    return;
+  }
+
+  const banner = document.createElement("div");
+  banner.className = "cookie-banner";
+  banner.innerHTML = `
+    <div class="cookie-card">
+      <div>
+        <span class="eyebrow"><i class="fa-solid fa-cookie-bite" aria-hidden="true"></i> Cookies</span>
+        <h3>We use cookies to keep the storefront fast and secure.</h3>
+        <p class="muted">
+          We store session and preference cookies so you can log in, keep items in your cart, and complete orders.
+          You can update your choice anytime from the policy page.
+        </p>
+      </div>
+      <div class="cookie-actions">
+        <button class="button button-ghost" type="button" data-cookie-decline>Decline</button>
+        <button class="button" type="button" data-cookie-accept>Accept cookies</button>
+      </div>
+    </div>
+  `;
+
+  document.body.append(banner);
+
+  banner.querySelector("[data-cookie-accept]")?.addEventListener("click", () => {
+    window.localStorage.setItem("hoinam_cookie_consent", "accepted");
+    banner.remove();
+  });
+
+  banner.querySelector("[data-cookie-decline]")?.addEventListener("click", () => {
+    window.localStorage.setItem("hoinam_cookie_consent", "declined");
+    banner.remove();
+  });
+}
+
 export function injectShell(activePage) {
   const company = window.HOINAM_CONFIG?.company || {
     name: "Hoinam Energy",
@@ -220,6 +290,7 @@ export function injectShell(activePage) {
             ${renderFooterOffices()}
             ${renderFooterFaq()}
             ${renderFooterSocials()}
+            ${renderFooterLegal()}
           </div>
         </div>
       </footer>
@@ -238,7 +309,13 @@ export function injectShell(activePage) {
     window.location.href = "/login.html";
   });
 
+  document.querySelector("[data-cookie-open]")?.addEventListener("click", () => {
+    window.localStorage.removeItem("hoinam_cookie_consent");
+    renderCookieBanner(true);
+  });
+
   refreshShell();
+  renderCookieBanner();
 }
 
 export function refreshShell() {

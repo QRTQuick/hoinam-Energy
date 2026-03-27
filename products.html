@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products | Hoinam Energy</title>
+    <meta name="description" content="Browse EcoFlow power stations, solar panels, and backup systems with live stock at Hoinam Energy.">
+    <link rel="canonical" href="https://hoinam-energy.vercel.app/products.html">
+    <meta property="og:title" content="EcoFlow Products | Hoinam Energy">
+    <meta property="og:description" content="Portable stations, solar panels, and high-capacity EcoFlow backup systems ready for sale.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hoinam-energy.vercel.app/products.html">
+    <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="EcoFlow Products | Hoinam Energy">
+    <meta name="twitter:description" content="Portable stations, solar panels, and high-capacity EcoFlow backup systems ready for sale.">
+    <meta name="twitter:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
+    <meta name="theme-color" content="#1f7a4c">
     <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
   <body>
@@ -19,19 +31,53 @@
 
       <section class="section">
         <div class="container">
-          <div class="search-row">
-            <label class="field">
-              <span>Search products</span>
-              <input id="search-products" type="search" placeholder="Search River, Delta, panel...">
-            </label>
-            <label class="field">
-              <span>Filter by category</span>
-              <select id="category-filter">
-                <option value="">All categories</option>
-              </select>
-            </label>
+          <div class="catalog-layout">
+            <aside class="panel catalog-sidebar">
+              <div class="catalog-sidebar-head">
+                <h2><i class="fa-solid fa-sliders" aria-hidden="true"></i> Filters</h2>
+                <button class="button button-ghost" type="button" id="clear-filters">Clear</button>
+              </div>
+              <div class="filter-group">
+                <label class="field">
+                  <span>Search products</span>
+                  <input id="search-products" type="search" placeholder="Search River, Delta, panel...">
+                </label>
+              </div>
+              <div class="filter-group">
+                <label class="field">
+                  <span>Filter by category</span>
+                  <select id="category-filter">
+                    <option value="">All categories</option>
+                  </select>
+                </label>
+              </div>
+              <div class="filter-group">
+                <label class="field">
+                  <span>Sort by</span>
+                  <select id="sort-products">
+                    <option value="featured">Featured</option>
+                    <option value="price-asc">Price: Low to high</option>
+                    <option value="price-desc">Price: High to low</option>
+                    <option value="name-asc">Name: A to Z</option>
+                    <option value="stock-desc">Stock: High to low</option>
+                  </select>
+                </label>
+              </div>
+              <div class="panel-copy muted">
+                Need help choosing? Book an <a href="/book-install.html">installation consult</a> for sizing advice.
+              </div>
+            </aside>
+
+            <div class="catalog-main">
+              <div class="catalog-toolbar">
+                <div class="chip-row" id="category-chips"></div>
+                <div class="catalog-meta">
+                  <span class="results-count" id="results-count">0 products</span>
+                </div>
+              </div>
+              <div class="product-grid" id="products-grid"></div>
+            </div>
           </div>
-          <div class="product-grid" id="products-grid"></div>
         </div>
       </section>
     </main>

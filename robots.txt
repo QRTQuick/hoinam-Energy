@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /login.html
+Disallow: /register.html
+
+Sitemap: https://hoinam-energy.vercel.app/sitemap.xml
