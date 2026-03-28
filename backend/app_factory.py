@@ -14,7 +14,7 @@ from .firebase_auth import verify_id_token
 from .models import Installation, Order, Product, User
 from .payments import initialize_transaction, verify_transaction
 from .services import apply_product_payload, calculate_order_items, ensure_unique_full_name, sync_user_from_claims
-from .utils import generate_order_number, generate_payment_reference, slugify, to_decimal, to_minor_units
+from .utils import generate_order_number, generate_payment_reference, resolve_product_image_url, slugify, to_decimal, to_minor_units
 
 
 class ApiError(Exception):
@@ -439,19 +439,20 @@ def create_app() -> Flask:
         created = 0
         updated = 0
         for row in rows:
+            product_slug = slugify(row["name"])
             product = db_session().query(Product).filter(Product.name == row["name"]).first()
             if product is None:
                 product = Product(
                     name=row["name"],
-                    slug=slugify(row["name"]),
-                    sku=slugify(row["name"]).upper().replace("-", "_"),
+                    slug=product_slug,
+                    sku=product_slug.upper().replace("-", "_"),
                     category=row["category"],
                     summary=row["summary"],
                     description=row["description"],
                     price=to_decimal(row["price"]),
                     currency=settings.default_currency,
                     stock=row["stock"],
-                    image_url=row["image_url"],
+                    image_url=resolve_product_image_url(row["name"], row["image_url"], product_slug),
                     active=True,
                 )
                 db_session().add(product)
@@ -461,7 +462,11 @@ def create_app() -> Flask:
                 if row["price"]:
                     product.price = to_decimal(row["price"])
                 product.category = row["category"] or product.category
-                product.image_url = row["image_url"] or product.image_url
+                product.image_url = resolve_product_image_url(
+                    row["name"],
+                    row["image_url"] or product.image_url,
+                    product.slug or product_slug,
+                )
                 product.summary = row["summary"] or product.summary
                 product.description = row["description"] or product.description
                 updated += 1

@@ -7,6 +7,7 @@ from sqlalchemy import JSON, Boolean, Date, DateTime, ForeignKey, Integer, Numer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
+from .utils import resolve_product_image_url
 
 
 def utcnow() -> datetime:
@@ -81,7 +82,7 @@ class Product(TimestampMixin, Base):
             "price": float(self.price),
             "currency": self.currency,
             "stock": self.stock,
-            "image_url": self.image_url,
+            "image_url": resolve_product_image_url(self.name, self.image_url, self.slug),
             "highlights": self.highlights or [],
             "featured": self.featured,
             "active": self.active,

@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 
 from .config import get_settings
 from .models import Product, User
-from .utils import slugify, to_decimal
+from .utils import resolve_product_image_url, slugify, to_decimal
 
 
 def ensure_unique_full_name(session, full_name: str | None, *, exclude_user_id: int | None = None) -> None:
@@ -65,21 +65,22 @@ def normalize_product_payload(payload: dict) -> dict:
     if not name:
         raise ValueError("Product name is required.")
 
+    slug = payload.get("slug") or slugify(name)
     highlights = payload.get("highlights") or []
     if isinstance(highlights, str):
         highlights = [item.strip() for item in highlights.split(",") if item.strip()]
 
     return {
         "name": name,
-        "slug": payload.get("slug") or slugify(name),
-        "sku": payload.get("sku") or slugify(name).upper().replace("-", "_"),
+        "slug": slug,
+        "sku": payload.get("sku") or slug.upper().replace("-", "_"),
         "category": payload.get("category") or "Portable Power",
         "summary": payload.get("summary"),
         "description": payload.get("description"),
         "price": to_decimal(payload.get("price")),
         "currency": payload.get("currency") or get_settings().default_currency,
         "stock": int(payload.get("stock", 0)),
-        "image_url": payload.get("image_url"),
+        "image_url": resolve_product_image_url(name, payload.get("image_url"), slug),
         "highlights": highlights,
         "featured": bool(payload.get("featured", False)),
         "active": bool(payload.get("active", True)),
@@ -136,7 +137,7 @@ def calculate_order_items(session, raw_items: Iterable[dict], *, lock_products: 
                 "unit_price": float(product.price),
                 "line_total": float(line_total),
                 "currency": product.currency,
-                "image_url": product.image_url,
+                "image_url": resolve_product_image_url(product.name, product.image_url, product.slug),
             }
         )
 
