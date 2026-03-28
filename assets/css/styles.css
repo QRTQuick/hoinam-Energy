@@ -3516,6 +3516,10 @@ body[data-page="products"] .catalog-hero-stat span {
 
 body[data-page="products"] .catalog-hero-search {
   padding: 0.78rem;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 30px rgba(0, 35, 78, 0.12);
+  backdrop-filter: blur(14px);
 }
 
 body[data-page="products"] .catalog-search-form {
@@ -3572,6 +3576,10 @@ body[data-page="products"] .catalog-layout {
 
 body[data-page="products"] .catalog-sidebar {
   top: 82px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 body[data-page="products"] .catalog-sidebar-mobile-head,
@@ -3582,6 +3590,25 @@ body[data-page="products"] .catalog-result-card {
   padding: 0.75rem;
 }
 
+body[data-page="products"] .catalog-sidebar-mobile-head,
+body[data-page="products"] .catalog-sidebar-block,
+body[data-page="products"] .catalog-support-note {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(0, 85, 184, 0.08);
+  border-radius: 18px;
+  box-shadow: none;
+  margin-bottom: 0.55rem;
+}
+
+body[data-page="products"] .catalog-sidebar-block {
+  border-bottom: 0;
+}
+
+body[data-page="products"] .catalog-support-note {
+  padding-top: 0.85rem;
+  padding-bottom: 0.9rem;
+}
+
 body[data-page="products"] .catalog-sidebar-mobile-head strong,
 body[data-page="products"] .catalog-sidebar-head h2,
 body[data-page="products"] .catalog-result-card h2 {
@@ -3589,15 +3616,50 @@ body[data-page="products"] .catalog-result-card h2 {
   line-height: 1.16;
 }
 
+body[data-page="products"] .catalog-toolbar {
+  padding: 0 0 0.7rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(0, 85, 184, 0.1);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body[data-page="products"] .catalog-active-filters {
+  margin: 0.5rem 0 0.72rem;
+  padding: 0;
+  background: transparent;
+}
+
 body[data-page="products"] .catalog-result-card {
   grid-template-columns: 150px minmax(0, 1fr) 165px;
   gap: 0.68rem;
   border-radius: 18px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.88));
+  border: 1px solid rgba(0, 85, 184, 0.08);
+  box-shadow: none;
+}
+
+body[data-page="products"] .catalog-result-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #0055b8, #ffc107);
+  opacity: 0.82;
 }
 
 body[data-page="products"] .catalog-result-image {
   min-height: 150px;
   border-radius: 14px;
+  background:
+    radial-gradient(circle at top right, rgba(0, 85, 184, 0.08), transparent 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(245, 248, 252, 0.86));
+  border: 1px solid rgba(0, 85, 184, 0.06);
 }
 
 body[data-page="products"] .catalog-result-image img {
@@ -3615,6 +3677,13 @@ body[data-page="products"] .catalog-toolbar-meta,
 body[data-page="products"] .catalog-toolbar-actions,
 body[data-page="products"] .catalog-active-filters {
   gap: 0.42rem;
+}
+
+body[data-page="products"] .catalog-result-actions {
+  align-content: start;
+  gap: 0.55rem;
+  padding-left: 0.72rem;
+  border-left: 1px solid rgba(0, 85, 184, 0.08);
 }
 
 body[data-page="products"] .catalog-result-price {
@@ -3635,12 +3704,11 @@ body[data-page="products"] .catalog-empty-state {
   padding: 1.35rem 0.9rem;
 }
 
-body[data-page="products"] .catalog-active-filters {
-  margin: 0.65rem 0 0.75rem;
-}
-
 body[data-page="products"] .catalog-active-pill {
   padding: 0.38rem 0.62rem;
+  background: rgba(230, 238, 248, 0.7);
+  border-color: rgba(0, 85, 184, 0.08);
+  box-shadow: none;
 }
 
 @media (max-width: 980px) {
@@ -3670,6 +3738,19 @@ body[data-page="products"] .catalog-active-pill {
   body[data-page="products"] .catalog-sidebar {
     width: min(80vw, 292px);
     max-width: 292px;
+    background: #ffffff;
+    border-right: 1px solid rgba(0, 85, 184, 0.08);
+    box-shadow: 0 22px 44px rgba(0, 35, 78, 0.16);
+  }
+
+  body[data-page="products"] .catalog-sidebar-mobile-head,
+  body[data-page="products"] .catalog-sidebar-block,
+  body[data-page="products"] .catalog-support-note {
+    margin-bottom: 0;
+    border-radius: 0;
+    background: transparent;
+    border-left: 0;
+    border-right: 0;
   }
 }
 
@@ -3724,6 +3805,11 @@ body[data-page="products"] .catalog-active-pill {
 
   body[data-page="products"] .catalog-toolbar-meta {
     display: none;
+  }
+
+  body[data-page="products"] .catalog-result-actions {
+    padding-left: 0;
+    border-left: 0;
   }
 }
 
