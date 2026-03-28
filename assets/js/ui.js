@@ -41,6 +41,28 @@ function initialsFromName(name = "") {
     .join("") || "HE";
 }
 
+function slugifyName(value = "") {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function resolveProductImageUrl(product = {}) {
+  const explicitImage = String(product.image_url || "").trim();
+  if (explicitImage) {
+    return explicitImage;
+  }
+
+  const slug = String(product.slug || "").trim() || slugifyName(product.name || "");
+  if (!slug) {
+    return "";
+  }
+
+  return `/assets/images/products/${slug}.png`;
+}
+
 export function formatMoney(amount, currency = "NGN") {
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -65,10 +87,23 @@ export function statusBadge(status) {
 
 export function productMedia(product, className = "product-media") {
   const fallback = `<div class="fallback-mark">${initialsFromName(product.name)}</div>`;
-  const image = product.image_url
-    ? `<img src="${product.image_url}" alt="${product.name}">`
-    : fallback;
-  return `<div class="${className}">${image}</div>`;
+  const imageUrl = resolveProductImageUrl(product);
+
+  if (!imageUrl) {
+    return `<div class="${className} is-fallback">${fallback}</div>`;
+  }
+
+  return `
+    <div class="${className} has-image">
+      <img
+        src="${imageUrl}"
+        alt="${product.name}"
+        loading="lazy"
+        onerror="this.remove(); this.parentElement.classList.remove('has-image'); this.parentElement.classList.add('is-fallback');"
+      >
+      ${fallback}
+    </div>
+  `;
 }
 
 export function renderProductCard(product) {
