@@ -767,15 +767,22 @@ button {
 
 .product-meta {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
 }
 
 .price {
   font-family: var(--font-heading);
   color: var(--heading);
   font-size: 1.4rem;
+  overflow-wrap: anywhere;
+}
+
+.product-card-link {
+  width: auto;
+  justify-self: start;
+  white-space: nowrap;
 }
 
 .feature-card,

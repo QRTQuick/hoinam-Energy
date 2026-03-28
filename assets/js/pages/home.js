@@ -13,7 +13,10 @@ async function init() {
 
   try {
     const products = await listProducts();
-    const featured = products.filter((product) => product.featured).slice(0, 4);
+    const spotlightProducts = [
+      ...products.filter((product) => product.featured),
+      ...products.filter((product) => !product.featured)
+    ].slice(0, 6);
     const categories = new Set(products.map((product) => product.category).filter(Boolean));
     const totalStock = products.reduce((sum, product) => sum + Number(product.stock || 0), 0);
 
@@ -30,7 +33,7 @@ async function init() {
       categoryCount.textContent = String(categories.size);
     }
 
-    productGrid.innerHTML = featured.map(renderProductCard).join("");
+    productGrid.innerHTML = spotlightProducts.map(renderProductCard).join("");
     refreshInteractions(productGrid);
     refreshInteractions(document.querySelector(".hero-stats") || document);
   } catch (error) {

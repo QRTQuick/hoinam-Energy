@@ -119,7 +119,7 @@ export function renderProductCard(product) {
         <p class="product-summary">${product.summary || "Reliable solar and backup power from Hoinam Energy."}</p>
         <div class="product-meta">
           <strong class="price">${formatMoney(product.price, product.currency)}</strong>
-          <a class="button button-ghost" href="/product-detail.html?id=${product.id}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
+          <a class="button button-ghost product-card-link" href="/product-detail.html?id=${product.id}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
         </div>
       </div>
     </article>

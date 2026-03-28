@@ -19,9 +19,9 @@
     },
     company: {
       name: "Hoinam Energy",
-      tagline: "Solar power installation and EcoFlow energy systems",
+      tagline: "Solar installation, backup products, and energy support",
       about:
-        "Hoinam Energy combines EcoFlow product sales with solar power planning and installation support for homes, offices, retail operations, and growing businesses that need dependable backup energy in Nigeria.",
+        "Hoinam Energy supplies backup systems, portable power stations, solar panels, and practical service support for homes, offices, shops, and growing businesses across Nigeria. We help customers move from product selection to delivery planning, installation coordination, and dependable follow-up.",
       offices: [
         {
           title: "Corporate Office",
@@ -38,20 +38,20 @@
       ],
       faq: [
         {
-          question: "Do you sell EcoFlow products directly?",
-          answer: "Yes. Hoinam Energy sells EcoFlow backup systems, portable power stations, and foldable solar panels through the online catalog."
+          question: "What kind of products does Hoinam Energy sell?",
+          answer: "Hoinam Energy supplies portable stations, larger backup systems, foldable solar panels, and related power accessories through the online catalog."
         },
         {
           question: "Can I book installation after ordering a product?",
-          answer: "Yes. Customers can place an order and also submit an installation request for site planning, setup, and follow-up."
+          answer: "Yes. Customers can place an order and also submit an installation request for load review, site planning, setup coordination, and follow-up."
         },
         {
           question: "Do you support homes, offices, and commercial sites?",
-          answer: "Yes. The current product and installation flow is structured for residential, office, and business backup power projects."
+          answer: "Yes. Hoinam Energy supports residential, office, retail, and business backup power projects with product guidance and installation coordination."
         },
         {
-          question: "How are payments confirmed?",
-          answer: "Payments are processed through Paystack before order confirmation, and the backend verifies the transaction reference before creating the order."
+          question: "What support do you provide during service?",
+          answer: "Hoinam Energy helps with product selection, delivery planning, installation booking, setup guidance, and post-purchase follow-up so customers are not left alone after buying."
         }
       ],
       socials: [
