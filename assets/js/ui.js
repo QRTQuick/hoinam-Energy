@@ -49,18 +49,20 @@ function slugifyName(value = "") {
     .replace(/^-+|-+$/g, "");
 }
 
-function resolveProductImageUrl(product = {}) {
+const PRODUCT_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
+
+function resolveProductImageUrls(product = {}) {
   const explicitImage = String(product.image_url || "").trim();
   if (explicitImage) {
-    return explicitImage;
+    return [explicitImage];
   }
 
   const slug = String(product.slug || "").trim() || slugifyName(product.name || "");
   if (!slug) {
-    return "";
+    return [];
   }
 
-  return `/assets/images/products/${slug}.png`;
+  return PRODUCT_IMAGE_EXTENSIONS.map((extension) => `/assets/images/products/${slug}${extension}`);
 }
 
 export function formatMoney(amount, currency = "NGN") {
@@ -87,19 +89,23 @@ export function statusBadge(status) {
 
 export function productMedia(product, className = "product-media") {
   const fallback = `<div class="fallback-mark">${initialsFromName(product.name)}</div>`;
-  const imageUrl = resolveProductImageUrl(product);
+  const imageUrls = resolveProductImageUrls(product);
+  const [imageUrl] = imageUrls;
 
   if (!imageUrl) {
     return `<div class="${className} is-fallback">${fallback}</div>`;
   }
 
+  const fallbackSources = imageUrls.join("|");
   return `
     <div class="${className} has-image">
       <img
         src="${imageUrl}"
         alt="${product.name}"
         loading="lazy"
-        onerror="this.remove(); this.parentElement.classList.remove('has-image'); this.parentElement.classList.add('is-fallback');"
+        data-fallback-srcs="${fallbackSources}"
+        data-fallback-index="0"
+        onerror="const sources=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); const nextIndex=Number(this.dataset.fallbackIndex||'0')+1; if (sources[nextIndex]) { this.dataset.fallbackIndex=String(nextIndex); this.src=sources[nextIndex]; return; } this.remove(); this.parentElement.classList.remove('has-image'); this.parentElement.classList.add('is-fallback');"
       >
       ${fallback}
     </div>

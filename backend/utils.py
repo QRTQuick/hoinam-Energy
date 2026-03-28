@@ -4,7 +4,6 @@ import re
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
-from functools import lru_cache
 from pathlib import Path
 
 
@@ -21,7 +20,6 @@ def _product_image_dir() -> Path:
     return Path(__file__).resolve().parents[1] / "assets" / "images" / "products"
 
 
-@lru_cache(maxsize=256)
 def _resolved_product_image_from_slug(slug: str) -> str | None:
     if not slug:
         return None
