@@ -331,8 +331,28 @@ export function injectShell(activePage) {
     `;
   }
 
-  document.querySelector(".nav-toggle")?.addEventListener("click", () => {
-    document.getElementById("site-nav")?.classList.toggle("is-open");
+  // Dropdown menu toggle
+  const navToggle = document.querySelector(".nav-toggle");
+  const siteNav = document.getElementById("site-nav");
+
+  navToggle?.addEventListener("click", () => {
+    siteNav?.classList.toggle("is-open");
+  });
+
+  // Close navbar when a link is clicked
+  siteNav?.querySelectorAll(".nav-link, .nav-pill").forEach((link) => {
+    link.addEventListener("click", () => {
+      siteNav?.classList.remove("is-open");
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (event) => {
+    const isToggle = event.target.closest(".nav-toggle");
+    const isNav = event.target.closest(".site-nav");
+    if (!isToggle && !isNav && siteNav?.classList.contains("is-open")) {
+      siteNav?.classList.remove("is-open");
+    }
   });
 
   document.querySelector("[data-logout-button]")?.addEventListener("click", async () => {

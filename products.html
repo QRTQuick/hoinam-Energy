@@ -21,61 +21,103 @@
   <body>
     <div id="site-header"></div>
     <main>
-      <section class="page-hero">
-        <div class="container">
-          <span class="eyebrow">Catalog</span>
-          <h1>EcoFlow solar and backup products</h1>
-          <p>Browse portable power, solar panels, and home backup systems available through Hoinam Energy.</p>
+      <section class="catalog-utility-bar">
+        <div class="container catalog-utility-inner">
+          <div class="catalog-utility-item"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Fast delivery support across Nigeria</div>
+          <div class="catalog-utility-item"><i class="fa-solid fa-headset" aria-hidden="true"></i> Energy experts available for sizing help</div>
+          <div class="catalog-utility-item"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Verified EcoFlow inventory and installation backup</div>
         </div>
       </section>
 
-      <section class="section">
+      <section class="page-hero catalog-hero">
+        <div class="container">
+          <div class="catalog-hero-grid">
+            <div>
+              <span class="eyebrow">Search Catalog</span>
+              <h1>Search EcoFlow products the way buyers expect.</h1>
+              <p>Find backup systems, portable power stations, and solar panels with a search-first catalog inspired by industrial parts storefronts.</p>
+            </div>
+            <div class="catalog-hero-search panel">
+              <form class="catalog-search-form" id="catalog-search-form">
+                <label class="catalog-search-input" for="search-products">
+                  <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                  <input id="search-products" type="search" placeholder="Search River, Delta, solar panel, backup..." autocomplete="off">
+                  <button class="button" type="submit">Search</button>
+                </label>
+                <div class="search-suggestions hidden" id="search-suggestions" aria-live="polite"></div>
+                <div class="catalog-search-links">
+                  <span>Popular searches</span>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="Delta">Delta</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="River">River</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="Solar Panel">Solar Panel</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="Home Backup">Home Backup</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section catalog-shell-section">
         <div class="container">
           <div class="catalog-layout">
             <aside class="panel catalog-sidebar">
-              <div class="catalog-sidebar-head">
-                <h2><i class="fa-solid fa-sliders" aria-hidden="true"></i> Filters</h2>
+              <div class="catalog-sidebar-head catalog-sidebar-block">
+                <h2><i class="fa-solid fa-sliders" aria-hidden="true"></i> Refine search</h2>
                 <button class="button button-ghost" type="button" id="clear-filters">Clear</button>
               </div>
-              <div class="filter-group">
-                <label class="field">
-                  <span>Search products</span>
-                  <input id="search-products" type="search" placeholder="Search River, Delta, panel...">
-                </label>
+              <div class="catalog-sidebar-block">
+                <div class="filter-group">
+                  <label class="field">
+                    <span>Category</span>
+                    <select id="category-filter">
+                      <option value="">All categories</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="filter-group">
+                  <label class="field">
+                    <span>Sort results</span>
+                    <select id="sort-products">
+                      <option value="relevance">Best match</option>
+                      <option value="featured">Featured</option>
+                      <option value="price-asc">Price: Low to high</option>
+                      <option value="price-desc">Price: High to low</option>
+                      <option value="name-asc">Name: A to Z</option>
+                      <option value="stock-desc">Stock: High to low</option>
+                    </select>
+                  </label>
+                </div>
               </div>
-              <div class="filter-group">
-                <label class="field">
-                  <span>Filter by category</span>
-                  <select id="category-filter">
-                    <option value="">All categories</option>
-                  </select>
-                </label>
+              <div class="catalog-sidebar-block">
+                <div class="catalog-sidebar-label">Browse by category</div>
+                <div class="chip-row catalog-filter-chips" id="category-chips"></div>
               </div>
-              <div class="filter-group">
-                <label class="field">
-                  <span>Sort by</span>
-                  <select id="sort-products">
-                    <option value="featured">Featured</option>
-                    <option value="price-asc">Price: Low to high</option>
-                    <option value="price-desc">Price: High to low</option>
-                    <option value="name-asc">Name: A to Z</option>
-                    <option value="stock-desc">Stock: High to low</option>
-                  </select>
-                </label>
+              <div class="catalog-sidebar-block">
+                <div class="catalog-sidebar-label">Search help</div>
+                <ul class="list-reset catalog-help-list">
+                  <li>Search by product line like <strong>River</strong> or <strong>Delta</strong>.</li>
+                  <li>Use broad terms like <strong>solar</strong>, <strong>backup</strong>, or <strong>portable</strong>.</li>
+                  <li>Open a product page to review stock, pricing, and installation options.</li>
+                </ul>
               </div>
-              <div class="panel-copy muted">
+              <div class="panel-copy muted catalog-support-note">
                 Need help choosing? Book an <a href="/book-install.html">installation consult</a> for sizing advice.
               </div>
             </aside>
 
             <div class="catalog-main">
-              <div class="catalog-toolbar">
-                <div class="chip-row" id="category-chips"></div>
-                <div class="catalog-meta">
+              <div class="catalog-toolbar panel">
+                <div class="catalog-toolbar-copy">
                   <span class="results-count" id="results-count">0 products</span>
+                  <p class="catalog-results-summary" id="results-summary">Loading catalog results...</p>
+                </div>
+                <div class="catalog-toolbar-meta">
+                  <span class="catalog-toolbar-badge"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i> Live inventory view</span>
+                  <span class="catalog-toolbar-badge"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> Ranked search</span>
                 </div>
               </div>
-              <div class="product-grid" id="products-grid"></div>
+              <div class="catalog-results-list" id="products-grid"></div>
             </div>
           </div>
         </div>
