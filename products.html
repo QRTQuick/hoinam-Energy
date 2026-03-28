@@ -32,16 +32,33 @@
       <section class="page-hero catalog-hero">
         <div class="container">
           <div class="catalog-hero-grid">
-            <div>
+            <div class="catalog-hero-copy">
               <span class="eyebrow">Search Catalog</span>
-              <h1>Search EcoFlow products the way buyers expect.</h1>
-              <p>Find backup systems, portable power stations, and solar panels with a search-first catalog inspired by industrial parts storefronts.</p>
+              <h1>Find the right EcoFlow setup faster and with less friction.</h1>
+              <p>Search backup systems, portable power stations, and solar panels with a cleaner Hoinam catalog flow built for real buying decisions.</p>
+              <div class="catalog-hero-stats">
+                <div class="catalog-hero-stat">
+                  <strong id="catalog-total-products">0</strong>
+                  <span>Products</span>
+                </div>
+                <div class="catalog-hero-stat">
+                  <strong id="catalog-total-categories">0</strong>
+                  <span>Categories</span>
+                </div>
+                <div class="catalog-hero-stat">
+                  <strong id="catalog-total-stock">0</strong>
+                  <span>Units in stock</span>
+                </div>
+              </div>
             </div>
             <div class="catalog-hero-search panel">
               <form class="catalog-search-form" id="catalog-search-form">
                 <label class="catalog-search-input" for="search-products">
                   <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                   <input id="search-products" type="search" placeholder="Search River, Delta, solar panel, backup..." autocomplete="off">
+                  <button class="catalog-search-clear hidden" type="button" id="clear-search" aria-label="Clear search">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                  </button>
                   <button class="button" type="submit">Search</button>
                 </label>
                 <div class="search-suggestions hidden" id="search-suggestions" aria-live="polite"></div>
@@ -52,6 +69,14 @@
                   <button class="catalog-link-chip" type="button" data-search-shortcut="Solar Panel">Solar Panel</button>
                   <button class="catalog-link-chip" type="button" data-search-shortcut="Home Backup">Home Backup</button>
                 </div>
+                <div class="catalog-search-actions">
+                  <button class="button button-ghost catalog-filter-toggle" type="button" id="open-filters">
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i> Refine search
+                  </button>
+                  <a class="button button-ghost" href="/book-install.html">
+                    <i class="fa-solid fa-user-gear" aria-hidden="true"></i> Get sizing help
+                  </a>
+                </div>
               </form>
             </div>
           </div>
@@ -60,8 +85,18 @@
 
       <section class="section catalog-shell-section">
         <div class="container">
+          <button class="catalog-sidebar-backdrop hidden" type="button" id="catalog-sidebar-backdrop" aria-label="Close filters"></button>
           <div class="catalog-layout">
-            <aside class="panel catalog-sidebar">
+            <aside class="panel catalog-sidebar" id="catalog-sidebar" aria-label="Catalog filters">
+              <div class="catalog-sidebar-mobile-head">
+                <div>
+                  <span class="catalog-sidebar-label">Catalog controls</span>
+                  <strong>Refine search</strong>
+                </div>
+                <button class="button button-ghost" type="button" id="close-filters">
+                  <i class="fa-solid fa-xmark" aria-hidden="true"></i> Close
+                </button>
+              </div>
               <div class="catalog-sidebar-head catalog-sidebar-block">
                 <h2><i class="fa-solid fa-sliders" aria-hidden="true"></i> Refine search</h2>
                 <button class="button button-ghost" type="button" id="clear-filters">Clear</button>
@@ -88,6 +123,16 @@
                     </select>
                   </label>
                 </div>
+                <div class="filter-group catalog-toggle-group">
+                  <label class="catalog-toggle" for="in-stock-only">
+                    <input id="in-stock-only" type="checkbox">
+                    <span>Only show products currently in stock</span>
+                  </label>
+                  <label class="catalog-toggle" for="featured-only">
+                    <input id="featured-only" type="checkbox">
+                    <span>Only show featured Hoinam picks</span>
+                  </label>
+                </div>
               </div>
               <div class="catalog-sidebar-block">
                 <div class="catalog-sidebar-label">Browse by category</div>
@@ -112,11 +157,20 @@
                   <span class="results-count" id="results-count">0 products</span>
                   <p class="catalog-results-summary" id="results-summary">Loading catalog results...</p>
                 </div>
-                <div class="catalog-toolbar-meta">
-                  <span class="catalog-toolbar-badge"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i> Live inventory view</span>
-                  <span class="catalog-toolbar-badge"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> Ranked search</span>
+                <div class="catalog-toolbar-side">
+                  <div class="catalog-toolbar-meta">
+                    <span class="catalog-toolbar-badge"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i> Live inventory view</span>
+                    <span class="catalog-toolbar-badge"><i class="fa-solid fa-magnifying-glass-chart" aria-hidden="true"></i> Ranked search</span>
+                  </div>
+                  <div class="catalog-toolbar-actions">
+                    <button class="button button-ghost catalog-filter-toggle" type="button" id="toolbar-filters">
+                      <i class="fa-solid fa-sliders" aria-hidden="true"></i> Refine search
+                    </button>
+                    <button class="button button-ghost" type="button" id="toolbar-reset">Reset view</button>
+                  </div>
                 </div>
               </div>
+              <div class="catalog-active-filters hidden" id="active-filters" aria-live="polite"></div>
               <div class="catalog-results-list" id="products-grid"></div>
             </div>
           </div>
