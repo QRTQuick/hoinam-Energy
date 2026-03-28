@@ -3570,12 +3570,15 @@ body[data-page="products"] .catalog-shell-section {
 }
 
 body[data-page="products"] .catalog-layout {
-  grid-template-columns: minmax(205px, 0.24fr) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   gap: 0.72rem;
 }
 
 body[data-page="products"] .catalog-sidebar {
-  top: 82px;
+  position: static;
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
   background: transparent;
   border: 0;
   box-shadow: none;
@@ -3602,6 +3605,70 @@ body[data-page="products"] .catalog-support-note {
 
 body[data-page="products"] .catalog-sidebar-block {
   border-bottom: 0;
+}
+
+body[data-page="products"] .catalog-sidebar-primary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0 0.6rem;
+  margin-bottom: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(0, 85, 184, 0.1);
+  border-radius: 0;
+}
+
+body[data-page="products"] .catalog-sidebar-primary-controls {
+  padding: 0.12rem 0 0.1rem;
+  margin-bottom: 0.15rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+body[data-page="products"] .catalog-refine-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.55rem;
+}
+
+body[data-page="products"] .catalog-refine-controls > .filter-group {
+  flex: 1 1 210px;
+  min-width: 0;
+  margin: 0;
+}
+
+body[data-page="products"] .catalog-refine-controls > .catalog-toggle-group {
+  display: flex;
+  flex: 2 1 430px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0;
+}
+
+body[data-page="products"] .catalog-refine-controls .field {
+  gap: 0.32rem;
+}
+
+body[data-page="products"] .catalog-refine-controls .field span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4d4d4d;
+}
+
+body[data-page="products"] .catalog-refine-controls .catalog-toggle {
+  min-height: 42px;
+  padding: 0.72rem 0.82rem;
+}
+
+body[data-page="products"] .catalog-sidebar-secondary {
+  display: none;
 }
 
 body[data-page="products"] .catalog-support-note {
@@ -3736,11 +3803,41 @@ body[data-page="products"] .catalog-active-pill {
   }
 
   body[data-page="products"] .catalog-sidebar {
+    position: fixed;
     width: min(80vw, 292px);
     max-width: 292px;
     background: #ffffff;
     border-right: 1px solid rgba(0, 85, 184, 0.08);
     box-shadow: 0 22px 44px rgba(0, 35, 78, 0.16);
+  }
+
+  body[data-page="products"] .catalog-sidebar-primary-head,
+  body[data-page="products"] .catalog-sidebar-primary-controls {
+    padding: 0.75rem;
+    border-bottom: 0;
+  }
+
+  body[data-page="products"] .catalog-sidebar-primary-head {
+    background: transparent;
+  }
+
+  body[data-page="products"] .catalog-sidebar-primary-controls {
+    margin-bottom: 0;
+  }
+
+  body[data-page="products"] .catalog-refine-controls,
+  body[data-page="products"] .catalog-refine-controls > .catalog-toggle-group {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  body[data-page="products"] .catalog-refine-controls > .filter-group,
+  body[data-page="products"] .catalog-refine-controls > .catalog-toggle-group {
+    flex: initial;
+  }
+
+  body[data-page="products"] .catalog-sidebar-secondary {
+    display: block;
   }
 
   body[data-page="products"] .catalog-sidebar-mobile-head,
