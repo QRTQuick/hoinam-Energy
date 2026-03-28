@@ -5,6 +5,7 @@ import { clearCachedProfile, getCachedProfile } from "./store.js";
 import { injectShell, refreshShell, showToast } from "./ui.js";
 
 export async function bootstrapPage(activePage, options = {}) {
+  document.body.dataset.page = activePage;
   injectShell(activePage);
   refreshInteractions();
 

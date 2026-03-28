@@ -1,5 +1,5 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&family=Syne:wght@600;700;800&display=swap");
 
 :root {
   --bg: #f5f5f5;
@@ -25,9 +25,11 @@
   --radius-md: 18px;
   --radius-sm: 12px;
   --max-width: 1180px;
-  --font-body: "Manrope", sans-serif;
-  --font-heading: "Outfit", sans-serif;
-  --font-ui: "Space Grotesk", sans-serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+  --font-heading: "Archivo", sans-serif;
+  --font-ui: "IBM Plex Sans Condensed", sans-serif;
+  --font-home-hero: "Sora", sans-serif;
+  --font-home-accent: "Syne", sans-serif;
   --gradient-gold: linear-gradient(135deg, #ffc107 0%, #efa040 100%);
   --gradient-accent: linear-gradient(135deg, #0055b8 0%, #006fba 100%);
   --gradient-dark: linear-gradient(135deg, #0055b8 0%, #01408f 100%);
@@ -3504,6 +3506,29 @@ body {
   line-height: 1.72;
 }
 
+.typed-heading {
+  min-height: 2.4em;
+  text-wrap: balance;
+}
+
+.typed-heading.is-typing::after,
+.typed-heading.is-typed::after {
+  content: "";
+  display: inline-block;
+  width: 0.12em;
+  height: 0.9em;
+  margin-left: 0.14em;
+  vertical-align: -0.08em;
+  background: currentColor;
+  animation: headingCaretBlink 0.95s steps(1) infinite;
+}
+
+@keyframes headingCaretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .brand-copy small,
 .eyebrow,
 .chip,
@@ -3605,6 +3630,36 @@ textarea {
   overflow: hidden;
 }
 
+body[data-page="home"] .hero-copy h1,
+body[data-page="home"] .section-heading h2,
+body[data-page="home"] .hero-showcase-main h2,
+body[data-page="home"] .category-feature h3,
+body[data-page="home"] .service-line h3,
+body[data-page="home"] .difference-point h3,
+body[data-page="home"] .brand-spotlight h2,
+body[data-page="home"] .trust-story-copy h2 {
+  text-wrap: balance;
+}
+
+body[data-page="home"] .hero-copy h1 {
+  font-family: var(--font-home-hero);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  max-width: 12ch;
+}
+
+body[data-page="home"] .hero-copy p,
+body[data-page="home"] .section-copy,
+body[data-page="home"] .category-feature p,
+body[data-page="home"] .service-line p,
+body[data-page="home"] .difference-point p,
+body[data-page="home"] .brand-spotlight p,
+body[data-page="home"] .testimonial-text,
+body[data-page="home"] .trust-flow p,
+body[data-page="home"] .hero-showcase-main p {
+  font-family: var(--font-body);
+}
+
 .home-hero-grid {
   align-items: center;
   gap: 2rem;
@@ -3672,6 +3727,19 @@ textarea {
   font-weight: 800;
 }
 
+body[data-page="home"] .eyebrow,
+body[data-page="home"] .hero-showcase-kicker,
+body[data-page="home"] .hero-mini-kicker,
+body[data-page="home"] .category-feature-label,
+body[data-page="home"] .hero-proofline span,
+body[data-page="home"] .service-link,
+body[data-page="home"] .brand-copy-actions .button,
+body[data-page="home"] .testimonial-location {
+  font-family: var(--font-ui);
+  line-height: 1.18;
+  letter-spacing: 0.06em;
+}
+
 .hero-showcase-main h2,
 .hero-mini-panel strong,
 .category-feature h3,
@@ -3683,11 +3751,29 @@ textarea {
   color: var(--heading);
 }
 
+body[data-page="home"] .hero-showcase-main h2,
+body[data-page="home"] .section-heading h2,
+body[data-page="home"] .category-feature h3,
+body[data-page="home"] .service-line h3,
+body[data-page="home"] .difference-point h3,
+body[data-page="home"] .brand-spotlight h2,
+body[data-page="home"] .trust-story-copy h2 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.045em;
+}
+
 .hero-showcase-main h2,
 .brand-spotlight h2,
 .trust-story-copy h2 {
   font-size: clamp(1.9rem, 1.8vw + 1.2rem, 2.9rem);
   line-height: 1.08;
+}
+
+body[data-page="home"] .section-heading h2,
+body[data-page="home"] .brand-spotlight h2,
+body[data-page="home"] .trust-story-copy h2 {
+  font-size: clamp(1.72rem, 1.32vw + 1.16rem, 2.5rem);
+  line-height: 1.04;
 }
 
 .trust-story-copy h2 {
@@ -3701,10 +3787,36 @@ textarea {
   line-height: 1.14;
 }
 
+body[data-page="home"] .category-feature h3 {
+  font-size: clamp(1.42rem, 0.72vw + 1.16rem, 1.82rem);
+  line-height: 1.08;
+}
+
 .service-line h3,
 .difference-point h3 {
   font-size: clamp(1.35rem, 0.8vw + 1.1rem, 1.7rem);
   line-height: 1.16;
+}
+
+body[data-page="home"] .service-line h3,
+body[data-page="home"] .difference-point h3 {
+  line-height: 1.08;
+}
+
+body[data-page="home"] .hero-mini-panel strong,
+body[data-page="home"] .difference-number,
+body[data-page="home"] .service-line-index,
+body[data-page="home"] .brand-gallery-item figcaption,
+body[data-page="home"] .testimonial-author,
+body[data-page="home"] .trust-flow strong {
+  font-family: var(--font-home-accent);
+  letter-spacing: -0.03em;
+}
+
+body[data-page="about"] .typed-heading {
+  font-family: var(--font-home-hero);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
 }
 
 .hero-showcase-main p,
@@ -4159,6 +4271,11 @@ textarea {
     line-height: 1.68;
   }
 
+  body[data-page="home"] .hero-copy h1 {
+    max-width: 13ch;
+    line-height: 1;
+  }
+
   .hero-showcase-stack,
   .brand-gallery {
     grid-template-columns: 1fr;
@@ -4213,5 +4330,9 @@ textarea {
   .trust-story-media img,
   .brand-gallery-item img {
     max-width: 100%;
+  }
+
+  .typed-heading {
+    min-height: 2.8em;
   }
 }

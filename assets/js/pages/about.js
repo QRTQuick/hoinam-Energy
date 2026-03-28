@@ -2,6 +2,8 @@ import { bootstrapPage } from "../app-shell.js";
 import { refreshInteractions } from "../interactions.js";
 import { renderOffices } from "../ui.js";
 
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
 function renderFaqCards() {
   const faqItems = window.HOINAM_CONFIG?.company?.faq || [];
   return faqItems
@@ -42,6 +44,41 @@ function renderSocialCards() {
     .join("");
 }
 
+function typeHeading(element) {
+  if (!element || element.dataset.typingReady === "1") {
+    return;
+  }
+
+  const fullText = element.dataset.typingText || element.textContent.trim();
+  element.dataset.typingReady = "1";
+  element.setAttribute("aria-label", fullText);
+
+  if (prefersReducedMotion.matches) {
+    element.textContent = fullText;
+    element.classList.add("is-typed");
+    return;
+  }
+
+  element.textContent = "";
+  element.classList.add("is-typing");
+
+  let index = 0;
+  const step = () => {
+    index += 1;
+    element.textContent = fullText.slice(0, index);
+
+    if (index < fullText.length) {
+      window.setTimeout(step, 42);
+      return;
+    }
+
+    element.classList.remove("is-typing");
+    element.classList.add("is-typed");
+  };
+
+  window.setTimeout(step, 220);
+}
+
 async function init() {
   await bootstrapPage("about");
 
@@ -51,6 +88,7 @@ async function init() {
   const officeTarget = document.getElementById("about-offices");
   const faqTarget = document.getElementById("about-faq");
   const socialTarget = document.getElementById("about-socials");
+  const typedHeading = document.querySelector("[data-typing-text]");
 
   if (aboutCopy) {
     aboutCopy.textContent =
@@ -72,6 +110,8 @@ async function init() {
     socialTarget.innerHTML = renderSocialCards();
     refreshInteractions(socialTarget);
   }
+
+  typeHeading(typedHeading);
 }
 
 init();
