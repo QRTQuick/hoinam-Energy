@@ -775,7 +775,7 @@ button {
 .price {
   font-family: var(--font-heading);
   color: var(--heading);
-  font-size: 1.4rem;
+  font-size: 1.12rem;
   overflow-wrap: anywhere;
 }
 
@@ -3582,7 +3582,8 @@ textarea,
 }
 
 .price {
-  font-size: clamp(1.6rem, 1.2vw + 1.2rem, 2rem);
+  font-size: clamp(1.08rem, 0.45vw + 0.98rem, 1.28rem);
+  line-height: 1.24;
 }
 
 .catalog-result-price {
@@ -3925,6 +3926,16 @@ textarea {
   filter: drop-shadow(0 30px 42px rgba(0, 0, 0, 0.08));
 }
 
+.trust-story-media-photo img {
+  width: 100%;
+  max-width: none;
+  min-height: 280px;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 30px 14px 30px 14px;
+  filter: none;
+}
+
 .service-lines {
   display: grid;
   gap: 1rem;
@@ -3983,6 +3994,21 @@ textarea {
   max-height: 220px;
   object-fit: contain;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.08));
+}
+
+.service-line-media-photo {
+  padding: 0;
+  overflow: hidden;
+  background: #eef3f8;
+}
+
+.service-line-media-photo img {
+  width: 100%;
+  min-height: 220px;
+  max-height: none;
+  object-fit: cover;
+  filter: none;
+  display: block;
 }
 
 .difference-river {
