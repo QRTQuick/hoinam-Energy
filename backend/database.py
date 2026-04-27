@@ -43,3 +43,13 @@ def close_session() -> None:
 def init_database() -> None:
     engine = get_engine()
     Base.metadata.create_all(bind=engine)
+
+
+def check_database_url() -> None:
+    """Raise early at startup if DATABASE_URL is missing or malformed."""
+    settings = get_settings()
+    if not settings.database_url:
+        raise RuntimeError(
+            "DATABASE_URL environment variable is required but not set. "
+            "Add it to your .env file or deployment environment."
+        )

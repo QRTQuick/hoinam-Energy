@@ -141,4 +141,4 @@ def calculate_order_items(session, raw_items: Iterable[dict], *, lock_products: 
             }
         )
 
-    return normalized_items, total
+    return normalized_items, total, products

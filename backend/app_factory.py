@@ -7,9 +7,10 @@ from flask import Flask, g, jsonify, request, send_from_directory
 from flask_cors import CORS
 from openpyxl import load_workbook
 from sqlalchemy import desc, func
+from sqlalchemy.orm import joinedload
 
 from .config import get_settings
-from .database import close_session, get_session
+from .database import check_database_url, close_session, get_session, init_database
 from .firebase_auth import verify_id_token
 from .models import Installation, Order, Product, User
 from .payments import initialize_transaction, verify_transaction
@@ -26,6 +27,8 @@ class ApiError(Exception):
 
 def create_app() -> Flask:
     settings = get_settings()
+    check_database_url()
+    init_database()
     app = Flask(__name__)
     project_root = Path(__file__).resolve().parents[1]
     CORS(
@@ -40,9 +43,10 @@ def create_app() -> Flask:
             g.db = get_session()
 
     @app.teardown_request
-    def teardown_request(_exc):
+    def teardown_request(exc):
         if hasattr(g, "db"):
-            g.db.close()
+            if exc is not None:
+                g.db.rollback()
         close_session()
 
     @app.errorhandler(ApiError)
@@ -243,7 +247,7 @@ def create_app() -> Flask:
         user = authenticate()
         payload = request.get_json(silent=True) or {}
         items = payload.get("items") or []
-        normalized_items, total = calculate_order_items(db_session(), items)
+        normalized_items, total, _ = calculate_order_items(db_session(), items)
         reference = generate_payment_reference()
         payment = initialize_transaction(
             email=user.email or payload.get("email") or "orders@hoinamenergy.com",
@@ -283,7 +287,7 @@ def create_app() -> Flask:
         if missing_fields:
             raise ApiError(f"Missing shipping fields: {', '.join(missing_fields)}.", 400)
 
-        normalized_items, total = calculate_order_items(
+        normalized_items, total, locked_products = calculate_order_items(
             db_session(), payload.get("items") or [], lock_products=True
         )
         verification = verify_transaction(payment_reference)
@@ -292,20 +296,11 @@ def create_app() -> Flask:
         if verification.get("amount") not in (None, to_minor_units(total)):
             raise ApiError("Payment amount does not match the order total.", 400)
 
-        product_quantities = {item["product_id"]: item["quantity"] for item in normalized_items}
-        products = (
-            db_session()
-            .query(Product)
-            .filter(Product.id.in_(product_quantities.keys()))
-            .with_for_update()
-            .all()
-        )
-        for product in products:
-            requested_quantity = product_quantities[product.id]
-            if product.stock < requested_quantity:
+        for item in normalized_items:
+            product = locked_products[item["product_id"]]
+            if product.stock < item["quantity"]:
                 raise ApiError(f"{product.name} is no longer available in that quantity.", 409)
-            product.stock -= requested_quantity
-
+            product.stock -= item["quantity"]
         order = Order(
             order_number=generate_order_number(),
             user_id=user.id,
@@ -337,7 +332,13 @@ def create_app() -> Flask:
     @app.get("/api/orders")
     def get_all_orders():
         authenticate(admin=True)
-        orders = db_session().query(Order).order_by(Order.created_at.desc()).all()
+        orders = (
+            db_session()
+            .query(Order)
+            .options(joinedload(Order.user))
+            .order_by(Order.created_at.desc())
+            .all()
+        )
         payload = []
         for order in orders:
             data = order.to_dict()
@@ -385,7 +386,13 @@ def create_app() -> Flask:
     @app.get("/api/installations")
     def get_all_installations():
         authenticate(admin=True)
-        installations = db_session().query(Installation).order_by(Installation.created_at.desc()).all()
+        installations = (
+            db_session()
+            .query(Installation)
+            .options(joinedload(Installation.user), joinedload(Installation.product))
+            .order_by(Installation.created_at.desc())
+            .all()
+        )
         return json_success([serialize_installation(item) for item in installations])
 
     @app.put("/api/installations/<int:installation_id>")
