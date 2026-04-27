@@ -323,7 +323,7 @@ export function injectShell(activePage) {
       <header class="site-header">
         <div class="container nav-row">
           <a class="brand" href="/index.html">
-            <span class="brand-mark"><i class="fa-solid fa-solar-panel" aria-hidden="true"></i></span>
+            <span class="brand-mark"><img src="/assets/images/hoinam logo.png" alt="Hoinam Energy logo"></span>
             <span class="brand-copy">
               <span>${company.name}</span>
               <small>${company.tagline}</small>
@@ -357,7 +357,7 @@ export function injectShell(activePage) {
         <div class="container">
           <div class="footer-grid footer-grid-wide">
             <article class="footer-panel">
-              <span class="badge"><i class="fa-solid fa-solar-panel" aria-hidden="true"></i> About Hoinam</span>
+              <span class="badge"><img src="/assets/images/hoinam logo.png" alt="" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:4px"> About Hoinam</span>
               <h3>${company.name}</h3>
               <p class="muted">${company.about || `${company.tagline}. We combine EcoFlow product sales with installation planning for homes, offices, and commercial energy resilience.`}</p>
               <a class="button button-ghost" href="/about.html"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Read more</a>
