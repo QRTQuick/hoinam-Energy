@@ -12,62 +12,429 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://hoinam-energy.vercel.app/login.html">
     <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Login | Hoinam Energy">
-    <meta name="twitter:description" content="Sign in to manage orders, payments, and installation bookings.">
-    <meta name="twitter:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
     <meta name="theme-color" content="#0055B8">
     <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+      /* ── Login page layout ── */
+      body[data-page="login"] {
+        background: #f5f5f5;
+      }
+
+      body[data-page="login"] #site-header,
+      body[data-page="login"] #site-footer {
+        display: none;
+      }
+
+      .login-shell {
+        display: grid;
+        grid-template-columns: minmax(380px, 480px) 1fr;
+        min-height: 100vh;
+      }
+
+      /* ── Left panel ── */
+      .login-panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        padding: 3rem 2.5rem;
+        background: #ffffff;
+        border-right: 1px solid #ebebeb;
+        position: relative;
+        z-index: 1;
+      }
+
+      .login-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+      }
+
+      .login-brand img {
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+      }
+
+      .login-brand-name {
+        font-family: "Anton", sans-serif;
+        font-size: 0.92rem;
+        letter-spacing: -0.02em;
+        color: #333333;
+      }
+
+      .login-heading {
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .login-heading h1 {
+        font-family: "Anton", sans-serif;
+        font-size: clamp(1.1rem, 2vw, 1.5rem);
+        color: #333333;
+        margin: 0;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+
+      .login-heading p {
+        margin: 0;
+        font-size: 0.8rem;
+        letter-spacing: -0.01em;
+        color: #4d4d4d;
+        font-family: "Dancing Script", cursive;
+      }
+
+      .login-form {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .login-form .field {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .login-form label span {
+        font-family: "Anton", sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+        color: #333333;
+      }
+
+      .login-form input {
+        border: 1.5px solid #ebebeb;
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        font-size: 0.92rem;
+        background: #f9f9f9;
+        transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      }
+
+      .login-form input:focus {
+        outline: none;
+        border-color: #0055b8;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(0, 85, 184, 0.1);
+      }
+
+      .login-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #aaa;
+        font-size: 0.78rem;
+        font-family: "Anton", sans-serif;
+        letter-spacing: 0.06em;
+      }
+
+      .login-divider::before,
+      .login-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #ebebeb;
+      }
+
+      .login-footer-note {
+        font-size: 0.82rem;
+        color: #4d4d4d;
+        text-align: center;
+        font-family: "Dancing Script", cursive;
+      }
+
+      .login-footer-note a {
+        color: #0055b8;
+        font-weight: 700;
+      }
+
+      /* ── Right panel — solar visual ── */
+      .login-visual {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #0a1628 0%, #0055b8 60%, #006fba 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+      }
+
+      /* Ambient glow orbs */
+      .login-visual::before {
+        content: "";
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 193, 7, 0.18) 0%, transparent 70%);
+        top: -100px;
+        right: -100px;
+        pointer-events: none;
+        animation: orbFloat 8s ease-in-out infinite alternate;
+      }
+
+      .login-visual::after {
+        content: "";
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 111, 186, 0.3) 0%, transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        pointer-events: none;
+        animation: orbFloat 10s ease-in-out infinite alternate-reverse;
+      }
+
+      @keyframes orbFloat {
+        from { transform: translate(0, 0) scale(1); }
+        to   { transform: translate(30px, 20px) scale(1.08); }
+      }
+
+      /* Rotating solar panel */
+      .solar-stage {
+        position: relative;
+        z-index: 1;
+        width: 340px;
+        height: 340px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 900px;
+      }
+
+      .solar-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 193, 7, 0.18);
+        animation: ringPulse 3s ease-in-out infinite;
+      }
+
+      .solar-ring:nth-child(2) {
+        inset: 20px;
+        border-color: rgba(255, 255, 255, 0.08);
+        animation-delay: 1s;
+      }
+
+      @keyframes ringPulse {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50%       { opacity: 1;   transform: scale(1.03); }
+      }
+
+      .solar-panel-wrap {
+        position: relative;
+        z-index: 2;
+        animation: solarSpin 12s linear infinite;
+        transform-style: preserve-3d;
+        filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
+      }
+
+      .solar-panel-wrap img {
+        width: 260px;
+        height: 260px;
+        object-fit: contain;
+        display: block;
+      }
+
+      @keyframes solarSpin {
+        0%   { transform: rotateY(0deg)   rotateX(8deg); }
+        50%  { transform: rotateY(180deg) rotateX(-8deg); }
+        100% { transform: rotateY(360deg) rotateX(8deg); }
+      }
+
+      /* Floating energy particles */
+      .particle {
+        position: absolute;
+        z-index: 1;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ffc107;
+        opacity: 0;
+        animation: particleRise var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+      }
+
+      @keyframes particleRise {
+        0%   { opacity: 0;   transform: translateY(0)    scale(0.5); }
+        20%  { opacity: 0.9; }
+        100% { opacity: 0;   transform: translateY(-180px) scale(1.4); }
+      }
+
+      /* Caption */
+      .solar-caption {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .solar-caption strong {
+        display: block;
+        font-family: "Anton", sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+      }
+
+      .solar-caption span {
+        font-family: "Dancing Script", cursive;
+        font-size: 0.85rem;
+        letter-spacing: -0.01em;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* Stats strip */
+      .solar-stats {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 1.5rem;
+      }
+
+      .solar-stat {
+        text-align: center;
+        color: #fff;
+      }
+
+      .solar-stat strong {
+        display: block;
+        font-family: "Anton", sans-serif;
+        font-size: 1.2rem;
+        letter-spacing: -0.02em;
+        color: #ffc107;
+      }
+
+      .solar-stat span {
+        font-family: "Dancing Script", cursive;
+        font-size: 0.75rem;
+        letter-spacing: -0.01em;
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 860px) {
+        .login-shell {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr;
+        }
+
+        .login-visual {
+          min-height: 320px;
+          order: -1;
+        }
+
+        .solar-stage {
+          width: 220px;
+          height: 220px;
+        }
+
+        .solar-panel-wrap img {
+          width: 170px;
+          height: 170px;
+        }
+
+        .solar-stats {
+          gap: 1rem;
+        }
+
+        .login-panel {
+          border-right: none;
+          border-top: 1px solid #ebebeb;
+          padding: 2rem 1.5rem;
+        }
+      }
+    </style>
   </head>
   <body data-page="login">
     <div id="site-header"></div>
-    <main>
-      <section class="page-hero">
-        <div class="container">
-          <span class="eyebrow"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Authentication</span>
-          <h1>Log in to place orders, pay, and track installations</h1>
-          <p>Use your Hoinam Energy account with email and password or Google to continue checkout and manage your energy projects.</p>
+
+    <div class="login-shell">
+
+      <!-- LEFT: Login form -->
+      <div class="login-panel">
+        <a class="login-brand" href="/index.html">
+          <img src="/assets/images/hoinam logo.png" alt="Hoinam Energy logo">
+          <span class="login-brand-name">Hoinam Energy</span>
+        </a>
+
+        <div class="login-heading">
+          <h1>Welcome back</h1>
+          <p>Sign in to manage your orders and installations</p>
         </div>
-      </section>
 
-      <section class="section">
-        <div class="container">
-          <div id="auth-config-note"></div>
-          <div class="auth-grid">
-            <form class="panel form-grid auth-card" id="login-form">
-              <h3 class="field-full"><i class="fa-solid fa-user-lock" aria-hidden="true"></i> Sign in</h3>
-              <label class="field field-full">
-                <span>Email</span>
-                <input name="email" type="email" required>
-              </label>
-              <label class="field field-full">
-                <span>Password</span>
-                <input name="password" type="password" required>
-              </label>
-              <div class="field field-full">
-                <button class="button button-full" type="submit"><i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Login</button>
-              </div>
-              <div class="field field-full">
-                <button class="button button-secondary button-full" data-google-auth type="button"><i class="fa-brands fa-google" aria-hidden="true"></i> Continue with Google</button>
-              </div>
-              <p class="field-full muted auth-switch">Need a new account? <a href="/register.html">Create one here</a>.</p>
-            </form>
+        <div id="auth-config-note"></div>
 
-            <article class="panel auth-side-card">
-              <span class="eyebrow"><i class="fa-solid fa-solar-panel" aria-hidden="true"></i> Account access</span>
-              <h3>Use one account across shopping, payment, and installation booking</h3>
-              <p class="muted">Customer sessions stay tied to Firebase authentication while your profile, orders, and bookings remain in Neon for the admin team.</p>
-              <div class="auth-side-list">
-                <div><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Resume cart and checkout from the same profile.</span></div>
-                <div><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Track installation requests after submitting a booking.</span></div>
-                <div><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Keep order records linked to verified customer access.</span></div>
-              </div>
-              <a class="button button-ghost" href="/register.html"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Create account</a>
-            </article>
+        <form class="login-form" id="login-form" novalidate>
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input name="password" type="password" placeholder="••••••••" required autocomplete="current-password">
+          </label>
+          <button class="button button-full" type="submit">
+            <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Sign in
+          </button>
+        </form>
+
+        <div class="login-divider">or</div>
+
+        <button class="button button-secondary button-full" data-google-auth type="button">
+          <i class="fa-brands fa-google" aria-hidden="true"></i> Continue with Google
+        </button>
+
+        <p class="login-footer-note">
+          No account yet? <a href="/register.html">Create one here</a>
+        </p>
+      </div>
+
+      <!-- RIGHT: Solar panel visual -->
+      <div class="login-visual" aria-hidden="true">
+
+        <!-- Floating particles -->
+        <div class="particle" style="--dur:3.8s; --delay:0s;   left:30%; bottom:20%;"></div>
+        <div class="particle" style="--dur:5s;   --delay:1.2s; left:50%; bottom:15%;"></div>
+        <div class="particle" style="--dur:4.2s; --delay:0.6s; left:70%; bottom:25%;"></div>
+        <div class="particle" style="--dur:6s;   --delay:2s;   left:40%; bottom:10%;"></div>
+        <div class="particle" style="--dur:3.5s; --delay:1.8s; left:60%; bottom:18%;"></div>
+
+        <!-- Rotating panel -->
+        <div class="solar-stage">
+          <div class="solar-ring"></div>
+          <div class="solar-ring"></div>
+          <div class="solar-panel-wrap">
+            <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="EcoFlow 110W foldable solar panel rotating">
           </div>
         </div>
-      </section>
-    </main>
+
+        <div class="solar-caption">
+          <strong>Clean Energy. Delivered.</strong>
+          <span>EcoFlow solar panels available through Hoinam</span>
+        </div>
+
+        <div class="solar-stats">
+          <div class="solar-stat">
+            <strong>110W</strong>
+            <span>Peak output</span>
+          </div>
+          <div class="solar-stat">
+            <strong>Foldable</strong>
+            <span>Easy deploy</span>
+          </div>
+          <div class="solar-stat">
+            <strong>Solar-ready</strong>
+            <span>Any station</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <div id="site-footer"></div>
     <script src="/assets/js/site-config.js"></script>
     <script type="module" src="/assets/js/pages/login.js"></script>

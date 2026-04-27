@@ -70,7 +70,8 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  letter-spacing: -0.01em;
   color: var(--text);
   background: var(--bg);
   background-image:
@@ -238,6 +239,8 @@ button {
   border-radius: 0;
   font-weight: 700;
   font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: -0.01em;
   color: var(--text-soft);
   transition: background 180ms ease, color 180ms ease;
   position: relative;
@@ -332,15 +335,15 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.55rem 0.8rem;
+  padding: 0.45rem 0.7rem;
   border-radius: 999px;
   background: #e6eef8;
   color: var(--primary);
   font-weight: 800;
   font-family: var(--font-ui);
-  letter-spacing: 0.03em;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
-  font-size: 0.74rem;
+  font-size: 0.65rem;
 }
 
 .eyebrow i {
@@ -356,13 +359,13 @@ button {
 .cta-card h2 {
   font-family: var(--font-heading);
   color: var(--heading);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 
 .hero h1,
 .page-hero h1 {
-  font-size: clamp(1.8rem, 3.5vw, 3.2rem);
+  font-size: clamp(1.5rem, 3vw, 2.6rem);
   line-height: 1.05;
   max-width: 14ch;
   margin-top: 0.75rem;
@@ -388,12 +391,13 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
   border: 0;
   border-radius: 999px;
-  padding: 0.95rem 1.3rem;
+  padding: 0.78rem 1.1rem;
   font-weight: 800;
   font-family: var(--font-ui);
+  font-size: 0.78rem;
   letter-spacing: -0.01em;
   background: var(--gradient-gold);
   color: #333333;
@@ -605,7 +609,17 @@ button {
   color: var(--text-soft);
   font-weight: 700;
   font-family: var(--font-ui);
-  font-size: 0.92rem;
+  font-size: 0.72rem;
+  letter-spacing: -0.01em;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  letter-spacing: -0.02em;
+  color: var(--heading);
 }
 
 .stat-card-head {
@@ -622,14 +636,6 @@ button {
   border-radius: 14px;
   color: var(--primary);
   background: linear-gradient(135deg, #e6eef8, #f5f5f5);
-}
-
-.stat-card strong {
-  display: block;
-  margin-top: 0.45rem;
-  font-family: var(--font-heading);
-  font-size: 1.95rem;
-  color: var(--heading);
 }
 
 .section {
@@ -722,10 +728,11 @@ button {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 0.38rem 0.75rem;
-  font-size: 0.82rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
   font-weight: 800;
   font-family: var(--font-ui);
+  letter-spacing: -0.01em;
   transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
@@ -1324,6 +1331,8 @@ button {
 label {
   font-weight: 800;
   font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: -0.01em;
   color: var(--heading);
 }
 
@@ -1438,11 +1447,11 @@ tbody tr:hover {
 }
 
 th {
-  font-size: 0.84rem;
+  font-size: 0.72rem;
   color: var(--text-soft);
   font-family: var(--font-ui);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.01em;
 }
 
 .admin-product-cell {
@@ -2293,9 +2302,19 @@ th {
   }
 }
 
-/* Smooth scroll behavior with refined easing */
-html {
-  scroll-behavior: smooth;
+/* Anton — tighten default tracking */
+h1, h2, h3, h4, h5, h6,
+.button, .nav-link, .nav-pill,
+.eyebrow, .chip, .badge,
+.stat-card strong, .price,
+label, th {
+  letter-spacing: -0.02em;
+}
+
+/* Dancing Script — slight tighten for readability */
+body, p, .muted, .section-copy,
+.product-summary, .panel-copy {
+  letter-spacing: -0.01em;
 }
 
 /* Text selection color premium feel */
@@ -2381,20 +2400,20 @@ html {
 
 .hero-copy h1 {
   font-family: var(--font-heading);
-  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-size: clamp(1.35rem, 3vw, 2.2rem);
   font-weight: 800;
   line-height: 1.1;
-  margin: 0 0 1rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.85rem;
   color: var(--heading);
-  letter-spacing: -0.01em;
 }
 
 .hero-copy p {
-  font-size: 0.95rem;
-  line-height: 1.65;
+  font-size: 0.85rem;
+  line-height: 1.6;
   color: var(--text-soft);
-  margin: 0 0 1.5rem;
-  max-width: 560px;
+  margin: 0 0 1.25rem;
+  max-width: 520px;
 }
 
 .hero-actions {
@@ -2472,18 +2491,19 @@ html {
 
 .section-heading h2 {
   font-family: var(--font-heading);
-  font-size: clamp(1.3rem, 2.5vw, 2rem);
+  font-size: clamp(1.1rem, 2vw, 1.65rem);
   font-weight: 800;
-  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
   color: var(--heading);
 }
 
 .section-heading p {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--text-soft);
   margin: 0;
   line-height: 1.55;
-  max-width: 560px;
+  max-width: 520px;
 }
 
 .trust-stats-grid {
@@ -5321,3 +5341,6 @@ main {
 .footer-button:hover {
   transform: translateX(3px);
 }
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
