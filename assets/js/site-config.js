@@ -21,19 +21,12 @@
       name: "Hoinam Energy",
       tagline: "Solar installation, backup products, and energy support",
       about:
-        "Hoinam Energy supplies backup systems, portable power stations, solar panels, and practical service support for homes, offices, shops, and growing businesses across Nigeria. We help customers move from product selection to delivery planning, installation coordination, and dependable follow-up.",
+        "Hoinam Energy supplies solar panels, backup power systems, portable stations, and installation services for homes, offices, shops, and businesses across Nigeria. We work with multiple brands and help customers from product selection through to installation and after-service support.",
+      email: "hoinamenergy@gmail.com",
       offices: [
         {
-          title: "Corporate Office",
+          title: "Aba Office",
           address: "235 Umuocham Road, off Tonimas Junction by Enugu-PHC Express, Osisioma, Aba, Abia."
-        },
-        {
-          title: "PHC Office",
-          address: "1 Okechukwu Chukwu Street, off Ogbatai, Woji, Port Harcourt, Rivers."
-        },
-        {
-          title: "Lagos Office",
-          address: "9 Ogundoju Street, Lagos"
         }
       ],
       faq: [

@@ -311,7 +311,7 @@ function renderCookieBanner(force = false) {
 export function injectShell(activePage) {
   const company = window.HOINAM_CONFIG?.company || {
     name: "Hoinam Energy",
-    tagline: "Solar power installation and EcoFlow energy systems"
+    tagline: "Solar installation, backup products, and energy support"
   };
 
   const header = document.getElementById("site-header");
@@ -323,7 +323,7 @@ export function injectShell(activePage) {
       <header class="site-header">
         <div class="container nav-row">
           <a class="brand" href="/index.html">
-            <span class="brand-mark"><img src="/assets/images/hoinam logo.png" alt="Hoinam Energy logo"></span>
+            <span class="brand-mark"><img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy logo"></span>
             <span class="brand-copy">
               <span>${company.name}</span>
               <small>${company.tagline}</small>
@@ -352,20 +352,53 @@ export function injectShell(activePage) {
   }
 
   if (footer) {
+    const office = (window.HOINAM_CONFIG?.company?.offices || [])[0];
+    const email = window.HOINAM_CONFIG?.company?.email || "hoinamenergy@gmail.com";
+    const socials = window.HOINAM_CONFIG?.company?.socials || [];
+
     footer.innerHTML = `
-      <footer class="footer">
-        <div class="container">
-          <div class="footer-grid footer-grid-wide">
-            <article class="footer-panel">
-              <span class="badge"><img src="/assets/images/hoinam logo.png" alt="" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:4px"> About Hoinam</span>
-              <h3>${company.name}</h3>
-              <p class="muted">${company.about || `${company.tagline}. We combine EcoFlow product sales with installation planning for homes, offices, and commercial energy resilience.`}</p>
-              <a class="button button-ghost" href="/about.html"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Read more</a>
-            </article>
-            ${renderFooterOffices()}
-            ${renderFooterFaq()}
-            ${renderFooterSocials()}
-            ${renderFooterLegal()}
+      <footer class="footer-bw">
+        <div class="container footer-bw-inner">
+
+          <div class="footer-bw-brand">
+            <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy logo" class="footer-bw-logo">
+            <span class="footer-bw-name">${company.name}</span>
+            <p class="footer-bw-about">${company.about || company.tagline}</p>
+          </div>
+
+          <div class="footer-bw-col">
+            <h4>Quick links</h4>
+            <a href="/index.html">Home</a>
+            <a href="/products.html">Products</a>
+            <a href="/book-install.html">Book Installation</a>
+            <a href="/about.html">About</a>
+            <a href="/contact.html">Contact</a>
+          </div>
+
+          <div class="footer-bw-col">
+            <h4>Contact</h4>
+            ${office ? `<p><i class="fa-solid fa-location-dot"></i> ${office.address}</p>` : ""}
+            <p><i class="fa-solid fa-envelope"></i> <a href="mailto:${email}">${email}</a></p>
+          </div>
+
+          <div class="footer-bw-col">
+            <h4>Legal</h4>
+            <a href="/privacy.html">Privacy policy</a>
+            <a href="/cookies.html">Cookie policy</a>
+            <button class="footer-bw-cookie-btn" type="button" data-cookie-open>Cookie preferences</button>
+          </div>
+
+        </div>
+
+        <div class="footer-bw-bottom">
+          <div class="container footer-bw-bottom-inner">
+            <span>&copy; ${new Date().getFullYear()} ${company.name}. All rights reserved.</span>
+            <div class="footer-bw-socials">
+              ${socials.map(s => s.href
+                ? `<a href="${s.href}" target="_blank" rel="noreferrer" aria-label="${s.label}"><i class="${s.icon}"></i></a>`
+                : `<span class="footer-bw-social-off" aria-label="${s.label}"><i class="${s.icon}"></i></span>`
+              ).join("")}
+            </div>
           </div>
         </div>
       </footer>
