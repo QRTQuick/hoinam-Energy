@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoinamEnergy | Future of Solar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Video/Image Background Container */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Overlay to make text pop */
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%);
+        }
+
+        .hero-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 8%;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffcc00;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ffcc00;
+        }
+
+        /* Main Content */
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 50px;
+            border-radius: 30px;
+            transform: perspective(1000px) rotateX(5deg);
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+            max-width: 800px;
+            transition: transform 0.5s ease;
+        }
+
+        .glass-card:hover {
+            transform: perspective(1000px) rotateX(0deg) scale(1.02);
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        h1 span {
+            color: #ffcc00;
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #e0e0e0;
+            max-width: 600px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            background: #ffcc00;
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 50px;
+            text-transform: uppercase;
+            transition: 0.3s;
+            display: inline-block;
+            box-shadow: 0 10px 20px rgba(255, 204, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Footer & Socials */
+        footer {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 20px;
+            transition: 0.3s;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            text-decoration: none;
+        }
+
+        .social-icons a:hover {
+            background: #ffcc00;
+            color: #000;
+            transform: scale(1.2);
+        }
+
+        .contact-info {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        .contact-info a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .glass-card { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-bg">
+        <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1509391366360-fe5bb6578506?auto=format&fit=crop&w=1920&q=80">
+            <source src="https://player.vimeo.com/external/477103233.sd.mp4?s=340150d18f50c0598858223635a9d82136e08285&profile_id=164&oauth2_token_id=57447761" type="video/mp4">
+        </video>
+    </div>
+
+    <nav>
+        <div class="logo">HOINAM<span>ENERGY</span></div>
+        <ul class="nav-links">
+            <li><a href="#">Products</a></li>
+            <li><a href="#">Technology</a></li>
+            <li><a href="#">Support</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="glass-card" id="card">
+            <h1>POWER FROM <span>ABOVE</span></h1>
+            <p>Premium monocrystalline solar solutions designed for maximum efficiency. Clean energy, zero compromise.</p>
+            <a href="#" class="btn">Shop Panels</a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="social-icons">
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://tiktok.com" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://x.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://wa.me/yourphonenumber" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="contact-info">
+            Questions? <a href="mailto:info@hoinamenergy.com">info@hoinamenergy.com</a>
+        </div>
+    </footer>
+
+    <script>
+        // Simple 3D Tilt Effect on Mouse Move
+        const card = document.getElementById('card');
+        const container = document.querySelector('.container');
+
+        container.addEventListener('mousemove', (e) => {
+            let xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            let yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            card.style.transform = `perspective(1000px) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        // Reset position when mouse leaves
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateY(0deg) rotateX(5deg)`;
+            card.style.transition = "all 0.5s ease";
+        });
+
+        container.addEventListener('mouseenter', () => {
+            card.style.transition = "none";
+        });
+    </script>
+</body>
+</html>
+ 

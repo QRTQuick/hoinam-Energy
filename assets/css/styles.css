@@ -36,27 +36,7 @@
   --gradient-dark: linear-gradient(135deg, #0055b8 0%, #01408f 100%);
 }
 
-.theme-dark {
-  --bg: #f5f5f5;
-  --bg-accent: #e6eef8;
-  --surface: #ffffff;
-  --surface-strong: #ffffff;
-  --surface-muted: #f5f5f5;
-  --border: #ebebeb;
-  --text: #333333;
-  --text-soft: #4d4d4d;
-  --heading: #333333;
-  --primary: #0055b8;
-  --primary-deep: #006fba;
-  --accent: #006fba;
-  --accent-soft: #e6eef8;
-  --danger: #ff6b6b;
-  --success: #008a00;
-  --warning: #ffc107;
-  --shadow: 0 14px 30px rgba(0, 85, 184, 0.08);
-  --shadow-lg: 0 22px 50px rgba(0, 85, 184, 0.12);
-  --shadow-sm: 0 8px 18px rgba(0, 85, 184, 0.08);
-}
+
 
 *,
 *::before,
@@ -5023,18 +5003,11 @@ body[data-page="about"] .typed-heading {
   margin: 0;
 }
 
-.theme-dark .brand-logo-lockup {
-  background: rgba(22, 27, 35, 0.94);
-  border-color: rgba(255, 255, 255, 0.08);
-}
 
-.theme-dark .brand-logo-copy strong {
-  color: #f7f9fc;
-}
 
-.theme-dark .brand-logo-copy p {
-  color: rgba(236, 241, 247, 0.78);
-}
+
+
+
 
 .brand-copy-actions {
   display: flex;
@@ -5705,25 +5678,13 @@ html { scroll-behavior: smooth; }
 }
 
 /* ── Dark mode nav ── */
-.theme-dark .snav-link:hover,
-.theme-dark .snav-link.is-active {
-  background: var(--surface-muted);
-}
 
-.theme-dark .snav-mega {
-  background: var(--surface);
-  border-color: var(--border);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-}
 
-.theme-dark .snav-product-img {
-  background: var(--bg-accent);
-}
 
-.theme-dark .snav-theme-btn {
-  background: var(--surface);
-  border-color: var(--border);
-}
+
+
+
+
 
 /* ── Nav row adjustment for desktop ── */
 @media (min-width: 860px) {

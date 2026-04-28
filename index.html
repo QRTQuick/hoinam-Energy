@@ -464,7 +464,153 @@
         flex-shrink: 0;
       }
 
-      /* ══ HERO TEXT REVEAL ══ */
+      /* ══ 3D PRODUCT SHOWCASE ══ */
+      .hp-3d-showcase {
+        padding: 7rem 0;
+        background: #0a0c12;
+        overflow: hidden;
+        position: relative;
+      }
+      .hp-3d-showcase::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0,85,184,0.18) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .hp-3d-showcase .hp-section-kicker { color: rgba(255,193,7,0.85); }
+      .hp-3d-showcase .hp-section-h2 { color: #fff; }
+      .hp-3d-scene {
+        perspective: 1200px;
+        perspective-origin: 50% 40%;
+        margin-top: 4rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 420px;
+        position: relative;
+      }
+      .hp-3d-ring {
+        position: relative;
+        width: 320px;
+        height: 320px;
+        transform-style: preserve-3d;
+        animation: ringRotate 18s linear infinite;
+      }
+      @keyframes ringRotate {
+        from { transform: rotateY(0deg) rotateX(12deg); }
+        to   { transform: rotateY(360deg) rotateX(12deg); }
+      }
+      .hp-3d-card {
+        position: absolute;
+        width: 160px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        margin: -100px 0 0 -80px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        cursor: pointer;
+        transition: background 300ms ease, border-color 300ms ease;
+        backface-visibility: hidden;
+      }
+      .hp-3d-card:hover {
+        background: rgba(255,255,255,0.09);
+        border-color: rgba(255,193,7,0.4);
+      }
+      .hp-3d-card img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 20px rgba(0,85,184,0.5));
+      }
+      .hp-3d-card span {
+        font-family: var(--font-heading);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.7);
+        text-align: center;
+        text-transform: uppercase;
+      }
+      /* position each card around the ring */
+      .hp-3d-card:nth-child(1) { transform: rotateY(0deg)   translateZ(220px); }
+      .hp-3d-card:nth-child(2) { transform: rotateY(72deg)  translateZ(220px); }
+      .hp-3d-card:nth-child(3) { transform: rotateY(144deg) translateZ(220px); }
+      .hp-3d-card:nth-child(4) { transform: rotateY(216deg) translateZ(220px); }
+      .hp-3d-card:nth-child(5) { transform: rotateY(288deg) translateZ(220px); }
+      /* ground reflection line */
+      .hp-3d-ground {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,193,7,0.3), transparent);
+      }
+
+      /* ══ MAGNETIC CARD EFFECT ══ */
+      .hp-testi, .hp-step {
+        transform-style: preserve-3d;
+        will-change: transform;
+      }
+
+      /* ══ HERO IMAGE 3D PARALLAX ══ */
+      .hp-hero-img {
+        transform-style: preserve-3d;
+        will-change: transform;
+        transition: transform 60ms linear;
+      }
+
+      /* ══ 3D FLIP STEPS ══ */
+      .hp-step-flip-wrap {
+        perspective: 800px;
+      }
+      .hp-step-flip-inner {
+        transform-style: preserve-3d;
+        transition: transform 600ms cubic-bezier(0.16,1,0.3,1);
+        position: relative;
+      }
+      .hp-step-flip-wrap:hover .hp-step-flip-inner {
+        transform: rotateX(-6deg) translateY(-6px);
+      }
+
+      /* ══ GLOWING ORBIT RING (hero bg) ══ */
+      .hp-orbit {
+        position: absolute;
+        border-radius: 50%;
+        border: 1px solid rgba(255,193,7,0.08);
+        pointer-events: none;
+        animation: orbitPulse 4s ease-in-out infinite;
+      }
+      .hp-orbit-1 { width: 500px; height: 500px; top: 50%; right: -100px; transform: translateY(-50%); animation-delay: 0s; }
+      .hp-orbit-2 { width: 700px; height: 700px; top: 50%; right: -200px; transform: translateY(-50%); animation-delay: 1s; border-color: rgba(0,85,184,0.06); }
+      .hp-orbit-3 { width: 900px; height: 900px; top: 50%; right: -300px; transform: translateY(-50%); animation-delay: 2s; border-color: rgba(255,193,7,0.04); }
+      @keyframes orbitPulse {
+        0%, 100% { opacity: 0.4; transform: translateY(-50%) scale(1); }
+        50%       { opacity: 1;   transform: translateY(-50%) scale(1.02); }
+      }
+
+      @media (max-width: 760px) {
+        .hp-3d-scene { height: 300px; }
+        .hp-3d-ring  { width: 220px; height: 220px; }
+        .hp-3d-card  { width: 120px; height: 150px; margin: -75px 0 0 -60px; }
+        .hp-3d-card:nth-child(1) { transform: rotateY(0deg)   translateZ(160px); }
+        .hp-3d-card:nth-child(2) { transform: rotateY(72deg)  translateZ(160px); }
+        .hp-3d-card:nth-child(3) { transform: rotateY(144deg) translateZ(160px); }
+        .hp-3d-card:nth-child(4) { transform: rotateY(216deg) translateZ(160px); }
+        .hp-3d-card:nth-child(5) { transform: rotateY(288deg) translateZ(160px); }
+        .hp-3d-card img { width: 70px; height: 70px; }
+        .hp-orbit-1, .hp-orbit-2, .hp-orbit-3 { display: none; }
+      }
       .hp-hero-h1 .word {
         display: inline-block;
         opacity: 0;
@@ -609,6 +755,10 @@
       <!-- ══ HERO ══ -->
       <section class="hp-hero">
         <canvas id="hp-canvas" aria-hidden="true"></canvas>
+        <!-- orbit rings -->
+        <div class="hp-orbit hp-orbit-1" aria-hidden="true"></div>
+        <div class="hp-orbit hp-orbit-2" aria-hidden="true"></div>
+        <div class="hp-orbit hp-orbit-3" aria-hidden="true"></div>
         <img
           class="hp-hero-img"
           src="/assets/images/home/ecoflow-delta-2-max.png"
@@ -675,6 +825,46 @@
           </div>
         </div>
       </div>
+
+      <!-- ══ 3D PRODUCT SHOWCASE ══ -->
+      <section class="hp-3d-showcase">
+        <div class="container">
+          <div class="hp-section-top hp-reveal">
+            <div>
+              <p class="hp-section-kicker">Our products</p>
+              <h2 class="hp-section-h2">Built for real energy needs</h2>
+            </div>
+            <a class="hp-btn-ghost" href="/products.html" style="border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.8)">
+              Browse all <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+          <div class="hp-3d-scene" id="hp-3d-scene">
+            <div class="hp-3d-ring" id="hp-3d-ring">
+              <a class="hp-3d-card" href="/products.html?category=Home%20Backup">
+                <img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max">
+                <span>Delta 2 Max</span>
+              </a>
+              <a class="hp-3d-card" href="/products.html?category=Portable%20Power">
+                <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
+                <span>River 2 Max</span>
+              </a>
+              <a class="hp-3d-card" href="/products.html?category=Solar%20Panels">
+                <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Solar Panel">
+                <span>110W Solar Panel</span>
+              </a>
+              <a class="hp-3d-card" href="/products.html?category=Portable%20Power">
+                <img src="/assets/images/products/river-2-pro.png" alt="River 2 Pro">
+                <span>River 2 Pro</span>
+              </a>
+              <a class="hp-3d-card" href="/products.html?category=Home%20Backup">
+                <img src="/assets/images/products/delta-3-2000-air.png" alt="Delta 3 2000 Air">
+                <span>Delta 3 Air</span>
+              </a>
+            </div>
+            <div class="hp-3d-ground" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
 
       <!-- ══ FEATURED PRODUCTS ══ -->
       <section class="hp-products">
@@ -960,5 +1150,79 @@
       }, { threshold: 0.5 });
 
       document.querySelectorAll(".hp-stat-num[data-count-up]").forEach(el => statObs.observe(el));
+
+      /* 6. Hero image 3D mouse parallax */
+      const heroImg = document.querySelector(".hp-hero-img");
+      const heroSection = document.querySelector(".hp-hero");
+      if (heroImg && heroSection && !reduced && window.matchMedia("(pointer:fine)").matches) {
+        heroSection.addEventListener("mousemove", e => {
+          const rect = heroSection.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top  + rect.height / 2;
+          const rx = ((e.clientY - cy) / rect.height) * -14;
+          const ry = ((e.clientX - cx) / rect.width)  *  14;
+          heroImg.style.transform =
+            `translateY(-50%) perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04)`;
+        }, { passive: true });
+        heroSection.addEventListener("mouseleave", () => {
+          heroImg.style.transform = "translateY(-50%) perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)";
+        });
+      }
+
+      /* 7. Magnetic tilt on testimonial + step cards */
+      if (!reduced && window.matchMedia("(pointer:fine)").matches) {
+        document.querySelectorAll(".hp-testi, .hp-step").forEach(card => {
+          card.addEventListener("mousemove", e => {
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width  - 0.5;
+            const y = (e.clientY - r.top)  / r.height - 0.5;
+            card.style.transform =
+              `perspective(600px) rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) translateY(-4px)`;
+            card.style.boxShadow = `${-x * 12}px ${-y * 12}px 30px rgba(0,85,184,0.12)`;
+          });
+          card.addEventListener("mouseleave", () => {
+            card.style.transform = "";
+            card.style.boxShadow = "";
+          });
+        });
+      }
+
+      /* 8. 3D ring — pause on hover, drag to spin */
+      const ring = document.getElementById("hp-3d-ring");
+      if (ring && !reduced) {
+        let paused = false;
+        let dragStart = null;
+        let currentAngle = 0;
+        let animAngle = 0;
+        let raf;
+
+        /* smooth manual spin */
+        ring.addEventListener("mouseenter", () => {
+          paused = true;
+          ring.style.animationPlayState = "paused";
+          /* capture current rotation from computed style */
+          const style = window.getComputedStyle(ring);
+          const mat = new DOMMatrix(style.transform);
+          animAngle = Math.atan2(mat.m13, mat.m33) * (180 / Math.PI);
+          currentAngle = animAngle;
+        });
+        ring.addEventListener("mouseleave", () => {
+          paused = false;
+          dragStart = null;
+          ring.style.animationPlayState = "running";
+          ring.style.transform = "";
+        });
+        ring.addEventListener("mousedown", e => {
+          dragStart = { x: e.clientX, angle: currentAngle };
+        });
+        window.addEventListener("mousemove", e => {
+          if (!dragStart || !paused) return;
+          const delta = (e.clientX - dragStart.x) * 0.4;
+          currentAngle = dragStart.angle + delta;
+          ring.style.transform = `rotateY(${currentAngle}deg) rotateX(12deg)`;
+        });
+        window.addEventListener("mouseup", () => { dragStart = null; });
+      }
+
     })();
     </script>

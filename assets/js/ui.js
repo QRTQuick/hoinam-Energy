@@ -1,37 +1,6 @@
 import { logoutUser } from "./firebase.js";
 import { clearCachedProfile, getCachedProfile, getCartCount } from "./store.js";
 
-const THEME_KEY = "hoinam_theme";
-
-function applyTheme(theme) {
-  const root = document.documentElement;
-  if (theme === "dark") {
-    root.classList.add("theme-dark");
-  } else {
-    root.classList.remove("theme-dark");
-  }
-
-  const toggle = document.querySelector("[data-theme-toggle]");
-  if (toggle) {
-    const isDark = theme === "dark";
-    toggle.setAttribute("aria-pressed", isDark ? "true" : "false");
-    toggle.innerHTML = isDark
-      ? `<i class="fa-solid fa-sun" aria-hidden="true"></i><span>Light mode</span>`
-      : `<i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>`;
-  }
-}
-
-function initTheme() {
-  const saved = window.localStorage.getItem(THEME_KEY);
-  if (saved === "light" || saved === "dark") {
-    applyTheme(saved);
-    return;
-  }
-
-  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-  applyTheme(prefersDark ? "dark" : "light");
-}
-
 function initialsFromName(name = "") {
   return name
     .split(" ")
@@ -390,9 +359,6 @@ export function injectShell(activePage) {
             <button class="snav-link hidden snav-auth-in" type="button" data-logout-button>Logout</button>
 
             <!-- Theme toggle -->
-            <button class="snav-theme-btn" type="button" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
-              <i class="fa-solid fa-moon" aria-hidden="true"></i>
-            </button>
           </nav>
 
           <!-- Mobile toggle -->
@@ -414,9 +380,6 @@ export function injectShell(activePage) {
             <a class="nav-link hidden snav-auth-in ${active("cart")}" data-cart-link href="/cart.html"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Cart <span data-cart-count>0</span></span></a>
             <a class="nav-link hidden ${active("admin")}" data-admin-link href="/admin.html"><i class="fa-solid fa-user-shield" aria-hidden="true"></i><span>Admin</span></a>
             <button class="nav-link hidden snav-auth-in" type="button" data-logout-button><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span></button>
-            <button class="nav-pill nav-pill-toggle" type="button" data-theme-toggle aria-pressed="false">
-              <i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>
-            </button>
           </nav>
 
         </div>
@@ -539,14 +502,6 @@ export function injectShell(activePage) {
     renderCookieBanner(true);
   });
 
-  document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
-    const isDark = document.documentElement.classList.contains("theme-dark");
-    const next = isDark ? "light" : "dark";
-    window.localStorage.setItem(THEME_KEY, next);
-    applyTheme(next);
-  });
-
-  initTheme();
   refreshShell();
   renderCookieBanner();
 }
