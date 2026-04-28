@@ -37,7 +37,8 @@ def sync_user_from_claims(session, claims: dict) -> User:
     role = "admin" if claims.get("admin") or (email and email in get_settings().admin_emails) else "user"
 
     if user is None:
-        ensure_unique_full_name(session, full_name)
+        # Do NOT enforce name uniqueness here — Google display names are not
+        # unique identifiers and blocking sign-in for a duplicate name is wrong.
         user = User(
             firebase_uid=firebase_uid,
             email=email,
@@ -49,8 +50,8 @@ def sync_user_from_claims(session, claims: dict) -> User:
     else:
         user.firebase_uid = firebase_uid
         user.email = email
+        # Only update the name if it changed; no uniqueness check on OAuth sync.
         if full_name and full_name != user.full_name:
-            ensure_unique_full_name(session, full_name, exclude_user_id=user.id)
             user.full_name = full_name
         user.phone = phone or user.phone
         if role == "admin" or not user.role:
