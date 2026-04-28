@@ -322,30 +322,103 @@ export function injectShell(activePage) {
     header.innerHTML = `
       <header class="site-header">
         <div class="container nav-row">
+
+          <!-- Brand -->
           <a class="brand" href="/index.html">
             <span class="brand-mark"><img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy logo"></span>
             <span class="brand-copy">
               <span>${company.name}</span>
-              <small>${company.tagline}</small>
             </span>
           </a>
-          <button class="nav-toggle" type="button" aria-label="Toggle navigation"><i class="fa-solid fa-bars" aria-hidden="true"></i> Menu</button>
-          <nav class="site-nav" id="site-nav">
+
+          <!-- Desktop nav -->
+          <nav class="site-nav-desktop" aria-label="Main navigation">
+
+            <!-- Home -->
+            <a class="snav-link ${active("home")}" href="/index.html">Home</a>
+
+            <!-- Products mega-dropdown -->
+            <div class="snav-dropdown-wrap">
+              <button class="snav-link snav-dropdown-trigger ${active("products")}" type="button" aria-expanded="false" aria-haspopup="true">
+                Products <i class="fa-solid fa-chevron-down snav-chevron" aria-hidden="true"></i>
+              </button>
+              <div class="snav-mega" role="menu">
+                <div class="snav-mega-inner">
+                  <a class="snav-product-tile" href="/products.html?category=Portable%20Power" role="menuitem">
+                    <div class="snav-product-img"><img src="/assets/images/products/river-2-max.png" alt="River 2 Max" loading="lazy"></div>
+                    <span class="snav-product-name">Portable Power</span>
+                    <span class="snav-product-sub">River series</span>
+                  </a>
+                  <a class="snav-product-tile" href="/products.html?category=Home%20Backup" role="menuitem">
+                    <div class="snav-product-img"><img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max" loading="lazy"></div>
+                    <span class="snav-product-name">Home Backup</span>
+                    <span class="snav-product-sub">Delta series</span>
+                  </a>
+                  <a class="snav-product-tile" href="/products.html?category=Solar%20Panels" role="menuitem">
+                    <div class="snav-product-img"><img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Solar Panel" loading="lazy"></div>
+                    <span class="snav-product-name">Solar Panels</span>
+                    <span class="snav-product-sub">Foldable panels</span>
+                  </a>
+                  <a class="snav-product-tile" href="/products.html" role="menuitem">
+                    <div class="snav-product-img snav-product-img-all"><i class="fa-solid fa-store"></i></div>
+                    <span class="snav-product-name">All Products</span>
+                    <span class="snav-product-sub">Browse catalog</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- About -->
+            <a class="snav-link ${active("about")}" href="/about.html">About</a>
+
+            <!-- Contact -->
+            <a class="snav-link ${active("contact")}" href="/contact.html">Contact</a>
+
+            <!-- Logged-out links -->
+            <a class="snav-link snav-auth-out ${active("login")}" data-login-link href="/login.html">Login</a>
+
+            <!-- Logged-in links (hidden until auth) -->
+            <a class="snav-link hidden snav-auth-in ${active("install")}" data-install-link href="/book-install.html">Install</a>
+            <a class="snav-link hidden snav-auth-in ${active("dashboard")}" data-dashboard-link href="/dashboard.html">Orders</a>
+            <a class="snav-pill hidden snav-auth-in ${active("cart")}" data-cart-link href="/cart.html">
+              <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+              <span data-cart-count>0</span>
+            </a>
+            <a class="snav-pill snav-pill-admin hidden ${active("admin")}" data-admin-link href="/admin.html">
+              <i class="fa-solid fa-user-shield" aria-hidden="true"></i> Admin
+            </a>
+            <button class="snav-link hidden snav-auth-in" type="button" data-logout-button>Logout</button>
+
+            <!-- Theme toggle -->
+            <button class="snav-theme-btn" type="button" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+              <i class="fa-solid fa-moon" aria-hidden="true"></i>
+            </button>
+          </nav>
+
+          <!-- Mobile toggle -->
+          <button class="nav-toggle" type="button" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+          </button>
+
+          <!-- Mobile nav -->
+          <nav class="site-nav" id="site-nav" aria-label="Mobile navigation">
+            <a class="nav-link ${active("home")}" href="/index.html"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
+            <a class="nav-link ${active("products")}" href="/products.html"><i class="fa-solid fa-store" aria-hidden="true"></i><span>Products</span></a>
+            <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
+            <a class="nav-link ${active("contact")}" href="/contact.html"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contact</span></a>
+            <!-- logged-out -->
+            <a class="nav-link snav-auth-out ${active("login")}" data-login-link href="/login.html"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Login</span></a>
+            <!-- logged-in -->
+            <a class="nav-link hidden snav-auth-in ${active("install")}" data-install-link href="/book-install.html"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Install</span></a>
+            <a class="nav-link hidden snav-auth-in ${active("dashboard")}" data-dashboard-link href="/dashboard.html"><i class="fa-solid fa-box" aria-hidden="true"></i><span>Orders</span></a>
+            <a class="nav-link hidden snav-auth-in ${active("cart")}" data-cart-link href="/cart.html"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Cart <span data-cart-count>0</span></span></a>
+            <a class="nav-link hidden ${active("admin")}" data-admin-link href="/admin.html"><i class="fa-solid fa-user-shield" aria-hidden="true"></i><span>Admin</span></a>
+            <button class="nav-link hidden snav-auth-in" type="button" data-logout-button><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span></button>
             <button class="nav-pill nav-pill-toggle" type="button" data-theme-toggle aria-pressed="false">
               <i class="fa-solid fa-moon" aria-hidden="true"></i><span>Dark mode</span>
             </button>
-            <a class="nav-link ${active("home")}" href="/index.html"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
-            <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
-            <a class="nav-link ${active("products")}" href="/products.html"><i class="fa-solid fa-battery-three-quarters" aria-hidden="true"></i><span>Products</span></a>
-            <a class="nav-link ${active("install")}" href="/book-install.html"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Install</span></a>
-            <a class="nav-link ${active("contact")}" href="/contact.html"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contact</span></a>
-            <a class="nav-link ${active("dashboard")} hidden" data-dashboard-link href="/dashboard.html"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Dashboard</span></a>
-            <a class="nav-link ${active("admin")} hidden" data-admin-link href="/admin.html"><i class="fa-solid fa-user-shield" aria-hidden="true"></i><span>Admin</span></a>
-            <a class="nav-pill ${active("cart")}" href="/cart.html"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i> Cart <span data-cart-count>0</span></a>
-            <a class="nav-pill ${active("login")}" data-login-link href="/login.html"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Login</a>
-            <a class="nav-pill ${active("register")}" data-register-link href="/register.html"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Register</a>
-            <button class="nav-pill button-ghost hidden" type="button" data-logout-button>Logout</button>
           </nav>
+
         </div>
       </header>
     `;
@@ -405,7 +478,7 @@ export function injectShell(activePage) {
     `;
   }
 
-  // Dropdown menu toggle
+  // Dropdown menu toggle (mobile)
   const navToggle = document.querySelector(".nav-toggle");
   const siteNav = document.getElementById("site-nav");
 
@@ -413,14 +486,14 @@ export function injectShell(activePage) {
     siteNav?.classList.toggle("is-open");
   });
 
-  // Close navbar when a link is clicked
+  // Close mobile navbar when a link is clicked
   siteNav?.querySelectorAll(".nav-link, .nav-pill").forEach((link) => {
     link.addEventListener("click", () => {
       siteNav?.classList.remove("is-open");
     });
   });
 
-  // Close dropdown when clicking outside
+  // Close mobile dropdown when clicking outside
   document.addEventListener("click", (event) => {
     const isToggle = event.target.closest(".nav-toggle");
     const isNav = event.target.closest(".site-nav");
@@ -428,6 +501,30 @@ export function injectShell(activePage) {
       siteNav?.classList.remove("is-open");
     }
   });
+
+  // Products mega-dropdown (desktop)
+  const megaTrigger = document.querySelector(".snav-dropdown-trigger");
+  const megaPanel   = document.querySelector(".snav-mega");
+  if (megaTrigger && megaPanel) {
+    megaTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = megaTrigger.getAttribute("aria-expanded") === "true";
+      megaTrigger.setAttribute("aria-expanded", String(!open));
+      megaPanel.classList.toggle("is-open", !open);
+    });
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".snav-dropdown-wrap")) {
+        megaTrigger.setAttribute("aria-expanded", "false");
+        megaPanel.classList.remove("is-open");
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        megaTrigger.setAttribute("aria-expanded", "false");
+        megaPanel.classList.remove("is-open");
+      }
+    });
+  }
 
   document.querySelector("[data-logout-button]")?.addEventListener("click", async () => {
     await logoutUser();
@@ -462,30 +559,36 @@ export function refreshShell() {
     node.textContent = String(cartCount);
   });
 
-  const authLink = document.querySelector("[data-auth-link]");
-  const loginLink = document.querySelector("[data-login-link]");
-  const registerLink = document.querySelector("[data-register-link]");
-  const logoutButton = document.querySelector("[data-logout-button]");
-  const dashboardLink = document.querySelector("[data-dashboard-link]");
-  const adminLink = document.querySelector("[data-admin-link]");
+  const loginLinks   = document.querySelectorAll("[data-login-link]");
+  const logoutBtns   = document.querySelectorAll("[data-logout-button]");
+  const dashLinks    = document.querySelectorAll("[data-dashboard-link]");
+  const installLinks = document.querySelectorAll("[data-install-link]");
+  const cartLinks    = document.querySelectorAll("[data-cart-link]");
+  const adminLinks   = document.querySelectorAll("[data-admin-link]");
+  const authInEls    = document.querySelectorAll(".snav-auth-in");
+  const authOutEls   = document.querySelectorAll(".snav-auth-out");
 
   if (profile) {
-    authLink?.classList.add("hidden");
-    loginLink?.classList.add("hidden");
-    registerLink?.classList.add("hidden");
-    logoutButton?.classList.remove("hidden");
-    dashboardLink?.classList.remove("hidden");
+    authOutEls.forEach(el => el.classList.add("hidden"));
+    authInEls.forEach(el => el.classList.remove("hidden"));
+    loginLinks.forEach(el => el.classList.add("hidden"));
+    logoutBtns.forEach(el => el.classList.remove("hidden"));
+    dashLinks.forEach(el => el.classList.remove("hidden"));
+    installLinks.forEach(el => el.classList.remove("hidden"));
+    cartLinks.forEach(el => el.classList.remove("hidden"));
     if (profile.role === "admin") {
-      adminLink?.classList.remove("hidden");
+      adminLinks.forEach(el => el.classList.remove("hidden"));
     } else {
-      adminLink?.classList.add("hidden");
+      adminLinks.forEach(el => el.classList.add("hidden"));
     }
   } else {
-    authLink?.classList.remove("hidden");
-    loginLink?.classList.remove("hidden");
-    registerLink?.classList.remove("hidden");
-    logoutButton?.classList.add("hidden");
-    dashboardLink?.classList.add("hidden");
-    adminLink?.classList.add("hidden");
+    authOutEls.forEach(el => el.classList.remove("hidden"));
+    authInEls.forEach(el => el.classList.add("hidden"));
+    loginLinks.forEach(el => el.classList.remove("hidden"));
+    logoutBtns.forEach(el => el.classList.add("hidden"));
+    dashLinks.forEach(el => el.classList.add("hidden"));
+    installLinks.forEach(el => el.classList.add("hidden"));
+    cartLinks.forEach(el => el.classList.add("hidden"));
+    adminLinks.forEach(el => el.classList.add("hidden"));
   }
 }
