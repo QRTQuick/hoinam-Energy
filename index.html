@@ -464,6 +464,37 @@
         flex-shrink: 0;
       }
 
+      /* ══ FLOATING BRAND (no navbar) ══ */
+      .hp-brand-float {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        text-decoration: none;
+        opacity: 0;
+        animation: brandFadeIn 800ms ease 400ms forwards;
+      }
+      @keyframes brandFadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .hp-brand-float img {
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        opacity: 0.9;
+      }
+      .hp-brand-float span {
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+        color: rgba(255,255,255,0.85);
+      }
+
       /* ══ 3D PRODUCT SHOWCASE ══ */
       .hp-3d-showcase {
         padding: 7rem 0;
@@ -747,7 +778,8 @@
     </style>
   </head>
   <body>
-    <div id="site-header"></div>
+    <!-- No navbar on landing page -->
+    <div id="site-header" style="display:none"></div>
     <main>
       <!-- cursor glow -->
       <div class="hp-cursor-glow" id="hp-cursor-glow" aria-hidden="true"></div>
@@ -759,6 +791,12 @@
         <div class="hp-orbit hp-orbit-1" aria-hidden="true"></div>
         <div class="hp-orbit hp-orbit-2" aria-hidden="true"></div>
         <div class="hp-orbit hp-orbit-3" aria-hidden="true"></div>
+
+        <!-- floating brand mark -->
+        <a href="/products.html" class="hp-brand-float" aria-label="Hoinam Energy — go to store">
+          <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">
+          <span>Hoinam Energy</span>
+        </a>
         <img
           class="hp-hero-img"
           src="/assets/images/home/ecoflow-delta-2-max.png"
@@ -777,10 +815,10 @@
           </p>
           <div class="hp-hero-actions" id="hp-actions">
             <a class="hp-btn-primary" href="/products.html">
-              <i class="fa-solid fa-store" aria-hidden="true"></i> Shop products
+              Visit our store
             </a>
-            <a class="hp-btn-ghost" href="/book-install.html">
-              <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> Book installation
+            <a class="hp-btn-ghost" href="/about.html">
+              Get started
             </a>
           </div>
         </div>
@@ -988,7 +1026,7 @@
       </section>
 
     </main>
-    <div id="site-footer"></div>
+    <div id="site-footer" style="display:none"></div>
     <script src="/assets/js/site-config.js"></script>
     <script type="module" src="/assets/js/pages/home.js"></script>
     <script>
