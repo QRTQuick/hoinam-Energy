@@ -1,51 +1,58 @@
 import os
 import sys
 from pathlib import Path
-from pdf2image import convert_from_path
+import pymupdf  # This is the PyMuPDF library
 
 def run_converter():
-    print("--- PDF to PNG Converter ---")
+    print("--- PDF to PNG Converter (No Poppler Needed) ---")
     
-    # 1. Ask user for the file path
-    # We strip quotes in case the user copies the path as "C:\path\file.pdf"
-    input_path = input("Paste the path to your PDF file: ").strip().replace('"', '').replace("'", "")
+    # 1. Get input path
+    input_raw = input("Paste the path to your PDF file: ").strip()
+    # Clean up quotes if user used 'Copy as Path'
+    input_path = input_raw.replace('"', '').replace("'", "")
     
-    path = Path(input_path)
+    pdf_path = Path(input_path)
 
     # 2. Validation
-    if not path.is_file():
-        print(f"Error: Could not find file at {path}")
+    if not pdf_path.is_file():
+        print(f"Error: Could not find file at {pdf_path}")
         return
     
-    if path.suffix.lower() != ".pdf":
+    if pdf_path.suffix.lower() != ".pdf":
         print("Error: The file selected is not a PDF.")
         return
 
-    # 3. Execution
     try:
-        print(f"Converting '{path.name}'...")
+        # 3. Open the PDF
+        doc = pymupdf.open(pdf_path)
         
-        # Convert PDF to list of PIL Image objects
-        # Note: If poppler is not in PATH, you can specify path here:
-        # pages = convert_from_path(input_path, poppler_path=r'C:\path\to\poppler\bin')
-        pages = convert_from_path(input_path)
-
-        # Create an output folder based on the filename
-        output_folder = path.parent / f"{path.stem}_images"
+        # Create output folder
+        output_folder = pdf_path.parent / f"{pdf_path.stem}_images"
         if not output_folder.exists():
             output_folder.mkdir()
 
-        for i, page in enumerate(pages):
-            output_filename = output_folder / f"page_{i + 1}.png"
-            page.save(output_filename, "PNG")
+        print(f"Converting {doc.page_count} pages...")
+
+        # 4. Loop through pages and save as PNG
+        for page_index in range(len(doc)):
+            page = doc[page_index]
+            
+            # Increase resolution (matrix). 2.0 = 2x zoom (sharper image)
+            zoom = 2.0 
+            mat = pymupdf.Matrix(zoom, zoom)
+            pix = page.get_pixmap(matrix=mat)
+            
+            output_filename = output_folder / f"page_{page_index + 1}.png"
+            pix.save(str(output_filename))
             print(f"Saved: {output_filename.name}")
 
-        print(f"\nDone! All images are in: {output_folder}")
+        doc.close()
+        print(f"\nSuccess! Images saved in: {output_folder}")
 
     except Exception as e:
         print(f"\nAn error occurred: {e}")
-        print("\nNote: Make sure 'Poppler' is installed and added to your System PATH.")
 
 if __name__ == "__main__":
     run_converter()
-    input("\nPress Enter to exit...") # Keeps terminal open when running as EXE
+    input("\nPress Enter to exit...")
+    
