@@ -1,5 +1,5 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
-@import url("https://fonts.googleapis.com/css2?family=Anton&family=Dancing+Script:wght@400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
 
 :root {
   --bg: #f5f5f5;
@@ -26,9 +26,9 @@
   --radius-sm: 12px;
   --max-width: 1180px;
   --font-body: "Dancing Script", cursive;
-  --font-heading: "Anton", sans-serif;
-  --font-ui: "Anton", sans-serif;
-  --font-home-hero: "Anton", sans-serif;
+  --font-heading: "Playfair Display", serif;
+  --font-ui: "Playfair Display", serif;
+  --font-home-hero: "Playfair Display", serif;
   --font-home-accent: "Dancing Script", cursive;
   --gradient-gold: linear-gradient(135deg, #ffc107 0%, #efa040 100%);
   --gradient-accent: linear-gradient(135deg, #0055b8 0%, #006fba 100%);
@@ -2302,7 +2302,7 @@ th {
   }
 }
 
-/* Anton — tighten default tracking */
+/* Playfair Display — tighten default tracking */
 h1, h2, h3, h4, h5, h6,
 .button, .nav-link, .nav-pill,
 .eyebrow, .chip, .badge,
