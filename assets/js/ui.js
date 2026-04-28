@@ -82,22 +82,46 @@ export function productMedia(product, className = "product-media") {
 }
 
 export function renderProductCard(product) {
+  const stock = Number(product.stock || 0);
+  const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
+  const stockClass = stock > 0 ? "stock-pill" : "stock-pill stock-pill-out";
   return `
     <article class="product-card">
       ${productMedia(product)}
       <div class="product-card-body">
         <div class="chip-row">
-          <span class="chip">${product.category || "EcoFlow"}</span>
-          <span class="stock-pill">${product.stock} in stock</span>
+          <span class="chip">${product.category || "Solar"}</span>
+          <span class="${stockClass}">${stockLabel}</span>
         </div>
         <h3>${product.name}</h3>
         <p class="product-summary">${product.summary || "Reliable solar and backup power from Hoinam Energy."}</p>
         <div class="product-meta">
           <strong class="price">${formatMoney(product.price, product.currency)}</strong>
-          <a class="button button-ghost product-card-link" href="/product-detail.html?id=${product.id}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View</a>
+          <a class="button button-ghost product-card-link" href="/product-detail.html?id=${product.id}">
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View
+          </a>
         </div>
       </div>
     </article>
+  `;
+}
+
+export function renderProductCardMobile(product) {
+  const stock = Number(product.stock || 0);
+  const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
+  return `
+    <a class="mob-product-card" href="/product-detail.html?id=${product.id}">
+      <div class="mob-product-img">
+        ${productMedia(product, "mob-product-media")}
+      </div>
+      <div class="mob-product-info">
+        <span class="mob-product-cat">${product.category || "Solar"}</span>
+        <h3 class="mob-product-name">${product.name}</h3>
+        <p class="mob-product-price">${formatMoney(product.price, product.currency)}</p>
+        <span class="mob-product-stock ${stock > 0 ? "in" : "out"}">${stockLabel}</span>
+      </div>
+      <i class="fa-solid fa-chevron-right mob-product-arrow" aria-hidden="true"></i>
+    </a>
   `;
 }
 

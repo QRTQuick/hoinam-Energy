@@ -1,7 +1,9 @@
 import { listProducts } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { refreshInteractions } from "../interactions.js";
-import { formatMoney, productMedia, showToast } from "../ui.js";
+import { formatMoney, productMedia, renderProductCardMobile, showToast } from "../ui.js";
+
+const isMobile = () => window.innerWidth <= 640;
 
 let allProducts = [];
 
@@ -429,8 +431,18 @@ function renderProducts() {
   }
 
   controls.productsGrid.innerHTML = sorted
-    .map(({ product }) => renderProductResult(product, state.search))
+    .map(({ product }) => isMobile()
+      ? renderProductCardMobile(product)
+      : renderProductResult(product, state.search))
     .join("");
+
+  if (isMobile()) {
+    controls.productsGrid.classList.add("mob-product-list");
+    controls.productsGrid.classList.remove("catalog-results-list");
+  } else {
+    controls.productsGrid.classList.remove("mob-product-list");
+    controls.productsGrid.classList.add("catalog-results-list");
+  }
 
   refreshInteractions(controls.productsGrid);
   syncUrl();

@@ -1,5 +1,5 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
     
@@ -26,11 +26,11 @@
   --radius-md: 18px;
   --radius-sm: 12px;
   --max-width: 1180px;
-  --font-body: "Dancing Script", cursive;
+  --font-body: "Inter", sans-serif;
   --font-heading: "Bebas Neue", sans-serif;
-  --font-ui: "Bebas Neue", sans-serif;
+  --font-ui: "Inter", sans-serif;
   --font-home-hero: "Bebas Neue", sans-serif;
-  --font-home-accent: "Dancing Script", cursive;
+  --font-home-accent: "Inter", sans-serif;
   --gradient-gold: linear-gradient(135deg, #ffc107 0%, #efa040 100%);
   --gradient-accent: linear-gradient(135deg, #0055b8 0%, #006fba 100%);
   --gradient-dark: linear-gradient(135deg, #0055b8 0%, #01408f 100%);
@@ -5702,4 +5702,258 @@ html { scroll-behavior: smooth; }
   .site-nav-desktop {
     justify-self: end;
   }
+}
+
+/* ═══════════════════════════════════════════
+   GLOBAL FONT RESET — Inter everywhere
+═══════════════════════════════════════════ */
+body,
+p, span, a, li, td, th, label,
+input, select, textarea, button,
+.muted, .product-summary, .panel-copy,
+.section-copy, .nav-link, .snav-link,
+.footer-bw-col a, .footer-bw-about,
+.hp-hero-sub, .hp-step p, .hp-testi blockquote,
+.cookie-card p, .auth-side-card p,
+.about-points p, .list-reset li {
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #1a1a1a;
+}
+
+p, .muted, .product-summary, .section-copy {
+  font-size: 0.93rem;
+  color: #333;
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE PRODUCT LIST — swipe-friendly rows
+═══════════════════════════════════════════ */
+.mob-product-list {
+  display: flex !important;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mob-product-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #ebebeb;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: background 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-product-card:first-child {
+  border-top: 1px solid #ebebeb;
+  border-radius: 14px 14px 0 0;
+}
+
+.mob-product-card:last-child {
+  border-radius: 0 0 14px 14px;
+  border-bottom: none;
+}
+
+.mob-product-card:active {
+  background: #f5f8ff;
+}
+
+.mob-product-img {
+  flex-shrink: 0;
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.mob-product-img .mob-product-media,
+.mob-product-img .product-media {
+  width: 100%;
+  height: 100%;
+  min-height: unset;
+  padding: 0;
+  border-radius: 0;
+  background: #f5f5f5;
+}
+
+.mob-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+
+.mob-product-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.mob-product-cat {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0055b8;
+}
+
+.mob-product-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: #111;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mob-product-price {
+  font-family: "Inter", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0055b8;
+  margin: 0;
+}
+
+.mob-product-stock {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.mob-product-stock.in {
+  background: #eaf8ef;
+  color: #008a00;
+}
+
+.mob-product-stock.out {
+  background: #fff0f0;
+  color: #cc0000;
+}
+
+.mob-product-arrow {
+  flex-shrink: 0;
+  color: #ccc;
+  font-size: 0.75rem;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE LANDING PAGE — logo + footer fix
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* show logo on mobile landing */
+  .hp-brand-float {
+    top: 1.25rem;
+    left: 1.25rem;
+  }
+
+  .hp-brand-float span {
+    font-size: 0.85rem;
+  }
+
+  /* footer visible on mobile */
+  .footer-bw-inner {
+    grid-template-columns: 1fr;
+    padding: 2rem 0 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .footer-bw-brand {
+    text-align: center;
+    align-items: center;
+  }
+
+  .footer-bw-about {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .footer-bw-col {
+    border-top: 1px solid #222;
+    padding-top: 1rem;
+  }
+
+  .footer-bw-bottom-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  /* product grid on mobile */
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* catalog hero compact on mobile */
+  .catalog-hero {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .catalog-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  /* nav font fix */
+  .nav-link span,
+  .nav-pill {
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER SOCIAL LINKS — real icons
+═══════════════════════════════════════════ */
+.footer-bw-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1e1e1e;
+  color: #aaa;
+  font-size: 0.9rem;
+  transition: background 180ms ease, color 180ms ease;
+  text-decoration: none;
+}
+
+.footer-bw-socials a:hover {
+  background: #0055b8;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════
+   LOGIN PAGE — Inter font fix
+═══════════════════════════════════════════ */
+.login-heading h1,
+.login-brand-name {
+  font-family: "Bebas Neue", sans-serif;
+}
+
+.login-heading p,
+.login-form label span,
+.login-divider,
+.login-footer-note,
+.login-form input {
+  font-family: "Inter", sans-serif;
 }

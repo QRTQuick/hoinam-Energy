@@ -49,24 +49,24 @@
       ],
       socials: [
         {
-          label: "Facebook",
-          icon: "fa-brands fa-facebook-f",
-          href: ""
+          label: "LinkedIn",
+          icon: "fa-brands fa-linkedin-in",
+          href: "https://www.linkedin.com/company/hoinam-energy/about/?viewAsMember=true"
         },
         {
           label: "Instagram",
           icon: "fa-brands fa-instagram",
-          href: ""
+          href: "https://www.instagram.com/hoinamenergy/"
         },
         {
-          label: "LinkedIn",
-          icon: "fa-brands fa-linkedin-in",
-          href: ""
+          label: "Facebook",
+          icon: "fa-brands fa-facebook-f",
+          href: "https://www.facebook.com/profile.php?id=61577479876089"
         },
         {
-          label: "WhatsApp",
-          icon: "fa-brands fa-whatsapp",
-          href: ""
+          label: "X (Twitter)",
+          icon: "fa-brands fa-x-twitter",
+          href: "https://x.com/HoinamEnergy"
         }
       ]
     }
