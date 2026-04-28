@@ -230,7 +230,7 @@ function renderFooterLegal() {
   `;
 }
 
-function renderCookieBanner(force = false) {
+export function renderCookieBanner(force = false) {
   const existing = document.querySelector(".cookie-banner");
   if (existing) {
     if (force) {
@@ -250,16 +250,19 @@ function renderCookieBanner(force = false) {
   banner.innerHTML = `
     <div class="cookie-card">
       <div>
-        <span class="eyebrow"><i class="fa-solid fa-cookie-bite" aria-hidden="true"></i> Cookies</span>
-        <h3>We use cookies to keep the storefront fast and secure.</h3>
+        <span class="eyebrow"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Before you continue</span>
+        <h3>We use cookies &amp; ask you to accept our terms.</h3>
         <p class="muted">
-          We store session and preference cookies so you can log in, keep items in your cart, and complete orders.
-          You can update your choice anytime from the policy page.
+          By using this site you agree to our
+          <a href="/cookies.html" style="color:var(--primary);font-weight:600">Cookie Policy</a>
+          and
+          <a href="/privacy.html" style="color:var(--primary);font-weight:600">Privacy Policy</a>.
+          We store session cookies so you can log in, keep items in your cart, and complete orders.
         </p>
       </div>
       <div class="cookie-actions">
         <button class="button button-ghost" type="button" data-cookie-decline>Decline</button>
-        <button class="button" type="button" data-cookie-accept>Accept cookies</button>
+        <button class="button" type="button" data-cookie-accept>Accept &amp; continue</button>
       </div>
     </div>
   `;

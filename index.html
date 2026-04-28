@@ -495,7 +495,147 @@
         color: rgba(255,255,255,0.85);
       }
 
-      /* ══ 3D PRODUCT SHOWCASE ══ */
+      /* ══ BRAND CATALOG ══ */
+      .hp-brands {
+        padding: 7rem 0;
+        background: #0a0c12;
+        position: relative;
+        overflow: hidden;
+      }
+      .hp-brands::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0,85,184,0.15) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .hp-brands .hp-section-kicker { color: rgba(255,193,7,0.85); }
+      .hp-brands .hp-section-h2     { color: #fff; }
+
+      .hp-brand-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-top: 3rem;
+      }
+
+      .hp-brand-tile {
+        position: relative;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        padding: 2rem 1.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        text-decoration: none;
+        overflow: hidden;
+        transition: border-color 280ms ease, background 280ms ease, transform 280ms ease;
+        cursor: pointer;
+      }
+      .hp-brand-tile:hover {
+        border-color: rgba(255,193,7,0.35);
+        background: rgba(255,255,255,0.06);
+        transform: translateY(-4px);
+      }
+      .hp-brand-tile::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,193,7,0.07) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 300ms ease;
+        pointer-events: none;
+      }
+      .hp-brand-tile:hover::after { opacity: 1; }
+
+      .hp-brand-tile-logo {
+        height: 40px;
+        display: flex;
+        align-items: center;
+      }
+      .hp-brand-tile-logo img {
+        height: 100%;
+        width: auto;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        opacity: 0.75;
+        transition: opacity 280ms ease;
+      }
+      .hp-brand-tile:hover .hp-brand-tile-logo img { opacity: 1; }
+      .hp-brand-tile-logo-text {
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.75);
+        transition: color 280ms ease;
+      }
+      .hp-brand-tile:hover .hp-brand-tile-logo-text { color: #fff; }
+
+      .hp-brand-tile-products {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .hp-brand-tile-products img {
+        width: 52px;
+        height: 52px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.06);
+        padding: 4px;
+        transition: transform 220ms ease;
+      }
+      .hp-brand-tile:hover .hp-brand-tile-products img {
+        transform: translateY(-3px);
+      }
+
+      .hp-brand-tile h3 {
+        font-family: var(--font-heading);
+        font-size: 1.05rem;
+        letter-spacing: -0.01em;
+        color: #fff;
+        margin: 0;
+      }
+      .hp-brand-tile p {
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        color: rgba(255,255,255,0.5);
+        margin: 0;
+        flex: 1;
+      }
+      .hp-brand-tile-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: var(--font-body);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #ffc107;
+        letter-spacing: 0.02em;
+        transition: gap 180ms ease;
+      }
+      .hp-brand-tile:hover .hp-brand-tile-cta { gap: 0.65rem; }
+
+      /* featured tile spans 2 cols */
+      .hp-brand-tile-featured {
+        grid-column: span 2;
+        flex-direction: row;
+        align-items: center;
+        gap: 2rem;
+      }
+      .hp-brand-tile-featured .hp-brand-tile-body { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+      .hp-brand-tile-featured .hp-brand-tile-products img { width: 72px; height: 72px; }
+
+      @media (max-width: 860px) {
+        .hp-brand-grid { grid-template-columns: 1fr 1fr; }
+        .hp-brand-tile-featured { grid-column: span 2; flex-direction: column; }
+      }
+      @media (max-width: 560px) {
+        .hp-brand-grid { grid-template-columns: 1fr; }
+        .hp-brand-tile-featured { grid-column: span 1; }
+      }
       .hp-3d-showcase {
         padding: 7rem 0;
         background: #0a0c12;
@@ -864,42 +1004,91 @@
         </div>
       </div>
 
-      <!-- ══ 3D PRODUCT SHOWCASE ══ -->
-      <section class="hp-3d-showcase">
+      <!-- ══ BRAND CATALOG ══ -->
+      <section class="hp-brands">
         <div class="container">
           <div class="hp-section-top hp-reveal">
             <div>
-              <p class="hp-section-kicker">Our products</p>
-              <h2 class="hp-section-h2">Built for real energy needs</h2>
+              <p class="hp-section-kicker">Brands we carry</p>
+              <h2 class="hp-section-h2">Solar &amp; backup brands<br>available through Hoinam</h2>
             </div>
             <a class="hp-btn-ghost" href="/products.html" style="border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.8)">
-              Browse all <i class="fa-solid fa-arrow-right"></i>
+              Browse all products <i class="fa-solid fa-arrow-right"></i>
             </a>
           </div>
-          <div class="hp-3d-scene" id="hp-3d-scene">
-            <div class="hp-3d-ring" id="hp-3d-ring">
-              <a class="hp-3d-card" href="/products.html?category=Home%20Backup">
-                <img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max">
-                <span>Delta 2 Max</span>
-              </a>
-              <a class="hp-3d-card" href="/products.html?category=Portable%20Power">
-                <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
-                <span>River 2 Max</span>
-              </a>
-              <a class="hp-3d-card" href="/products.html?category=Solar%20Panels">
+
+          <div class="hp-brand-grid">
+
+            <!-- EcoFlow — featured -->
+            <a class="hp-brand-tile hp-brand-tile-featured hp-reveal" href="/products.html">
+              <div class="hp-brand-tile-products">
+                <img src="/assets/images/products/delta-2-max.png"            alt="Delta 2 Max">
+                <img src="/assets/images/products/river-2-max.png"            alt="River 2 Max">
+                <img src="/assets/images/products/river-2-pro.png"            alt="River 2 Pro">
                 <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Solar Panel">
-                <span>110W Solar Panel</span>
-              </a>
-              <a class="hp-3d-card" href="/products.html?category=Portable%20Power">
+              </div>
+              <div class="hp-brand-tile-body">
+                <div class="hp-brand-tile-logo">
+                  <img src="/assets/images/brands/ecoflow-logo.svg" alt="EcoFlow">
+                </div>
+                <h3>EcoFlow</h3>
+                <p>Portable power stations, home backup systems, and foldable solar panels. River and Delta series available in stock.</p>
+                <span class="hp-brand-tile-cta">Shop EcoFlow <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+            </a>
+
+            <!-- Generic Solar Panels -->
+            <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Solar%20Panels">
+              <div class="hp-brand-tile-logo">
+                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-solar-panel" style="font-size:1.6rem;color:#ffc107"></i></span>
+              </div>
+              <h3>Solar Panels</h3>
+              <p>Monocrystalline and foldable solar panels from multiple manufacturers — sized for homes, rooftops, and field deployments.</p>
+              <div class="hp-brand-tile-products">
+                <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="110W Panel">
+              </div>
+              <span class="hp-brand-tile-cta">Browse panels <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
+            <!-- Backup Power Systems -->
+            <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Home%20Backup">
+              <div class="hp-brand-tile-logo">
+                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-battery-full" style="font-size:1.6rem;color:#4d8ef0"></i></span>
+              </div>
+              <h3>Home Backup</h3>
+              <p>High-capacity backup power systems for homes, offices, and businesses that need reliable energy storage and solar expansion.</p>
+              <div class="hp-brand-tile-products">
+                <img src="/assets/images/products/delta-2-max.png"      alt="Delta 2 Max">
+                <img src="/assets/images/products/delta-3-2000-air.png" alt="Delta 3 Air">
+              </div>
+              <span class="hp-brand-tile-cta">Browse backup <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
+            <!-- Portable Power -->
+            <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/products.html?category=Portable%20Power">
+              <div class="hp-brand-tile-logo">
+                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-plug-circle-bolt" style="font-size:1.6rem;color:#ffc107"></i></span>
+              </div>
+              <h3>Portable Power</h3>
+              <p>Compact stations for everyday backup — lights, laptops, routers, and small appliances. Easy to carry, fast to recharge.</p>
+              <div class="hp-brand-tile-products">
+                <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
                 <img src="/assets/images/products/river-2-pro.png" alt="River 2 Pro">
-                <span>River 2 Pro</span>
-              </a>
-              <a class="hp-3d-card" href="/products.html?category=Home%20Backup">
-                <img src="/assets/images/products/delta-3-2000-air.png" alt="Delta 3 2000 Air">
-                <span>Delta 3 Air</span>
-              </a>
-            </div>
-            <div class="hp-3d-ground" aria-hidden="true"></div>
+                <img src="/assets/images/products/river-2.png"     alt="River 2">
+              </div>
+              <span class="hp-brand-tile-cta">Browse portable <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
+            <!-- Installation -->
+            <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/book-install.html">
+              <div class="hp-brand-tile-logo">
+                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-screwdriver-wrench" style="font-size:1.6rem;color:#4d8ef0"></i></span>
+              </div>
+              <h3>Installation Service</h3>
+              <p>We don't just sell — we install. Book a site visit, get a load assessment, and have your system set up by our team in Aba.</p>
+              <span class="hp-brand-tile-cta" style="margin-top:auto">Book installation <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
           </div>
         </div>
       </section>
@@ -1189,7 +1378,20 @@
 
       document.querySelectorAll(".hp-stat-num[data-count-up]").forEach(el => statObs.observe(el));
 
-      /* 6. Hero image 3D mouse parallax */
+      /* 6. Brand tile mouse-tracking glow */
+      if (!reduced && window.matchMedia("(pointer:fine)").matches) {
+        document.querySelectorAll(".hp-brand-tile").forEach(tile => {
+          tile.addEventListener("mousemove", e => {
+            const r = tile.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
+            const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+            tile.style.setProperty("--mx", x + "%");
+            tile.style.setProperty("--my", y + "%");
+          });
+        });
+      }
+
+      /* 7. Hero image 3D mouse parallax */
       const heroImg = document.querySelector(".hp-hero-img");
       const heroSection = document.querySelector(".hp-hero");
       if (heroImg && heroSection && !reduced && window.matchMedia("(pointer:fine)").matches) {
@@ -1207,7 +1409,7 @@
         });
       }
 
-      /* 7. Magnetic tilt on testimonial + step cards */
+      /* 8. Magnetic tilt on testimonial + step cards */
       if (!reduced && window.matchMedia("(pointer:fine)").matches) {
         document.querySelectorAll(".hp-testi, .hp-step").forEach(card => {
           card.addEventListener("mousemove", e => {
@@ -1225,7 +1427,7 @@
         });
       }
 
-      /* 8. 3D ring — pause on hover, drag to spin */
+      /* 9. 3D ring — pause on hover, drag to spin */
       const ring = document.getElementById("hp-3d-ring");
       if (ring && !reduced) {
         let paused = false;

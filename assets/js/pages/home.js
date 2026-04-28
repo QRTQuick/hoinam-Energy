@@ -1,10 +1,13 @@
 import { listProducts } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { refreshInteractions } from "../interactions.js";
-import { renderProductCard, showToast } from "../ui.js";
+import { renderCookieBanner, renderProductCard, showToast } from "../ui.js";
 
 async function init() {
   await bootstrapPage("home");
+
+  // Always show cookie banner on landing page
+  renderCookieBanner();
 
   const productGrid = document.getElementById("featured-products");
   const productCount = document.getElementById("hp-count-products");
