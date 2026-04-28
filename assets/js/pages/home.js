@@ -7,9 +7,9 @@ async function init() {
   await bootstrapPage("home");
 
   const productGrid = document.getElementById("featured-products");
-  const productCount = document.querySelector("[data-product-count]");
-  const stockCount = document.querySelector("[data-stock-count]");
-  const categoryCount = document.querySelector("[data-category-count]");
+  const productCount = document.getElementById("hp-count-products");
+  const stockCount = document.getElementById("hp-count-stock");
+  const categoryCount = document.getElementById("hp-count-cats");
 
   try {
     const products = await listProducts();
@@ -31,9 +31,7 @@ async function init() {
     if (categoryCount) {
       categoryCount.dataset.countUp = String(categories.size);
       categoryCount.textContent = String(categories.size);
-    }
-
-    productGrid.innerHTML = spotlightProducts.map(renderProductCard).join("");
+    }    productGrid.innerHTML = spotlightProducts.map(renderProductCard).join("");
     refreshInteractions(productGrid);
     refreshInteractions(document.querySelector(".hero-stats") || document);
   } catch (error) {
