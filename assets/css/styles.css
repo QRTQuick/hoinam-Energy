@@ -26,9 +26,9 @@
   --radius-sm: 12px;
   --max-width: 1180px;
   --font-body: "Dancing Script", cursive;
-  --font-heading: "Playfair Display", serif;
-  --font-ui: "Playfair Display", serif;
-  --font-home-hero: "Playfair Display", serif;
+  --font-heading: "Bebas Neue", sans-serif;
+  --font-ui: "Bebas Neue", sans-serif;
+  --font-home-hero: "Bebas Neue", sans-serif;
   --font-home-accent: "Dancing Script", cursive;
   --gradient-gold: linear-gradient(135deg, #ffc107 0%, #efa040 100%);
   --gradient-accent: linear-gradient(135deg, #0055b8 0%, #006fba 100%);
@@ -2302,7 +2302,7 @@ th {
   }
 }
 
-/* Playfair Display — tighten default tracking */
+/* Bebas Neue — tighten default tracking */
 h1, h2, h3, h4, h5, h6,
 .button, .nav-link, .nav-pill,
 .eyebrow, .chip, .badge,
