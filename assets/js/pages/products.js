@@ -1,7 +1,7 @@
 import { listProducts } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { refreshInteractions } from "../interactions.js";
-import { formatMoney, productMedia, renderProductCardMobile, showToast } from "../ui.js";
+import { formatMoney, formatProductPrice, productMedia, renderProductCardMobile, showToast } from "../ui.js";
 
 const isMobile = () => window.innerWidth <= 640;
 
@@ -34,6 +34,8 @@ function buildSearchTerms(product) {
     product.name,
     product.summary,
     product.description,
+    product.brand,
+    product.store_slug,
     product.category,
     ...(product.highlights || [])
   ]
@@ -49,6 +51,7 @@ function scoreProduct(product, query) {
   }
 
   const name = (product.name || "").toLowerCase();
+  const brand = (product.brand || "").toLowerCase();
   const category = (product.category || "").toLowerCase();
   const summary = (product.summary || "").toLowerCase();
   const haystack = buildSearchTerms(product);
@@ -67,6 +70,9 @@ function scoreProduct(product, query) {
     }
     if (category.includes(term)) {
       score += 35;
+    }
+    if (brand.includes(term)) {
+      score += 50;
     }
     if (summary.includes(term)) {
       score += 20;
@@ -97,6 +103,7 @@ function getControls() {
     searchForm: document.getElementById("catalog-search-form"),
     searchInput: document.getElementById("search-products"),
     clearSearch: document.getElementById("clear-search"),
+    brandFilter: document.getElementById("brand-filter"),
     categoryFilter: document.getElementById("category-filter"),
     sortSelect: document.getElementById("sort-products"),
     inStockOnly: document.getElementById("in-stock-only"),
@@ -109,8 +116,10 @@ function getControls() {
     suggestions: document.getElementById("search-suggestions"),
     activeFilters: document.getElementById("active-filters"),
     categoryChips: document.getElementById("category-chips"),
+    storeStrip: document.getElementById("store-strip"),
     totalProducts: document.getElementById("catalog-total-products"),
     totalCategories: document.getElementById("catalog-total-categories"),
+    totalBrands: document.getElementById("catalog-total-brands"),
     totalStock: document.getElementById("catalog-total-stock"),
     sidebar: document.getElementById("catalog-sidebar"),
     sidebarBackdrop: document.getElementById("catalog-sidebar-backdrop"),
@@ -124,6 +133,7 @@ function getState() {
   const controls = getControls();
   return {
     search: controls.searchInput.value.trim(),
+    brand: controls.brandFilter.value,
     category: controls.categoryFilter.value,
     sort: controls.sortSelect.value,
     inStockOnly: Boolean(controls.inStockOnly.checked),
@@ -134,6 +144,7 @@ function getState() {
 function hasActiveFilters(state = getState()) {
   return Boolean(
     state.search ||
+    state.brand ||
     state.category ||
     state.sort !== "relevance" ||
     state.inStockOnly ||
@@ -142,13 +153,19 @@ function hasActiveFilters(state = getState()) {
 }
 
 function syncUrl() {
-  const { search, category, sort, inStockOnly, featuredOnly } = getState();
+  const { search, brand, category, sort, inStockOnly, featuredOnly } = getState();
   const params = new URLSearchParams(window.location.search);
 
   if (search) {
     params.set("q", search);
   } else {
     params.delete("q");
+  }
+
+  if (brand) {
+    params.set("store", brand);
+  } else {
+    params.delete("store");
   }
 
   if (category) {
@@ -183,6 +200,7 @@ function loadStateFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const controls = getControls();
   controls.searchInput.value = params.get("q") || "";
+  controls.brandFilter.value = params.get("store") || "";
   controls.categoryFilter.value = params.get("category") || "";
   controls.sortSelect.value = params.get("sort") || "relevance";
   controls.inStockOnly.checked = params.get("stock") === "1";
@@ -197,6 +215,14 @@ function setActiveCategoryChip(category) {
   });
 }
 
+function setActiveStoreCard(brand) {
+  document.querySelectorAll("[data-store-filter]").forEach((card) => {
+    const active = card.dataset.storeFilter === brand;
+    card.classList.toggle("is-active", active);
+    card.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
 function updateSearchClearVisibility() {
   const { searchInput, clearSearch } = getControls();
   const hasSearch = Boolean(searchInput.value.trim());
@@ -207,11 +233,58 @@ function updateSearchClearVisibility() {
 function updateHeroStats(products = allProducts) {
   const controls = getControls();
   const categories = new Set(products.map((product) => product.category).filter(Boolean));
+  const brands = new Set(products.map((product) => product.brand).filter(Boolean));
   const stock = products.reduce((sum, product) => sum + Number(product.stock || 0), 0);
 
   controls.totalProducts.textContent = String(products.length);
   controls.totalCategories.textContent = String(categories.size);
+  controls.totalBrands.textContent = String(brands.size);
   controls.totalStock.textContent = String(stock);
+}
+
+function renderStoreStrip() {
+  const controls = getControls();
+  const brandStats = [...new Set(allProducts.map((product) => product.brand).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b))
+    .map((brand) => {
+      const products = allProducts.filter((product) => product.brand === brand);
+      const categories = new Set(products.map((product) => product.category).filter(Boolean));
+      const imageProduct = products.find((product) => product.image_url) || products[0];
+      return {
+        brand,
+        count: products.length,
+        categories: categories.size,
+        imageProduct
+      };
+    });
+
+  controls.storeStrip.innerHTML = [
+    `
+      <button class="store-card is-active" type="button" data-store-filter="">
+        <span class="store-card-icon"><i class="fa-solid fa-store" aria-hidden="true"></i></span>
+        <strong>All Stores</strong>
+        <small>${allProducts.length} products</small>
+      </button>
+    `,
+    ...brandStats.map(
+      (item) => `
+        <button class="store-card" type="button" data-store-filter="${escapeHtml(item.brand)}">
+          <span class="store-card-media">${productMedia(item.imageProduct, "store-card-product-media")}</span>
+          <strong>${escapeHtml(item.brand)} Store</strong>
+          <small>${item.count} products - ${item.categories} categories</small>
+        </button>
+      `
+    )
+  ].join("");
+
+  controls.storeStrip.querySelectorAll("[data-store-filter]").forEach((card) => {
+    card.addEventListener("click", () => {
+      controls.brandFilter.value = card.dataset.storeFilter || "";
+      setActiveStoreCard(controls.brandFilter.value);
+      renderProducts();
+      scrollResultsIntoView();
+    });
+  });
 }
 
 function renderSuggestionList() {
@@ -242,7 +315,7 @@ function renderSuggestionList() {
       ({ product }) => `
         <button class="search-suggestion-item" type="button" data-suggestion="${escapeHtml(product.name)}">
           <span class="search-suggestion-title">${highlightMatch(product.name, query)}</span>
-          <span class="search-suggestion-meta">${escapeHtml(product.category || "EcoFlow")} - ${formatMoney(product.price, product.currency)}</span>
+          <span class="search-suggestion-meta">${escapeHtml(product.brand || product.category || "Hoinam")} - ${formatProductPrice(product.price, product.currency)}</span>
         </button>
       `
     )
@@ -272,7 +345,8 @@ function renderProductResult(product, query = "") {
       </div>
       <div class="catalog-result-body">
         <div class="catalog-result-meta">
-          <span class="catalog-result-tag">${escapeHtml(product.category || "EcoFlow")}</span>
+          <span class="catalog-result-tag">${escapeHtml(product.brand || "Hoinam Store")}</span>
+          <span class="catalog-result-tag">${escapeHtml(product.category || "Energy Product")}</span>
           ${product.featured ? '<span class="catalog-result-tag is-featured">Featured pick</span>' : ""}
           <span class="catalog-result-stock ${stock > 0 ? "is-in-stock" : "is-backorder"}">${availability}: ${stock}</span>
         </div>
@@ -280,6 +354,7 @@ function renderProductResult(product, query = "") {
         <p class="catalog-result-summary">${highlightMatch(product.summary || "Reliable solar and backup power from Hoinam Energy.", query)}</p>
         ${highlightMarkup}
         <div class="catalog-result-details">
+          <span><strong>Store:</strong> ${escapeHtml(product.brand || "Hoinam")}</span>
           <span><strong>Type:</strong> ${escapeHtml(product.category || "Portable Power")}</span>
           <span><strong>Best for:</strong> ${escapeHtml(highlights[0] || "Homes, shops, and backup setups")}</span>
         </div>
@@ -287,7 +362,7 @@ function renderProductResult(product, query = "") {
       <div class="catalog-result-actions">
         <div class="catalog-result-price-block">
           <span class="catalog-result-price-label">Listed price</span>
-          <strong class="catalog-result-price">${formatMoney(product.price, product.currency)}</strong>
+          <strong class="catalog-result-price">${formatProductPrice(product.price, product.currency)}</strong>
         </div>
         <div class="catalog-result-button-stack">
           <a class="button" href="/product-detail.html?id=${product.id}"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> View details</a>
@@ -303,6 +378,9 @@ function buildSummary(state, count) {
 
   if (state.search) {
     labels.push(`"${state.search}"`);
+  }
+  if (state.brand) {
+    labels.push(`${state.brand} store`);
   }
   if (state.category) {
     labels.push(state.category);
@@ -336,6 +414,9 @@ function renderActiveFilters() {
   const items = [];
   if (state.search) {
     items.push({ key: "search", label: `Search: ${state.search}` });
+  }
+  if (state.brand) {
+    items.push({ key: "brand", label: `${state.brand} store` });
   }
   if (state.category) {
     items.push({ key: "category", label: state.category });
@@ -386,11 +467,12 @@ function renderProducts() {
   const filtered = allProducts
     .map((product) => ({ product, score: scoreProduct(product, state.search) }))
     .filter(({ product, score }) => {
+      const brandMatch = !state.brand || product.brand === state.brand;
       const categoryMatch = !state.category || product.category === state.category;
       const inStockMatch = !state.inStockOnly || Number(product.stock || 0) > 0;
       const featuredMatch = !state.featuredOnly || Boolean(product.featured);
       const searchMatch = state.search ? score > 0 : true;
-      return categoryMatch && inStockMatch && featuredMatch && searchMatch;
+      return brandMatch && categoryMatch && inStockMatch && featuredMatch && searchMatch;
     });
 
   const sorted = [...filtered];
@@ -451,11 +533,13 @@ function renderProducts() {
 function clearAllFilters() {
   const controls = getControls();
   controls.searchInput.value = "";
+  controls.brandFilter.value = "";
   controls.categoryFilter.value = "";
   controls.sortSelect.value = "relevance";
   controls.inStockOnly.checked = false;
   controls.featuredOnly.checked = false;
   controls.suggestions.classList.add("hidden");
+  setActiveStoreCard("");
   setActiveCategoryChip("");
   updateSearchClearVisibility();
 }
@@ -468,6 +552,9 @@ function clearFilterByKey(key) {
   } else if (key === "category") {
     controls.categoryFilter.value = "";
     setActiveCategoryChip("");
+  } else if (key === "brand") {
+    controls.brandFilter.value = "";
+    setActiveStoreCard("");
   } else if (key === "sort") {
     controls.sortSelect.value = "relevance";
   } else if (key === "stock") {
@@ -544,8 +631,14 @@ async function init() {
   try {
     allProducts = await listProducts();
     updateHeroStats(allProducts);
+    renderStoreStrip();
 
+    const brands = [...new Set(allProducts.map((product) => product.brand).filter(Boolean))];
     const categories = [...new Set(allProducts.map((product) => product.category).filter(Boolean))];
+    controls.brandFilter.innerHTML += brands
+      .map((brand) => `<option value="${escapeHtml(brand)}">${escapeHtml(brand)} Store</option>`)
+      .join("");
+
     controls.categoryFilter.innerHTML += categories
       .map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
       .join("");
@@ -569,6 +662,7 @@ async function init() {
     });
 
     loadStateFromUrl();
+    setActiveStoreCard(controls.brandFilter.value || "");
     setActiveCategoryChip(controls.categoryFilter.value || "");
     renderSuggestionList();
     renderProducts();
@@ -602,6 +696,11 @@ async function init() {
 
   controls.categoryFilter.addEventListener("change", (event) => {
     setActiveCategoryChip(event.target.value || "");
+    renderProducts();
+  });
+
+  controls.brandFilter.addEventListener("change", (event) => {
+    setActiveStoreCard(event.target.value || "");
     renderProducts();
   });
 

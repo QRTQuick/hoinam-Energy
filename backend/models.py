@@ -33,6 +33,8 @@ class User(TimestampMixin, Base):
     phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
     role: Mapped[str] = mapped_column(String(32), default="user", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    needs_monitoring: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    monitoring_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     orders = relationship("Order", back_populates="user")
     installations = relationship("Installation", back_populates="user")
@@ -46,6 +48,8 @@ class User(TimestampMixin, Base):
             "phone": self.phone,
             "role": self.role,
             "is_active": self.is_active,
+            "needs_monitoring": self.needs_monitoring,
+            "monitoring_reason": self.monitoring_reason,
             "created_at": self.created_at.isoformat(),
         }
 
@@ -57,6 +61,8 @@ class Product(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     sku: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    brand: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    store_slug: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
     category: Mapped[str] = mapped_column(String(128), default="Portable Power", nullable=False)
     summary: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -76,6 +82,8 @@ class Product(TimestampMixin, Base):
             "name": self.name,
             "slug": self.slug,
             "sku": self.sku,
+            "brand": self.brand,
+            "store_slug": self.store_slug,
             "category": self.category,
             "summary": self.summary,
             "description": self.description,
@@ -99,6 +107,7 @@ class Order(TimestampMixin, Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(32), default="confirmed", nullable=False)
     payment_status: Mapped[str] = mapped_column(String(32), default="paid", nullable=False)
+    payment_method: Mapped[str] = mapped_column(String(32), default="opay_transfer", nullable=False)
     payment_reference: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
@@ -115,6 +124,7 @@ class Order(TimestampMixin, Base):
             "user_id": self.user_id,
             "status": self.status,
             "payment_status": self.payment_status,
+            "payment_method": self.payment_method,
             "payment_reference": self.payment_reference,
             "total_amount": float(self.total_amount),
             "currency": self.currency,

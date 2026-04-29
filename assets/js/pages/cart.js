@@ -67,7 +67,7 @@ function renderCart() {
         </div>
         <div class="summary-row">
           <span>Checkout</span>
-          <span>Handled securely with Paystack</span>
+          <span>OPay transfer or pay on delivery</span>
         </div>
       </div>
       <div class="inline-actions">

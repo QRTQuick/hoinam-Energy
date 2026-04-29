@@ -50,6 +50,10 @@
               <input name="category" type="text" required>
             </label>
             <label class="field">
+              <span>Brand store</span>
+              <input name="brand" type="text" placeholder="EcoFlow, Bluetti, Deye">
+            </label>
+            <label class="field">
               <span>Price</span>
               <input name="price" type="number" min="0" required>
             </label>
@@ -109,7 +113,7 @@
               <span>Excel file</span>
               <input name="inventory_file" type="file" accept=".xlsx,.xls" required>
             </label>
-            <p class="field-full muted">Accepted layout: name, stock, price, category, image_url, summary, description. A simple name + stock sheet also works.</p>
+            <p class="field-full muted">Accepted layout: the Hoinam stock workbook with brand sections, reference, description, quantity, and rate.</p>
             <div class="field field-full">
               <button class="button button-full" type="submit"><i class="fa-solid fa-upload" aria-hidden="true"></i> Upload inventory</button>
             </div>
@@ -151,7 +155,7 @@
             <div class="section-heading">
               <div>
                 <span class="eyebrow"><i class="fa-solid fa-receipt" aria-hidden="true"></i> Orders</span>
-                <h2>Payments and order records</h2>
+                <h2>Payment and order records</h2>
               </div>
             </div>
             <div class="table-wrap" id="admin-orders"></div>

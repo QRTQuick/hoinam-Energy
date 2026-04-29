@@ -42,6 +42,10 @@ export function formatMoney(amount, currency = "NGN") {
   }).format(Number(amount || 0));
 }
 
+export function formatProductPrice(amount, currency = "NGN") {
+  return Number(amount || 0) > 0 ? formatMoney(amount, currency) : "Request quote";
+}
+
 export function formatDate(value) {
   if (!value) {
     return "Not set";
@@ -90,13 +94,13 @@ export function renderProductCard(product) {
       ${productMedia(product)}
       <div class="product-card-body">
         <div class="chip-row">
-          <span class="chip">${product.category || "Solar"}</span>
+          <span class="chip">${product.brand || product.category || "Solar"}</span>
           <span class="${stockClass}">${stockLabel}</span>
         </div>
         <h3>${product.name}</h3>
         <p class="product-summary">${product.summary || "Reliable solar and backup power from Hoinam Energy."}</p>
         <div class="product-meta">
-          <strong class="price">${formatMoney(product.price, product.currency)}</strong>
+          <strong class="price">${formatProductPrice(product.price, product.currency)}</strong>
           <a class="button button-ghost product-card-link" href="/product-detail.html?id=${product.id}">
             <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View
           </a>
@@ -115,9 +119,9 @@ export function renderProductCardMobile(product) {
         ${productMedia(product, "mob-product-media")}
       </div>
       <div class="mob-product-info">
-        <span class="mob-product-cat">${product.category || "Solar"}</span>
+        <span class="mob-product-cat">${product.brand || product.category || "Solar"}</span>
         <h3 class="mob-product-name">${product.name}</h3>
-        <p class="mob-product-price">${formatMoney(product.price, product.currency)}</p>
+        <p class="mob-product-price">${formatProductPrice(product.price, product.currency)}</p>
         <span class="mob-product-stock ${stock > 0 ? "in" : "out"}">${stockLabel}</span>
       </div>
       <i class="fa-solid fa-chevron-right mob-product-arrow" aria-hidden="true"></i>
@@ -340,20 +344,20 @@ export function injectShell(activePage) {
               </button>
               <div class="snav-mega" role="menu">
                 <div class="snav-mega-inner">
-                  <a class="snav-product-tile" href="/products.html?category=Portable%20Power" role="menuitem">
+                  <a class="snav-product-tile" href="/products.html?store=EcoFlow" role="menuitem">
                     <div class="snav-product-img"><img src="/assets/images/products/river-2-max.png" alt="River 2 Max" loading="lazy"></div>
-                    <span class="snav-product-name">Portable Power</span>
-                    <span class="snav-product-sub">River series</span>
+                    <span class="snav-product-name">EcoFlow Store</span>
+                    <span class="snav-product-sub">River and Delta series</span>
                   </a>
-                  <a class="snav-product-tile" href="/products.html?category=Home%20Backup" role="menuitem">
-                    <div class="snav-product-img"><img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max" loading="lazy"></div>
-                    <span class="snav-product-name">Home Backup</span>
-                    <span class="snav-product-sub">Delta series</span>
+                  <a class="snav-product-tile" href="/products.html?store=Bluetti" role="menuitem">
+                    <div class="snav-product-img"><img src="/assets/images/products/bluetti-ac180.png" alt="Bluetti AC180" loading="lazy"></div>
+                    <span class="snav-product-name">Bluetti Store</span>
+                    <span class="snav-product-sub">AC, EP, and B series</span>
                   </a>
-                  <a class="snav-product-tile" href="/products.html?category=Solar%20Panels" role="menuitem">
-                    <div class="snav-product-img"><img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Solar Panel" loading="lazy"></div>
-                    <span class="snav-product-name">Solar Panels</span>
-                    <span class="snav-product-sub">Foldable panels</span>
+                  <a class="snav-product-tile" href="/products.html?store=Deye" role="menuitem">
+                    <div class="snav-product-img"><img src="/assets/images/products/deye-sun-6k-sg04lp1-eu-sm2.png" alt="Deye inverter" loading="lazy"></div>
+                    <span class="snav-product-name">Deye Store</span>
+                    <span class="snav-product-sub">Inverters and batteries</span>
                   </a>
                   <a class="snav-product-tile" href="/products.html" role="menuitem">
                     <div class="snav-product-img snav-product-img-all"><i class="fa-solid fa-store"></i></div>

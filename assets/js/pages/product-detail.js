@@ -1,7 +1,7 @@
 import { getProduct } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { addToCart } from "../store.js";
-import { formatMoney, productMedia, refreshShell, showToast } from "../ui.js";
+import { formatProductPrice, productMedia, refreshShell, showToast } from "../ui.js";
 
 function escapeHtml(value = "") {
   return String(value)
@@ -32,7 +32,7 @@ function updateMetadata(product) {
 }
 
 function updateHero(product) {
-  setText("product-hero-eyebrow", product.category || "EcoFlow product");
+  setText("product-hero-eyebrow", product.brand ? `${product.brand} Store` : product.category || "Energy product");
   setText("product-hero-title", product.name || "Product overview");
   setText(
     "product-hero-summary",
@@ -78,7 +78,8 @@ function renderDetail(product) {
   const stock = Number(product.stock || 0);
   const availability = getAvailability(stock);
   const description = product.description || product.summary || "Clean energy backup engineered for modern homes and businesses.";
-  const category = product.category || "EcoFlow product";
+  const category = product.category || "Energy product";
+  const brand = product.brand || "Hoinam";
   const primaryHighlight = (product.highlights || []).find(Boolean) || "Homes, shops, and business backup";
   const sku = product.sku || product.slug || "HOINAM";
   const stockPillText = stock > 0 ? `${stock} in stock` : "On request";
@@ -86,7 +87,8 @@ function renderDetail(product) {
   return `
     <div class="detail-layout product-detail-layout">
       <article class="panel detail-card product-detail-media-card interactive-card">
-        <div class="detail-card-top">
+          <div class="detail-card-top">
+          <span class="detail-category-badge">${escapeHtml(brand)} Store</span>
           <span class="detail-category-badge">${escapeHtml(category)}</span>
           <span class="detail-sku">SKU ${escapeHtml(sku)}</span>
         </div>
@@ -98,7 +100,7 @@ function renderDetail(product) {
           </div>
           <div class="detail-fact-card">
             <span>Current price</span>
-            <strong>${formatMoney(product.price, product.currency)}</strong>
+            <strong>${formatProductPrice(product.price, product.currency)}</strong>
           </div>
           <div class="detail-fact-card">
             <span>Best for</span>
@@ -118,7 +120,7 @@ function renderDetail(product) {
           <div class="detail-price-row">
             <div>
               <p class="detail-label">Current price</p>
-              <strong class="detail-price">${formatMoney(product.price, product.currency)}</strong>
+              <strong class="detail-price">${formatProductPrice(product.price, product.currency)}</strong>
             </div>
             <div class="detail-availability ${availability.className}">
               <span>${escapeHtml(availability.label)}</span>
@@ -128,6 +130,7 @@ function renderDetail(product) {
 
           <div class="chip-row detail-summary-meta">
             <span class="chip">${escapeHtml(category)}</span>
+            <span class="chip">${escapeHtml(brand)} Store</span>
             <span class="stock-pill">${escapeHtml(stockPillText)}</span>
             <span class="badge">Secure checkout</span>
           </div>
@@ -164,6 +167,10 @@ function renderDetail(product) {
               <div class="detail-meta-item">
                 <span>Category</span>
                 <strong>${escapeHtml(category)}</strong>
+              </div>
+              <div class="detail-meta-item">
+                <span>Brand store</span>
+                <strong>${escapeHtml(brand)}</strong>
               </div>
               <div class="detail-meta-item">
                 <span>Stock level</span>

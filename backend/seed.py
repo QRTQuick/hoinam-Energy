@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .config import get_settings
+from .inventory import parse_stock_inventory
 from .models import Product
 from .utils import slugify, to_decimal
 
@@ -88,6 +89,11 @@ SEED_PRODUCTS = [
 
 def seed_products(session) -> None:
     settings = get_settings()
+    inventory_products = parse_stock_inventory()
+    if inventory_products:
+        upsert_inventory_products(session, inventory_products)
+        return
+
     existing_names = {name for (name,) in session.query(Product.name).all()}
 
     for product_data in SEED_PRODUCTS:
@@ -109,5 +115,35 @@ def seed_products(session) -> None:
             highlights=product_data.get("highlights", []),
         )
         session.add(product)
+
+    session.commit()
+
+
+def upsert_inventory_products(session, inventory_products: list[dict]) -> None:
+    settings = get_settings()
+    products = session.query(Product).all()
+    by_slug = {product.slug: product for product in products if product.slug}
+    by_sku = {product.sku: product for product in products if product.sku}
+
+    for product_data in inventory_products:
+        legacy_slug = product_data.pop("legacy_slug", None)
+        product_data.pop("reference", None)
+        product_data["currency"] = settings.default_currency
+
+        product = (
+            by_sku.get(product_data["sku"])
+            or by_slug.get(product_data["slug"])
+            or by_slug.get(legacy_slug)
+        )
+
+        if product is None:
+            product = Product()
+            session.add(product)
+
+        for field_name, value in product_data.items():
+            setattr(product, field_name, value)
+
+        by_slug[product.slug] = product
+        by_sku[product.sku] = product
 
     session.commit()

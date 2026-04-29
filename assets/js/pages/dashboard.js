@@ -123,7 +123,7 @@ async function init() {
                   ${statusBadge(order.status)}
                 </div>
                 <h3>${formatMoney(order.total_amount, order.currency)}</h3>
-                <p class="muted">Paid via reference ${order.payment_reference}</p>
+                <p class="muted">${order.payment_method === "pay_on_delivery" ? "Pay on delivery" : "OPay transfer"} - ${order.payment_reference}</p>
                 <div class="mini-meta">
                   <span>${formatDate(order.created_at)}</span>
                   <span>${order.items.length} item(s)</span>

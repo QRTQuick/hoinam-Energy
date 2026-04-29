@@ -47,10 +47,16 @@ class Settings:
     frontend_url: str = field(
         default_factory=lambda: os.getenv("FRONTEND_URL", "http://localhost:5000").rstrip("/")
     )
-    paystack_secret_key: str = field(default_factory=lambda: os.getenv("PAYSTACK_SECRET_KEY", "").strip())
-    allow_demo_payments: bool = field(
-        default_factory=lambda: _env_flag("ALLOW_DEMO_PAYMENTS", default=False)
+    opay_merchant_name: str = field(
+        default_factory=lambda: os.getenv("OPAY_MERCHANT_NAME", "Hoinam Energy").strip()
     )
+    opay_bank_name: str = field(
+        default_factory=lambda: os.getenv("OPAY_BANK_NAME", "OPay").strip()
+    )
+    opay_account_number: str = field(
+        default_factory=lambda: os.getenv("OPAY_ACCOUNT_NUMBER", "").strip()
+    )
+    opay_account_name: str = field(default_factory=lambda: os.getenv("OPAY_ACCOUNT_NAME", "").strip())
     admin_emails: set[str] = field(default_factory=_admin_email_set)
     firebase_credentials_json: str = field(
         default_factory=lambda: os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
@@ -65,10 +71,6 @@ class Settings:
         if private_key:
             payload["private_key"] = private_key.replace("\\n", "\n")
         return payload
-
-    @property
-    def paystack_callback_url(self) -> str:
-        return f"{self.frontend_url}/checkout.html?payment=complete"
 
 
 @lru_cache(maxsize=1)

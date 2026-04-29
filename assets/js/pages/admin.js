@@ -53,6 +53,7 @@ function readFileAsDataUrl(file) {
 function productFormPayload(form) {
   return {
     name: field(form, "name").value.trim(),
+    brand: field(form, "brand").value.trim(),
     category: field(form, "category").value.trim(),
     summary: field(form, "summary").value.trim(),
     description: field(form, "description").value.trim(),
@@ -72,6 +73,7 @@ function populateProductForm(product) {
   const form = document.getElementById("product-form");
   field(form, "product_id").value = product?.id || "";
   field(form, "name").value = product?.name || "";
+  field(form, "brand").value = product?.brand || "";
   field(form, "category").value = product?.category || "";
   field(form, "summary").value = product?.summary || "";
   field(form, "description").value = product?.description || "";
@@ -95,6 +97,7 @@ function renderProducts() {
           <th>Price</th>
           <th>Stock</th>
           <th>Category</th>
+          <th>Store</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -115,6 +118,7 @@ function renderProducts() {
                 <td>${formatMoney(product.price, product.currency)}</td>
                 <td>${product.stock}</td>
                 <td>${product.category}</td>
+                <td>${product.brand || "-"}</td>
                 <td>
                   <div class="inline-actions">
                     <button class="button button-ghost" type="button" data-edit-product="${product.id}">Edit</button>
@@ -138,6 +142,7 @@ function renderUsers(users) {
           <th>User</th>
           <th>Role</th>
           <th>Phone</th>
+          <th>Monitor</th>
           <th>Created</th>
         </tr>
       </thead>
@@ -152,6 +157,7 @@ function renderUsers(users) {
                 </td>
                 <td>${user.role}</td>
                 <td>${user.phone || "-"}</td>
+                <td>${user.needs_monitoring ? `<span class="status-badge" data-status="pending">Watch</span><br><span class="muted">${user.monitoring_reason || "Duplicate name review"}</span>` : "-"}</td>
                 <td>${formatDate(user.created_at)}</td>
               </tr>
             `
@@ -181,7 +187,7 @@ function renderOrders(orders) {
               <tr>
                 <td>
                   <strong>${order.order_number}</strong><br>
-                  <span class="muted">${order.payment_reference}</span>
+                  <span class="muted">${order.payment_method === "pay_on_delivery" ? "Pay on delivery" : "OPay transfer"} - ${order.payment_reference}</span>
                 </td>
                 <td>${order.user?.full_name || order.user?.email || "Customer"}</td>
                 <td>${formatMoney(order.total_amount, order.currency)}</td>

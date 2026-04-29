@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products | Hoinam Energy</title>
-    <meta name="description" content="Browse solar panels, power stations, and backup systems at Hoinam Energy.">
+    <meta name="description" content="Browse EcoFlow, Bluetti, Deye, solar panels, power stations, and backup systems at Hoinam Energy.">
     <link rel="canonical" href="https://hoinam-energy.vercel.app/products.html">
     <meta property="og:title" content="Products | Hoinam Energy">
-    <meta property="og:description" content="Portable stations, solar panels, and backup systems — multiple brands, ready for sale.">
+    <meta property="og:description" content="Portable stations, solar panels, inverters, batteries, and backup systems by brand store.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://hoinam-energy.vercel.app/products.html">
     <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Products | Hoinam Energy">
-    <meta name="twitter:description" content="Portable stations, solar panels, and backup systems — multiple brands, ready for sale.">
+    <meta name="twitter:description" content="Portable stations, solar panels, inverters, batteries, and backup systems by brand store.">
     <meta name="twitter:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
     <meta name="theme-color" content="#0055B8">
     <link rel="stylesheet" href="/assets/css/styles.css">
@@ -25,7 +25,7 @@
         <div class="container catalog-utility-inner">
           <div class="catalog-utility-item"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Fast delivery across Nigeria</div>
           <div class="catalog-utility-item"><i class="fa-solid fa-headset" aria-hidden="true"></i> Sizing help from Hoinam</div>
-          <div class="catalog-utility-item"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Verified stock</div>
+          <div class="catalog-utility-item"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Verified inventory</div>
         </div>
       </section>
 
@@ -33,9 +33,9 @@
         <div class="container">
           <div class="catalog-hero-grid">
             <div class="catalog-hero-copy">
-              <span class="eyebrow">Search Catalog</span>
-              <h1>Browse our products.</h1>
-              <p>Portable power, home backup, solar panels, and installation — multiple brands, one place.</p>
+              <span class="eyebrow">Hoinam Stores</span>
+              <h1>Shop EcoFlow, Bluetti, and Deye products.</h1>
+              <p>Portable power, solar panels, hybrid inverters, batteries, and complete backup systems from the latest stock inventory.</p>
               <div class="catalog-hero-stats">
                 <div class="catalog-hero-stat">
                   <strong id="catalog-total-products">0</strong>
@@ -46,8 +46,12 @@
                   <span>Categories</span>
                 </div>
                 <div class="catalog-hero-stat">
+                  <strong id="catalog-total-brands">0</strong>
+                  <span>Stores</span>
+                </div>
+                <div class="catalog-hero-stat">
                   <strong id="catalog-total-stock">0</strong>
-                  <span>Units in stock</span>
+                  <span>Tracked units</span>
                 </div>
               </div>
             </div>
@@ -55,7 +59,7 @@
               <form class="catalog-search-form" id="catalog-search-form">
                 <label class="catalog-search-input" for="search-products">
                   <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                  <input id="search-products" type="search" placeholder="Search River, Delta, solar panel, backup..." autocomplete="off">
+                  <input id="search-products" type="search" placeholder="Search River, Delta, AC180, Deye inverter..." autocomplete="off">
                   <button class="catalog-search-clear hidden" type="button" id="clear-search" aria-label="Clear search">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                   </button>
@@ -64,10 +68,10 @@
                 <div class="search-suggestions hidden" id="search-suggestions" aria-live="polite"></div>
                 <div class="catalog-search-links">
                   <span>Popular searches</span>
-                  <button class="catalog-link-chip" type="button" data-search-shortcut="Delta">Delta</button>
-                  <button class="catalog-link-chip" type="button" data-search-shortcut="River">River</button>
-                  <button class="catalog-link-chip" type="button" data-search-shortcut="Solar Panel">Solar Panel</button>
-                  <button class="catalog-link-chip" type="button" data-search-shortcut="Home Backup">Home Backup</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="EcoFlow">EcoFlow</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="Bluetti">Bluetti</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="Deye">Deye</button>
+                  <button class="catalog-link-chip" type="button" data-search-shortcut="Inverter">Inverter</button>
                 </div>
                 <div class="catalog-search-actions">
                   <button class="button button-ghost catalog-filter-toggle" type="button" id="open-filters">
@@ -85,6 +89,7 @@
 
       <section class="section catalog-shell-section">
         <div class="container">
+          <div class="store-strip" id="store-strip" aria-label="Brand stores"></div>
           <button class="catalog-sidebar-backdrop hidden" type="button" id="catalog-sidebar-backdrop" aria-label="Close filters"></button>
           <div class="catalog-layout">
             <aside class="panel catalog-sidebar" id="catalog-sidebar" aria-label="Catalog filters">
@@ -103,6 +108,14 @@
               </div>
               <div class="catalog-sidebar-block catalog-sidebar-primary-controls">
                 <div class="catalog-refine-controls">
+                <div class="filter-group">
+                  <label class="field">
+                    <span>Store</span>
+                    <select id="brand-filter">
+                      <option value="">All stores</option>
+                    </select>
+                  </label>
+                </div>
                 <div class="filter-group">
                   <label class="field">
                     <span>Category</span>

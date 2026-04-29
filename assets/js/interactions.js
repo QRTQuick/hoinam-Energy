@@ -4,6 +4,7 @@ const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
 let revealObserver;
 let countObserver;
 let scrollHandlerBound = false;
+let cursorGlowBound = false;
 
 const revealSelectors = [
   ".hero .container > *",
@@ -140,6 +141,30 @@ function bindScrollHeader() {
   window.addEventListener("scroll", update, { passive: true });
 }
 
+function bindCursorGlow() {
+  if (cursorGlowBound || prefersReducedMotion.matches || !hasFinePointer) {
+    return;
+  }
+  cursorGlowBound = true;
+
+  let glow = document.querySelector(".site-cursor-glow");
+  if (!glow) {
+    glow = document.createElement("div");
+    glow.className = "site-cursor-glow";
+    document.body.append(glow);
+  }
+
+  document.body.classList.add("has-cursor-glow");
+  window.addEventListener(
+    "mousemove",
+    (event) => {
+      document.documentElement.style.setProperty("--cursor-x", `${event.clientX}px`);
+      document.documentElement.style.setProperty("--cursor-y", `${event.clientY}px`);
+    },
+    { passive: true }
+  );
+}
+
 function initObservers() {
   if (!prefersReducedMotion.matches && !revealObserver) {
     revealObserver = new IntersectionObserver(
@@ -173,6 +198,7 @@ function initObservers() {
 export function refreshInteractions(root = document) {
   initObservers();
   bindScrollHeader();
+  bindCursorGlow();
   prepareRevealTargets(root);
   prepareCountTargets(root);
   prepareTiltTargets(root);

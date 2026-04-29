@@ -5,17 +5,17 @@ from pathlib import Path
 
 from flask import Flask, g, jsonify, request, send_from_directory
 from flask_cors import CORS
-from openpyxl import load_workbook
 from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 
 from .config import get_settings
 from .database import check_database_url, close_session, get_session, init_database
 from .firebase_auth import verify_id_token
+from .inventory import parse_stock_inventory
 from .models import Installation, Order, Product, User
-from .payments import initialize_transaction, verify_transaction
-from .services import apply_product_payload, calculate_order_items, ensure_unique_full_name, sync_user_from_claims
-from .utils import generate_order_number, generate_payment_reference, resolve_product_image_url, slugify, to_decimal, to_minor_units
+from .seed import seed_products
+from .services import apply_product_payload, calculate_order_items, flag_duplicate_full_name_users, sync_user_from_claims
+from .utils import generate_order_number, generate_payment_reference, resolve_product_image_url, slugify, to_decimal
 
 
 class ApiError(Exception):
@@ -29,6 +29,11 @@ def create_app() -> Flask:
     settings = get_settings()
     check_database_url()
     init_database()
+    seed_session = get_session()
+    try:
+        seed_products(seed_session)
+    finally:
+        close_session()
     app = Flask(__name__)
     project_root = Path(__file__).resolve().parents[1]
     CORS(
@@ -106,59 +111,10 @@ def create_app() -> Flask:
         return payload
 
     def parse_inventory_file(file_storage) -> list[dict]:
-        workbook = load_workbook(file_storage.stream, data_only=True)
-        sheet = workbook.active
-        rows = list(sheet.iter_rows(values_only=True))
+        rows = parse_stock_inventory(file_storage.stream)
         if not rows:
-            raise ApiError("The uploaded workbook is empty.", 400)
-
-        first_row = [str(cell).strip().lower() if cell is not None else "" for cell in rows[0]]
-        has_header = any(cell in {"name", "product", "stock", "quantity"} for cell in first_row)
-        data_rows = rows[1:] if has_header else rows
-
-        header_map = {}
-        if has_header:
-            for index, header in enumerate(first_row):
-                header_map[header] = index
-
-        parsed = []
-        for row in data_rows:
-            if not row or not row[0]:
-                continue
-
-            if has_header:
-                name = row[header_map.get("name", header_map.get("product", 0))]
-                stock = row[header_map.get("stock", header_map.get("quantity", 1))]
-                price = row[header_map.get("price")] if "price" in header_map else None
-                category = row[header_map.get("category")] if "category" in header_map else None
-                image_url = row[header_map.get("image_url")] if "image_url" in header_map else None
-                summary = row[header_map.get("summary")] if "summary" in header_map else None
-                description = row[header_map.get("description")] if "description" in header_map else None
-            else:
-                name = row[0]
-                stock = row[1] if len(row) > 1 else 0
-                price = row[2] if len(row) > 2 else None
-                category = row[3] if len(row) > 3 else None
-                image_url = row[4] if len(row) > 4 else None
-                summary = row[5] if len(row) > 5 else None
-                description = row[6] if len(row) > 6 else None
-
-            if not name:
-                continue
-
-            parsed.append(
-                {
-                    "name": str(name).strip(),
-                    "stock": int(stock or 0),
-                    "price": str(price or 0),
-                    "category": str(category).strip() if category else "Portable Power",
-                    "image_url": str(image_url).strip() if image_url else None,
-                    "summary": str(summary).strip() if summary else f"{name} ready for storefront publication.",
-                    "description": str(description).strip() if description else f"{name} inventory imported from the latest admin upload.",
-                }
-            )
-
-        return parsed
+            raise ApiError("The uploaded workbook is empty or does not match the stock inventory layout.", 400)
+        return rows
 
     @app.get("/api/health")
     def health_check():
@@ -183,9 +139,9 @@ def create_app() -> Flask:
         if "full_name" in payload:
             full_name = (payload.get("full_name") or "").strip()
             if full_name:
-                ensure_unique_full_name(db_session(), full_name, exclude_user_id=user.id)
                 user.full_name = full_name
 
+        flag_duplicate_full_name_users(db_session(), user)
         db_session().commit()
         return json_success(user.to_dict())
 
@@ -242,41 +198,41 @@ def create_app() -> Flask:
         db_session().commit()
         return json_success({"id": product_id}, message="Product archived.")
 
-    @app.post("/api/payments/initialize")
-    def initialize_payment_route():
-        user = authenticate()
-        payload = request.get_json(silent=True) or {}
-        items = payload.get("items") or []
-        normalized_items, total, _ = calculate_order_items(db_session(), items)
-        reference = generate_payment_reference()
-        payment = initialize_transaction(
-            email=user.email or payload.get("email") or "orders@hoinamenergy.com",
-            amount_minor=to_minor_units(total),
-            reference=reference,
-            metadata={
-                "user_id": user.id,
-                "items": normalized_items,
-                "customer": user.full_name or user.email or user.firebase_uid,
-            },
-        )
-        return json_success(
-            {
-                "reference": reference,
-                "authorization_url": payment["authorization_url"],
-                "access_code": payment.get("access_code"),
-                "amount": float(total),
-                "currency": settings.default_currency,
-            }
-        )
+    def payment_options_payload() -> dict:
+        return {
+            "methods": [
+                {
+                    "id": "opay_transfer",
+                    "label": "OPay merchant transfer",
+                    "description": "Place the order now, then pay by transfer to the Hoinam Energy OPay merchant account.",
+                    "bank_name": settings.opay_bank_name,
+                    "account_number": settings.opay_account_number,
+                    "account_name": settings.opay_account_name or settings.opay_merchant_name,
+                },
+                {
+                    "id": "pay_on_delivery",
+                    "label": "Pay on delivery",
+                    "description": "Reserve the order and pay when Hoinam Energy confirms delivery.",
+                },
+            ]
+        }
+
+    @app.get("/api/payment-options")
+    def payment_options_route():
+        return json_success(payment_options_payload())
 
     @app.post("/api/orders")
     def create_order():
         user = authenticate()
         payload = request.get_json(silent=True) or {}
-        payment_reference = (payload.get("payment_reference") or "").strip()
-        if not payment_reference:
-            raise ApiError("payment_reference is required.", 400)
+        payment_method = (payload.get("payment_method") or "opay_transfer").strip()
+        allowed_payment_methods = {"opay_transfer", "pay_on_delivery"}
+        if payment_method not in allowed_payment_methods:
+            raise ApiError("Choose OPay transfer or pay on delivery.", 400)
 
+        payment_reference = (payload.get("payment_reference") or "").strip() or generate_payment_reference(
+            "OPAY" if payment_method == "opay_transfer" else "POD"
+        )
         existing_order = db_session().query(Order).filter(Order.payment_reference == payment_reference).first()
         if existing_order:
             return json_success(existing_order.to_dict())
@@ -290,22 +246,22 @@ def create_app() -> Flask:
         normalized_items, total, locked_products = calculate_order_items(
             db_session(), payload.get("items") or [], lock_products=True
         )
-        verification = verify_transaction(payment_reference)
-        if verification.get("status") != "success":
-            raise ApiError("Payment has not been completed.", 402)
-        if verification.get("amount") not in (None, to_minor_units(total)):
-            raise ApiError("Payment amount does not match the order total.", 400)
 
         for item in normalized_items:
             product = locked_products[item["product_id"]]
-            if product.stock < item["quantity"]:
+            if product.stock > 0 and product.stock < item["quantity"]:
                 raise ApiError(f"{product.name} is no longer available in that quantity.", 409)
-            product.stock -= item["quantity"]
+            if product.stock > 0:
+                product.stock -= item["quantity"]
+
+        payment_status = "awaiting_transfer" if payment_method == "opay_transfer" else "pay_on_delivery"
+        order_status = "payment_pending" if payment_method == "opay_transfer" else "confirmed"
         order = Order(
             order_number=generate_order_number(),
             user_id=user.id,
-            status="confirmed",
-            payment_status="paid",
+            status=order_status,
+            payment_status=payment_status,
+            payment_method=payment_method,
             payment_reference=payment_reference,
             total_amount=to_decimal(total),
             currency=settings.default_currency,
@@ -315,7 +271,9 @@ def create_app() -> Flask:
         )
         db_session().add(order)
         db_session().commit()
-        return json_success(order.to_dict(), status_code=201)
+        order_payload = order.to_dict()
+        order_payload["payment_options"] = payment_options_payload()
+        return json_success(order_payload, status_code=201)
 
     @app.get("/api/orders/user")
     def get_user_orders():
@@ -446,13 +404,27 @@ def create_app() -> Flask:
         created = 0
         updated = 0
         for row in rows:
-            product_slug = slugify(row["name"])
-            product = db_session().query(Product).filter(Product.name == row["name"]).first()
+            product_slug = row.get("slug") or slugify(row["name"])
+            product_sku = row.get("sku") or product_slug.upper().replace("-", "_")
+            legacy_slug = row.get("legacy_slug")
+            product = (
+                db_session()
+                .query(Product)
+                .filter(
+                    (Product.sku == product_sku)
+                    | (Product.slug == product_slug)
+                    | (Product.slug == legacy_slug)
+                    | (Product.name == row["name"])
+                )
+                .first()
+            )
             if product is None:
                 product = Product(
                     name=row["name"],
                     slug=product_slug,
-                    sku=product_slug.upper().replace("-", "_"),
+                    sku=product_sku,
+                    brand=row.get("brand"),
+                    store_slug=row.get("store_slug"),
                     category=row["category"],
                     summary=row["summary"],
                     description=row["description"],
@@ -465,6 +437,11 @@ def create_app() -> Flask:
                 db_session().add(product)
                 created += 1
             else:
+                product.name = row["name"]
+                product.slug = product_slug
+                product.sku = product_sku
+                product.brand = row.get("brand") or product.brand
+                product.store_slug = row.get("store_slug") or product.store_slug
                 product.stock = row["stock"]
                 if row["price"]:
                     product.price = to_decimal(row["price"])

@@ -11,9 +11,42 @@ import {
 import { showToast } from "../ui.js";
 
 async function completeAuthSuccess() {
+  showAuthLoading("Finalizing your Hoinam Energy session", "Checking your account and opening your dashboard.");
   await syncSession();
   showToast("Authentication successful.", "success");
   redirectAfterAuth();
+}
+
+function showAuthLoading(title = "Signing you in", copy = "Google sign-in is complete. Hoinam Energy is creating your secure session.") {
+  let loader = document.getElementById("auth-loading-screen");
+  if (!loader) {
+    loader = document.createElement("div");
+    loader.id = "auth-loading-screen";
+    loader.className = "auth-loading-screen";
+    document.body.append(loader);
+  }
+
+  loader.innerHTML = `
+    <div class="auth-loading-card">
+      <div class="auth-loading-mark">
+        <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">
+      </div>
+      <div class="auth-loading-spinner" aria-hidden="true"></div>
+      <h2>${title}</h2>
+      <p>${copy}</p>
+      <div class="auth-loading-steps">
+        <span>Google verified</span>
+        <span>Syncing account</span>
+        <span>Opening dashboard</span>
+      </div>
+    </div>
+  `;
+  document.body.dataset.authLoading = "true";
+}
+
+function hideAuthLoading() {
+  document.body.dataset.authLoading = "false";
+  document.getElementById("auth-loading-screen")?.remove();
 }
 
 function formatAuthError(error) {
@@ -38,15 +71,18 @@ async function handleGoogleRedirect() {
   let hadRedirectResult = false;
 
   try {
+    showAuthLoading();
     const result = await getGoogleRedirectResult();
     hadRedirectResult = Boolean(result?.user);
   } catch (error) {
+    hideAuthLoading();
     showToast(formatAuthError(error), "error");
     return false;
   }
 
   const user = await waitForAuthReady();
   if (!user && !hadRedirectResult) {
+    hideAuthLoading();
     return false;
   }
 
@@ -60,6 +96,7 @@ async function handleGoogleRedirect() {
     await sleep(250);
   }
 
+  hideAuthLoading();
   showToast("Google sign-in completed, but the session could not be restored yet. Please try again.", "error");
   return false;
 }
@@ -97,6 +134,7 @@ async function init() {
         });
         await completeAuthSuccess();
       } catch (error) {
+        hideAuthLoading();
         showToast(formatAuthError(error), "error");
       }
     });
@@ -113,6 +151,7 @@ async function init() {
         });
         await completeAuthSuccess();
       } catch (error) {
+        hideAuthLoading();
         showToast(formatAuthError(error), "error");
       }
     });
@@ -121,8 +160,10 @@ async function init() {
   googleButtons.forEach((button) => {
     button.addEventListener("click", async () => {
       try {
+        showAuthLoading("Opening Google sign-in", "Choose your Google account, then we will bring you back here automatically.");
         await loginWithGoogle();
       } catch (error) {
+        hideAuthLoading();
         showToast(formatAuthError(error), "error");
       }
     });

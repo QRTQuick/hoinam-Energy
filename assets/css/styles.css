@@ -62,6 +62,27 @@ body {
   overflow-x: hidden;
 }
 
+.site-cursor-glow {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 193, 7, 0.22) 0%, rgba(0, 85, 184, 0.12) 34%, transparent 68%);
+  transform: translate3d(calc(var(--cursor-x, -500px) - 50%), calc(var(--cursor-y, -500px) - 50%), 0);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  z-index: 2;
+}
+
+body.has-cursor-glow .site-cursor-glow {
+  opacity: 1;
+}
+
 img {
   display: block;
   max-width: 100%;
@@ -3777,7 +3798,271 @@ body[data-page="products"] .catalog-active-pill {
   box-shadow: none;
 }
 
+.store-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.store-card {
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(0, 85, 184, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--heading);
+  text-align: left;
+  box-shadow: none;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.store-card:hover,
+.store-card.is-active {
+  transform: translateY(-2px);
+  border-color: rgba(255, 193, 7, 0.8);
+  background: #ffffff;
+}
+
+.store-card strong,
+.store-card small {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.store-card strong {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--heading);
+}
+
+.store-card small {
+  color: var(--text-soft);
+  line-height: 1.35;
+}
+
+.store-card-icon,
+.store-card-media {
+  grid-row: span 2;
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #e6eef8;
+  color: var(--primary);
+  overflow: hidden;
+}
+
+.store-card-product-media {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+}
+
+.store-card-product-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.25rem;
+}
+
+.auth-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    linear-gradient(135deg, rgba(6, 8, 16, 0.96), rgba(0, 47, 102, 0.94)),
+    url("/assets/images/products/delta-2-max.png") center / min(560px, 75vw) no-repeat;
+}
+
+.auth-loading-card {
+  width: min(100%, 430px);
+  display: grid;
+  place-items: center;
+  gap: 0.9rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  text-align: center;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.auth-loading-mark {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.auth-loading-mark img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.auth-loading-spinner {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.22);
+  border-top-color: #ffc107;
+  animation: authSpin 900ms linear infinite;
+}
+
+@keyframes authSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-loading-card h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  color: #ffffff;
+}
+
+.auth-loading-card p {
+  margin: 0;
+  max-width: 28rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}
+
+.auth-loading-steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.auth-loading-steps span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.auth-loading-steps span {
+  padding: 0.38rem 0.62rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.72rem;
+}
+
+.checkout-reference {
+  color: var(--text-soft);
+}
+
+.payment-methods {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.payment-option-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.9rem;
+  border: 1px solid rgba(0, 85, 184, 0.12);
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.payment-option-card.is-selected,
+.payment-option-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 193, 7, 0.9);
+  box-shadow: 0 14px 30px rgba(0, 85, 184, 0.08);
+}
+
+.payment-option-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.payment-option-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--accent-soft);
+}
+
+.payment-option-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.payment-option-copy strong {
+  color: var(--heading);
+}
+
+.payment-option-copy small,
+.payment-option-copy em {
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.payment-option-copy em {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.checkout-complete-panel {
+  margin-bottom: 1rem;
+}
+
+.transfer-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.transfer-details div {
+  padding: 0.8rem;
+  border-radius: 14px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.transfer-details span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.transfer-details strong {
+  color: var(--heading);
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 980px) {
+  .store-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   body[data-page="products"] .catalog-utility-inner {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -3910,6 +4195,25 @@ body[data-page="products"] .catalog-active-pill {
 }
 
 @media (max-width: 520px) {
+  .transfer-details {
+    grid-template-columns: 1fr;
+  }
+
+  .store-strip {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .store-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .store-card {
+    flex: 0 0 238px;
+  }
+
   body[data-page="products"] .catalog-utility-item {
     padding: 0.4rem 0.6rem;
   }

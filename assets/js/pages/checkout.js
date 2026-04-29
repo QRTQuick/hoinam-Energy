@@ -1,13 +1,23 @@
-import { createOrder, initializePayment } from "../api.js";
+import { createOrder, getPaymentOptions } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
-import { clearCart, clearPendingOrder, getCart, getCartSubtotal, getPendingOrder, setPendingOrder } from "../store.js";
+import { clearCart, getCart, getCartSubtotal } from "../store.js";
 import { formatMoney, showToast } from "../ui.js";
+
+let paymentOptions = [];
 
 function orderItemsFromCart() {
   return getCart().map((item) => ({
     product_id: item.product_id,
     quantity: item.quantity
   }));
+}
+
+function selectedPaymentMethod(form) {
+  return form.querySelector('input[name="payment_method"]:checked')?.value || "opay_transfer";
+}
+
+function optionById(id) {
+  return paymentOptions.find((option) => option.id === id);
 }
 
 function renderSummary() {
@@ -17,14 +27,14 @@ function renderSummary() {
   if (!cart.length) {
     summary.innerHTML = `
       <div class="empty-state">
-        Your cart is empty. Add products before starting Paystack checkout.
+        Your cart is empty. Add products before checkout.
       </div>
     `;
     return;
   }
 
   summary.innerHTML = `
-    <div class="panel">
+    <div class="panel checkout-summary-panel">
       <h3>Order summary</h3>
       <div class="summary-list">
         ${cart
@@ -42,48 +52,80 @@ function renderSummary() {
           <strong class="price">${formatMoney(getCartSubtotal())}</strong>
         </div>
       </div>
+      <p class="muted checkout-note">Orders are confirmed by Hoinam Energy after transfer confirmation or delivery scheduling.</p>
     </div>
   `;
 }
 
-async function finalizePendingOrder(reference) {
-  const status = document.getElementById("checkout-status");
-  const pendingOrder = getPendingOrder();
-
-  if (!pendingOrder) {
-    status.innerHTML = `<div class="empty-state">Payment reference detected, but no pending order was found in this browser session.</div>`;
+function renderPaymentOptions() {
+  const target = document.getElementById("payment-methods");
+  if (!target) {
     return;
   }
 
-  status.innerHTML = `<div class="panel"><h3>Verifying payment</h3><p class="muted">Please wait while we confirm your Paystack transaction and create the order.</p></div>`;
+  target.innerHTML = paymentOptions
+    .map(
+      (option, index) => `
+        <label class="payment-option-card ${index === 0 ? "is-selected" : ""}">
+          <input name="payment_method" type="radio" value="${option.id}" ${index === 0 ? "checked" : ""}>
+          <span class="payment-option-icon">
+            <i class="fa-solid ${option.id === "opay_transfer" ? "fa-building-columns" : "fa-truck-fast"}" aria-hidden="true"></i>
+          </span>
+          <span class="payment-option-copy">
+            <strong>${option.label}</strong>
+            <small>${option.description}</small>
+            ${
+              option.id === "opay_transfer"
+                ? `<em>${option.bank_name || "OPay"} ${option.account_number || "account details pending"} ${option.account_name ? `- ${option.account_name}` : ""}</em>`
+                : ""
+            }
+          </span>
+        </label>
+      `
+    )
+    .join("");
 
-  try {
-    const order = await createOrder({
-      items: pendingOrder.items,
-      shipping_address: pendingOrder.shipping_address,
-      notes: pendingOrder.notes,
-      payment_reference: reference
+  target.querySelectorAll('input[name="payment_method"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      target.querySelectorAll(".payment-option-card").forEach((card) => {
+        card.classList.toggle("is-selected", card.contains(input) && input.checked);
+      });
     });
+  });
+}
 
-    clearPendingOrder();
-    clearCart();
-    status.innerHTML = `
-      <div class="panel">
-        <span class="badge">Payment confirmed</span>
-        <h3>Order ${order.order_number} created</h3>
-        <p class="muted">Your payment has been verified and the order is now in the Hoinam Energy dashboard.</p>
-        <div class="inline-actions">
-          <a class="button" href="/dashboard.html">View dashboard</a>
-          <a class="button button-ghost" href="/products.html">Continue shopping</a>
-        </div>
+function renderOrderComplete(order) {
+  const status = document.getElementById("checkout-status");
+  const method = optionById(order.payment_method);
+  const isTransfer = order.payment_method === "opay_transfer";
+
+  status.innerHTML = `
+    <div class="panel checkout-complete-panel">
+      <span class="badge">${isTransfer ? "Transfer pending" : "Pay on delivery"}</span>
+      <h3>Order ${order.order_number} created</h3>
+      <p class="muted">
+        ${isTransfer
+          ? "Use the transfer details below and include your order reference so the admin team can confirm the payment."
+          : "Hoinam Energy will contact you to confirm delivery and collect payment."}
+      </p>
+      ${
+        isTransfer
+          ? `
+            <div class="transfer-details">
+              <div><span>Bank</span><strong>${method?.bank_name || "OPay"}</strong></div>
+              <div><span>Account number</span><strong>${method?.account_number || "Pending setup"}</strong></div>
+              <div><span>Account name</span><strong>${method?.account_name || "Hoinam Energy"}</strong></div>
+              <div><span>Reference</span><strong>${order.payment_reference}</strong></div>
+            </div>
+          `
+          : `<p class="checkout-reference">Reference: <strong>${order.payment_reference}</strong></p>`
+      }
+      <div class="inline-actions">
+        <a class="button" href="/dashboard.html">View dashboard</a>
+        <a class="button button-ghost" href="/products.html">Continue shopping</a>
       </div>
-    `;
-    showToast("Payment verified and order created.", "success");
-    window.history.replaceState({}, document.title, "/checkout.html");
-  } catch (error) {
-    status.innerHTML = `<div class="empty-state">${error.message}</div>`;
-    showToast(error.message, "error");
-  }
+    </div>
+  `;
 }
 
 async function init() {
@@ -93,13 +135,6 @@ async function init() {
   }
 
   renderSummary();
-
-  const params = new URLSearchParams(window.location.search);
-  const reference = params.get("reference") || params.get("trxref");
-  if (reference) {
-    await finalizePendingOrder(reference);
-    return;
-  }
 
   const form = document.getElementById("checkout-form");
   const cart = getCart();
@@ -111,6 +146,14 @@ async function init() {
     `;
     form.classList.add("hidden");
     return;
+  }
+
+  try {
+    const optionsPayload = await getPaymentOptions();
+    paymentOptions = optionsPayload.methods || [];
+    renderPaymentOptions();
+  } catch (error) {
+    showToast(error.message, "error");
   }
 
   form.full_name.value = profile.full_name || "";
@@ -128,15 +171,24 @@ async function init() {
     };
 
     try {
-      const payment = await initializePayment(orderItemsFromCart());
-      setPendingOrder({
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Creating order`;
+      const order = await createOrder({
         items: orderItemsFromCart(),
         shipping_address: shippingAddress,
-        notes: form.notes.value.trim()
+        notes: form.notes.value.trim(),
+        payment_method: selectedPaymentMethod(form)
       });
-      showToast("Redirecting to Paystack for payment.", "info");
-      window.location.href = payment.authorization_url;
+
+      clearCart();
+      form.classList.add("hidden");
+      renderOrderComplete(order);
+      showToast("Order created successfully.", "success");
     } catch (error) {
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = false;
+      submitButton.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Place order`;
       showToast(error.message, "error");
     }
   });

@@ -76,12 +76,8 @@ export function getProduct(productId) {
   return apiFetch(`/products/${productId}`);
 }
 
-export function initializePayment(items) {
-  return apiFetch("/payments/initialize", {
-    method: "POST",
-    authRequired: true,
-    body: { items }
-  });
+export function getPaymentOptions() {
+  return apiFetch("/payment-options");
 }
 
 export function createOrder(payload) {

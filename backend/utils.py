@@ -49,8 +49,9 @@ def generate_order_number() -> str:
     return f"HN-{stamp}-{uuid.uuid4().hex[:8].upper()}"
 
 
-def generate_payment_reference() -> str:
-    return f"HOINAM-{uuid.uuid4().hex[:12].upper()}"
+def generate_payment_reference(prefix: str = "HOINAM") -> str:
+    safe_prefix = re.sub(r"[^A-Z0-9]+", "", prefix.upper()) or "HOINAM"
+    return f"{safe_prefix}-{uuid.uuid4().hex[:12].upper()}"
 
 
 def to_decimal(value) -> Decimal:

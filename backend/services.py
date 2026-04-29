@@ -11,17 +11,36 @@ from .utils import resolve_product_image_url, slugify, to_decimal
 
 
 def ensure_unique_full_name(session, full_name: str | None, *, exclude_user_id: int | None = None) -> None:
-    if not full_name:
+    return
+
+
+def flag_duplicate_full_name_users(session, user: User) -> None:
+    if not user.full_name:
+        user.needs_monitoring = False
+        user.monitoring_reason = None
         return
 
-    normalized = " ".join(full_name.split())
+    normalized = " ".join(user.full_name.split())
     query = select(User).where(func.lower(User.full_name) == normalized.lower())
-    if exclude_user_id is not None:
-        query = query.where(User.id != exclude_user_id)
+    duplicates = [candidate for candidate in session.execute(query).scalars().all()]
+    different_email_duplicates = [
+        candidate
+        for candidate in duplicates
+        if candidate.id != user.id and (candidate.email or "").lower() != (user.email or "").lower()
+    ]
 
-    existing = session.execute(query).scalar_one_or_none()
-    if existing:
-        raise ValueError("Full name is already in use. Please use a different name.")
+    if not different_email_duplicates:
+        if not user.needs_monitoring or "Duplicate full name" in (user.monitoring_reason or ""):
+            user.needs_monitoring = False
+            user.monitoring_reason = None
+        return
+
+    monitored_users = [user, *different_email_duplicates]
+    monitored_ids = ", ".join(str(candidate.id) for candidate in monitored_users if candidate.id)
+    reason = f"Duplicate full name '{normalized}' found across different email accounts. Related user ids: {monitored_ids}."
+    for candidate in monitored_users:
+        candidate.needs_monitoring = True
+        candidate.monitoring_reason = reason
 
 
 def sync_user_from_claims(session, claims: dict) -> User:
@@ -47,6 +66,7 @@ def sync_user_from_claims(session, claims: dict) -> User:
             role=role,
         )
         session.add(user)
+        session.flush()
     else:
         user.firebase_uid = firebase_uid
         user.email = email
@@ -57,6 +77,7 @@ def sync_user_from_claims(session, claims: dict) -> User:
         if role == "admin" or not user.role:
             user.role = role
 
+    flag_duplicate_full_name_users(session, user)
     session.commit()
     return user
 
@@ -75,6 +96,8 @@ def normalize_product_payload(payload: dict) -> dict:
         "name": name,
         "slug": slug,
         "sku": payload.get("sku") or slug.upper().replace("-", "_"),
+        "brand": payload.get("brand"),
+        "store_slug": payload.get("store_slug") or slugify(payload.get("brand") or ""),
         "category": payload.get("category") or "Portable Power",
         "summary": payload.get("summary"),
         "description": payload.get("description"),
@@ -125,7 +148,7 @@ def calculate_order_items(session, raw_items: Iterable[dict], *, lock_products: 
 
     for product_id, quantity in quantities.items():
         product = products[product_id]
-        if lock_products and quantity > product.stock:
+        if lock_products and product.stock > 0 and quantity > product.stock:
             raise ValueError(f"Not enough stock available for {product.name}.")
 
         line_total = (product.price or Decimal("0.00")) * quantity
