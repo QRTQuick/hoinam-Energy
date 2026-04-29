@@ -38,6 +38,23 @@ def create_app() -> Flask:
 
     _db_initialized = False
 
+    def route_needs_database(path: str) -> bool:
+        if not path.startswith("/api/"):
+            return False
+
+        database_optional_paths = {
+            "/api/health",
+            "/api/stores",
+            "/api/payment-options",
+        }
+        if path in database_optional_paths:
+            return False
+
+        if path.startswith("/api/stores/"):
+            return False
+
+        return True
+
     def ensure_db_initialized():
         nonlocal _db_initialized
         if _db_initialized:
@@ -57,7 +74,7 @@ def create_app() -> Flask:
 
     @app.before_request
     def attach_session():
-        if request.path.startswith("/api/"):
+        if route_needs_database(request.path):
             ensure_db_initialized()
             g.db = get_session()
 

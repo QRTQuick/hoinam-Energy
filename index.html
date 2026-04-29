@@ -1,1390 +1,1693 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hoinam Energy | Solar Installation & Backup Power</title>
-    <meta name="description" content="Hoinam Energy supplies solar panels, backup power systems, and installation services for homes and businesses across Nigeria.">
-    <link rel="canonical" href="https://hoinam-energy.vercel.app/">
-    <meta property="og:title" content="Hoinam Energy | Solar Installation & Backup Power">
-    <meta property="og:description" content="Solar panels, backup power, and installation support from Hoinam Energy.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hoinam-energy.vercel.app/">
-    <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#0055B8">
-    <link rel="stylesheet" href="/assets/css/styles.css">
-    <style>
 
-      /* ══════════════════════════════════════
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoinam Energy | Solar Installation & Backup Power</title>
+  <meta name="description"
+    content="Hoinam Energy supplies solar panels, backup power systems, and installation services for homes and businesses across Nigeria.">
+  <link rel="canonical" href="https://hoinam-energy.vercel.app/">
+  <meta property="og:title" content="Hoinam Energy | Solar Installation & Backup Power">
+  <meta property="og:description" content="Solar panels, backup power, and installation support from Hoinam Energy.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hoinam-energy.vercel.app/">
+  <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0055B8">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    /* ══════════════════════════════════════
          HOME — HERO (full-bleed dark)
       ══════════════════════════════════════ */
-      .hp-hero {
-        min-height: 92vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        position: relative;
-        overflow: hidden;
-        background: #0a0c12;
-        padding: 0 0 4rem;
+    .hp-hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      position: relative;
+      overflow: hidden;
+      background: #0a0c12;
+      padding: 0 0 4rem;
+    }
+
+    /* subtle radial glow */
+    .hp-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 75% 35%, rgba(0, 85, 184, 0.28) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255, 193, 7, 0.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* floating product image */
+    .hp-hero-img {
+      position: absolute;
+      right: 6%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(42%, 520px);
+      opacity: 0.92;
+      filter: drop-shadow(0 40px 80px rgba(0, 85, 184, 0.45));
+      animation: heroFloat 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes heroFloat {
+
+      0%,
+      100% {
+        transform: translateY(-50%) translateY(0px);
       }
 
-      /* subtle radial glow */
-      .hp-hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(ellipse 70% 55% at 75% 35%, rgba(0,85,184,0.28) 0%, transparent 65%),
-          radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,193,7,0.10) 0%, transparent 60%);
-        pointer-events: none;
+      50% {
+        transform: translateY(-50%) translateY(-18px);
+      }
+    }
+
+    .hp-hero-content {
+      position: relative;
+      z-index: 2;
+      padding-top: 7rem;
+    }
+
+    .hp-hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 1.5rem;
+    }
+
+    .hp-hero-eyebrow::before {
+      content: "";
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .hp-hero-h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(3.5rem, 8vw, 7.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      margin: 0 0 2rem;
+      max-width: 14ch;
+    }
+
+    .hp-hero-h1 .accent {
+      color: #ffc107;
+    }
+
+    .hp-hero-sub {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.62);
+      max-width: 420px;
+      margin: 0 0 2.5rem;
+    }
+
+    .hp-hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .hp-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.9rem 1.8rem;
+      border-radius: 999px;
+      background: #ffc107;
+      color: #0a0c12;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      box-shadow: 0 8px 28px rgba(255, 193, 7, 0.35);
+    }
+
+    .hp-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(255, 193, 7, 0.45);
+    }
+
+    .hp-btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.9rem 1.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: rgba(255, 255, 255, 0.8);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 180ms ease, background 180ms ease;
+    }
+
+    .hp-btn-ghost:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* scroll hint */
+    .hp-hero-scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.68rem;
+      font-family: var(--font-body);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      z-index: 2;
+      animation: scrollBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollBounce {
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
       }
 
-      /* floating product image */
-      .hp-hero-img {
-        position: absolute;
-        right: 6%;
-        top: 50%;
-        transform: translateY(-50%);
-        width: min(42%, 520px);
-        opacity: 0.92;
-        filter: drop-shadow(0 40px 80px rgba(0,85,184,0.45));
-        animation: heroFloat 6s ease-in-out infinite;
-        pointer-events: none;
+      50% {
+        transform: translateX(-50%) translateY(6px);
       }
+    }
 
-      @keyframes heroFloat {
-        0%, 100% { transform: translateY(-50%) translateY(0px); }
-        50%       { transform: translateY(-50%) translateY(-18px); }
-      }
-
-      .hp-hero-content {
-        position: relative;
-        z-index: 2;
-        padding-top: 7rem;
-      }
-
-      .hp-hero-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: var(--font-body);
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.5);
-        margin-bottom: 1.5rem;
-      }
-
-      .hp-hero-eyebrow::before {
-        content: "";
-        display: block;
-        width: 28px;
-        height: 1px;
-        background: rgba(255,255,255,0.35);
-      }
-
-      .hp-hero-h1 {
-        font-family: var(--font-heading);
-        font-size: clamp(3.5rem, 8vw, 7.5rem);
-        line-height: 0.95;
-        letter-spacing: -0.01em;
-        color: #ffffff;
-        margin: 0 0 2rem;
-        max-width: 14ch;
-      }
-
-      .hp-hero-h1 .accent {
-        color: #ffc107;
-      }
-
-      .hp-hero-sub {
-        font-family: var(--font-body);
-        font-size: 1.05rem;
-        line-height: 1.7;
-        color: rgba(255,255,255,0.62);
-        max-width: 420px;
-        margin: 0 0 2.5rem;
-      }
-
-      .hp-hero-actions {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .hp-btn-primary {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.55rem;
-        padding: 0.9rem 1.8rem;
-        border-radius: 999px;
-        background: #ffc107;
-        color: #0a0c12;
-        font-family: var(--font-body);
-        font-size: 0.88rem;
-        font-weight: 700;
-        text-decoration: none;
-        transition: transform 180ms ease, box-shadow 180ms ease;
-        box-shadow: 0 8px 28px rgba(255,193,7,0.35);
-      }
-
-      .hp-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 36px rgba(255,193,7,0.45);
-      }
-
-      .hp-btn-ghost {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.55rem;
-        padding: 0.9rem 1.8rem;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.22);
-        color: rgba(255,255,255,0.8);
-        font-family: var(--font-body);
-        font-size: 0.88rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: border-color 180ms ease, background 180ms ease;
-      }
-
-      .hp-btn-ghost:hover {
-        border-color: rgba(255,255,255,0.5);
-        background: rgba(255,255,255,0.06);
-      }
-
-      /* scroll hint */
-      .hp-hero-scroll {
-        position: absolute;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
-        color: rgba(255,255,255,0.3);
-        font-size: 0.68rem;
-        font-family: var(--font-body);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        z-index: 2;
-        animation: scrollBounce 2s ease-in-out infinite;
-      }
-
-      @keyframes scrollBounce {
-        0%, 100% { transform: translateX(-50%) translateY(0); }
-        50%       { transform: translateX(-50%) translateY(6px); }
-      }
-
-      /* ══════════════════════════════════════
+    /* ══════════════════════════════════════
          MARQUEE STRIP
       ══════════════════════════════════════ */
-      .hp-marquee-wrap {
-        background: #ffc107;
-        overflow: hidden;
-        padding: 0.85rem 0;
-        white-space: nowrap;
+    .hp-marquee-wrap {
+      background: #ffc107;
+      overflow: hidden;
+      padding: 0.85rem 0;
+      white-space: nowrap;
+    }
+
+    .hp-marquee-track {
+      display: inline-flex;
+      gap: 0;
+      animation: marqueeScroll 22s linear infinite;
+    }
+
+    .hp-marquee-track span {
+      font-family: var(--font-heading);
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #0a0c12;
+      padding: 0 2.5rem;
+    }
+
+    .hp-marquee-track span::after {
+      content: "·";
+      margin-left: 2.5rem;
+    }
+
+    @keyframes marqueeScroll {
+      from {
+        transform: translateX(0);
       }
 
-      .hp-marquee-track {
-        display: inline-flex;
-        gap: 0;
-        animation: marqueeScroll 22s linear infinite;
+      to {
+        transform: translateX(-50%);
       }
+    }
 
-      .hp-marquee-track span {
-        font-family: var(--font-heading);
-        font-size: 0.82rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #0a0c12;
-        padding: 0 2.5rem;
-      }
-
-      .hp-marquee-track span::after {
-        content: "·";
-        margin-left: 2.5rem;
-      }
-
-      @keyframes marqueeScroll {
-        from { transform: translateX(0); }
-        to   { transform: translateX(-50%); }
-      }
-
-      /* ══════════════════════════════════════
+    /* ══════════════════════════════════════
          PRODUCTS GRID (Active Theory tile style)
       ══════════════════════════════════════ */
-      .hp-products {
-        padding: 6rem 0;
-        background: var(--bg);
-      }
+    .hp-products {
+      padding: 6rem 0;
+      background: var(--bg);
+    }
 
-      .hp-section-top {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 3rem;
-      }
+    .hp-section-top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
 
-      .hp-section-kicker {
-        font-family: var(--font-body);
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--primary);
-        margin-bottom: 0.5rem;
-      }
+    .hp-section-kicker {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
 
-      .hp-section-h2 {
-        font-family: var(--font-heading);
-        font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-        letter-spacing: -0.01em;
-        color: var(--heading);
-        margin: 0;
-        line-height: 1.05;
-      }
+    .hp-section-h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      letter-spacing: -0.01em;
+      color: var(--heading);
+      margin: 0;
+      line-height: 1.05;
+    }
 
-      /* ══════════════════════════════════════
+    /* ══════════════════════════════════════
          HOW WE WORK — numbered steps
       ══════════════════════════════════════ */
-      .hp-process {
-        padding: 6rem 0;
-        background: #0a0c12;
-        color: #fff;
-      }
+    .hp-process {
+      padding: 6rem 0;
+      background: #0a0c12;
+      color: #fff;
+    }
 
-      .hp-process .hp-section-h2 { color: #fff; }
-      .hp-process .hp-section-kicker { color: rgba(255,193,7,0.85); }
+    .hp-process .hp-section-h2 {
+      color: #fff;
+    }
 
-      .hp-steps {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0;
-        margin-top: 3.5rem;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 20px;
-        overflow: hidden;
-      }
+    .hp-process .hp-section-kicker {
+      color: rgba(255, 193, 7, 0.85);
+    }
 
-      .hp-step {
-        padding: 2.5rem 2rem;
-        border-right: 1px solid rgba(255,255,255,0.08);
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        transition: background 220ms ease;
-      }
+    .hp-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 3.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+    }
 
-      .hp-step:last-child { border-right: none; }
+    .hp-step {
+      padding: 2.5rem 2rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: background 220ms ease;
+    }
 
-      .hp-step:hover { background: rgba(255,255,255,0.04); }
+    .hp-step:last-child {
+      border-right: none;
+    }
 
-      .hp-step-num {
-        font-family: var(--font-heading);
-        font-size: 3.5rem;
-        line-height: 1;
-        color: rgba(255,255,255,0.1);
-        letter-spacing: -0.02em;
-      }
+    .hp-step:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
 
-      .hp-step-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: rgba(255,193,7,0.12);
-        display: grid;
-        place-items: center;
-        color: #ffc107;
-        font-size: 1rem;
-      }
+    .hp-step-num {
+      font-family: var(--font-heading);
+      font-size: 3.5rem;
+      line-height: 1;
+      color: rgba(255, 255, 255, 0.1);
+      letter-spacing: -0.02em;
+    }
 
-      .hp-step h3 {
-        font-family: var(--font-heading);
-        font-size: 1.15rem;
-        letter-spacing: -0.01em;
-        color: #fff;
-        margin: 0;
-      }
+    .hp-step-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 193, 7, 0.12);
+      display: grid;
+      place-items: center;
+      color: #ffc107;
+      font-size: 1rem;
+    }
 
-      .hp-step p {
-        font-family: var(--font-body);
-        font-size: 0.88rem;
-        line-height: 1.7;
-        color: rgba(255,255,255,0.55);
-        margin: 0;
-        flex: 1;
-      }
+    .hp-step h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin: 0;
+    }
 
-      .hp-step-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-family: var(--font-body);
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #ffc107;
-        text-decoration: none;
-        letter-spacing: 0.02em;
-        transition: gap 180ms ease;
-      }
+    .hp-step p {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.55);
+      margin: 0;
+      flex: 1;
+    }
 
-      .hp-step-link:hover { gap: 0.65rem; }
+    .hp-step-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ffc107;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: gap 180ms ease;
+    }
 
-      /* ══════════════════════════════════════
+    .hp-step-link:hover {
+      gap: 0.65rem;
+    }
+
+    /* ══════════════════════════════════════
          TESTIMONIALS
       ══════════════════════════════════════ */
-      .hp-testimonials {
-        padding: 6rem 0;
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-      }
+    .hp-testimonials {
+      padding: 6rem 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
 
-      .hp-testi-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
-        margin-top: 3rem;
-      }
+    .hp-testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
 
-      .hp-testi {
-        padding: 2rem;
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        background: var(--bg);
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        transition: transform 220ms ease, box-shadow 220ms ease;
-      }
+    .hp-testi {
+      padding: 2rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: transform 220ms ease, box-shadow 220ms ease;
+    }
 
-      .hp-testi:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow);
-      }
+    .hp-testi:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
 
-      .hp-testi-stars {
-        display: flex;
-        gap: 0.2rem;
-        color: #ffc107;
-        font-size: 0.78rem;
-      }
+    .hp-testi-stars {
+      display: flex;
+      gap: 0.2rem;
+      color: #ffc107;
+      font-size: 0.78rem;
+    }
 
-      .hp-testi blockquote {
-        margin: 0;
-        font-family: var(--font-body);
-        font-size: 0.95rem;
-        line-height: 1.75;
-        color: var(--text);
-        font-style: italic;
-        flex: 1;
-      }
+    .hp-testi blockquote {
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text);
+      font-style: italic;
+      flex: 1;
+    }
 
-      .hp-testi-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 0.15rem;
-        padding-top: 1rem;
-        border-top: 1px solid var(--border);
-      }
+    .hp-testi-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
 
-      .hp-testi-meta strong {
-        font-family: var(--font-heading);
-        font-size: 0.85rem;
-        letter-spacing: 0.04em;
-        color: var(--heading);
-      }
+    .hp-testi-meta strong {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      color: var(--heading);
+    }
 
-      .hp-testi-meta span {
-        font-family: var(--font-body);
-        font-size: 0.75rem;
-        color: var(--text-soft);
-      }
+    .hp-testi-meta span {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
 
-      /* ══════════════════════════════════════
+    /* ══════════════════════════════════════
          CTA BANNER
       ══════════════════════════════════════ */
-      .hp-cta {
-        padding: 6rem 0;
-        background: var(--bg);
-        border-top: 1px solid var(--border);
-      }
+    .hp-cta {
+      padding: 6rem 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
 
-      .hp-cta-box {
-        border-radius: 24px;
-        background: linear-gradient(135deg, #0055b8 0%, #003d8a 100%);
-        padding: 4rem 3.5rem;
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 2rem;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-      }
+    .hp-cta-box {
+      border-radius: 24px;
+      background: linear-gradient(135deg, #0055b8 0%, #003d8a 100%);
+      padding: 4rem 3.5rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
 
-      .hp-cta-box::before {
-        content: "";
-        position: absolute;
-        right: -60px;
-        top: -60px;
-        width: 320px;
-        height: 320px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(255,193,7,0.18) 0%, transparent 70%);
-        pointer-events: none;
-      }
+    .hp-cta-box::before {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 193, 7, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
 
-      .hp-cta-box h2 {
-        font-family: var(--font-heading);
-        font-size: clamp(1.8rem, 3.5vw, 3rem);
-        letter-spacing: -0.01em;
-        color: #fff;
-        margin: 0 0 0.75rem;
-        line-height: 1.05;
-      }
+    .hp-cta-box h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin: 0 0 0.75rem;
+      line-height: 1.05;
+    }
 
-      .hp-cta-box p {
-        font-family: var(--font-body);
-        font-size: 1rem;
-        color: rgba(255,255,255,0.7);
-        margin: 0;
-        max-width: 480px;
-      }
+    .hp-cta-box p {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      max-width: 480px;
+    }
 
-      .hp-cta-btns {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        flex-shrink: 0;
-      }
+    .hp-cta-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
 
-      /* ══ FLOATING BRAND (no navbar) ══ */
-      .hp-brand-float {
-        position: absolute;
-        top: 2rem;
-        left: 2rem;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        text-decoration: none;
+    /* ══ FLOATING BRAND (no navbar) ══ */
+    .hp-brand-float {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      opacity: 0;
+      animation: brandFadeIn 800ms ease 400ms forwards;
+    }
+
+    @keyframes brandFadeIn {
+      from {
         opacity: 0;
-        animation: brandFadeIn 800ms ease 400ms forwards;
-      }
-      @keyframes brandFadeIn {
-        from { opacity: 0; transform: translateY(-8px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      .hp-brand-float img {
-        width: 40px;
-        height: 40px;
-        object-fit: contain;
-        /* no filter — show the actual logo colours */
-        opacity: 1;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.12);
-        padding: 4px;
-      }
-      .hp-brand-float span {
-        font-family: var(--font-heading);
-        font-size: 1rem;
-        letter-spacing: 0.04em;
-        color: rgba(255,255,255,0.85);
+        transform: translateY(-8px);
       }
 
-      /* ══ BRAND CATALOG ══ */
-      .hp-brands {
-        padding: 7rem 0;
-        background: #0a0c12;
-        position: relative;
-        overflow: hidden;
-      }
-      .hp-brands::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0,85,184,0.15) 0%, transparent 70%);
-        pointer-events: none;
-      }
-      .hp-brands .hp-section-kicker { color: rgba(255,193,7,0.85); }
-      .hp-brands .hp-section-h2     { color: #fff; }
-
-      .hp-brand-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.25rem;
-        margin-top: 3rem;
-      }
-
-      .hp-brand-tile {
-        position: relative;
-        border-radius: 20px;
-        border: 1px solid rgba(255,255,255,0.08);
-        background: rgba(255,255,255,0.03);
-        padding: 2rem 1.75rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        text-decoration: none;
-        overflow: hidden;
-        transition: border-color 280ms ease, background 280ms ease, transform 280ms ease;
-        cursor: pointer;
-      }
-      .hp-brand-tile:hover {
-        border-color: rgba(255,193,7,0.35);
-        background: rgba(255,255,255,0.06);
-        transform: translateY(-4px);
-      }
-      .hp-brand-tile::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,193,7,0.07) 0%, transparent 60%);
-        opacity: 0;
-        transition: opacity 300ms ease;
-        pointer-events: none;
-      }
-      .hp-brand-tile:hover::after { opacity: 1; }
-
-      .hp-brand-tile-logo {
-        height: 40px;
-        display: flex;
-        align-items: center;
-      }
-      .hp-brand-tile-logo img {
-        height: 100%;
-        width: auto;
-        object-fit: contain;
-        filter: brightness(0) invert(1);
-        opacity: 0.75;
-        transition: opacity 280ms ease;
-      }
-      .hp-brand-tile:hover .hp-brand-tile-logo img { opacity: 1; }
-      .hp-brand-tile-logo-text {
-        font-family: var(--font-heading);
-        font-size: 1.4rem;
-        letter-spacing: 0.06em;
-        color: rgba(255,255,255,0.75);
-        transition: color 280ms ease;
-      }
-      .hp-brand-tile:hover .hp-brand-tile-logo-text { color: #fff; }
-
-      .hp-brand-tile-products {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-      }
-      .hp-brand-tile-products img {
-        width: 52px;
-        height: 52px;
-        object-fit: contain;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.06);
-        padding: 4px;
-        transition: transform 220ms ease;
-      }
-      .hp-brand-tile:hover .hp-brand-tile-products img {
-        transform: translateY(-3px);
-      }
-
-      .hp-brand-tile h3 {
-        font-family: var(--font-heading);
-        font-size: 1.05rem;
-        letter-spacing: -0.01em;
-        color: #fff;
-        margin: 0;
-      }
-      .hp-brand-tile p {
-        font-family: var(--font-body);
-        font-size: 0.82rem;
-        line-height: 1.65;
-        color: rgba(255,255,255,0.5);
-        margin: 0;
-        flex: 1;
-      }
-      .hp-brand-tile-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-family: var(--font-body);
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #ffc107;
-        letter-spacing: 0.02em;
-        transition: gap 180ms ease;
-      }
-      .hp-brand-tile:hover .hp-brand-tile-cta { gap: 0.65rem; }
-
-      /* featured tile spans 2 cols */
-      .hp-brand-tile-featured {
-        grid-column: span 2;
-        flex-direction: row;
-        align-items: center;
-        gap: 2rem;
-      }
-      .hp-brand-tile-featured .hp-brand-tile-body { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
-      .hp-brand-tile-featured .hp-brand-tile-products img { width: 72px; height: 72px; }
-
-      @media (max-width: 860px) {
-        .hp-brand-grid { grid-template-columns: 1fr 1fr; }
-        .hp-brand-tile-featured { grid-column: span 2; flex-direction: column; }
-      }
-      @media (max-width: 560px) {
-        .hp-brand-grid { grid-template-columns: 1fr; }
-        .hp-brand-tile-featured { grid-column: span 1; }
-      }
-
-      /* ══ Simplified Brand Cards ══ */
-      .hp-brands-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
-        margin-top: 3rem;
-      }
-
-      .brand-card {
-        position: relative;
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.1);
-        background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-        padding: 2rem 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        text-decoration: none;
-        color: inherit;
-        overflow: hidden;
-        transition: all 280ms ease;
-        cursor: pointer;
-      }
-
-      .brand-card:hover {
-        border-color: rgba(255,193,7,0.5);
-        background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
-        transform: translateY(-6px);
-        box-shadow: 0 12px 40px rgba(0,85,184,0.2);
-      }
-
-      .brand-card .brand-logo {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, rgba(0,85,184,0.3) 0%, rgba(255,193,7,0.1) 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: rgba(255,255,255,0.6);
-        transition: all 280ms ease;
-      }
-
-      .brand-card:hover .brand-logo {
-        background: linear-gradient(135deg, rgba(0,85,184,0.5) 0%, rgba(255,193,7,0.2) 100%);
-        color: #ffc107;
-        transform: scale(1.1);
-      }
-
-      .brand-card h3 {
-        font-family: var(--font-heading);
-        font-size: 1.3rem;
-        letter-spacing: -0.01em;
-        color: #fff;
-        margin: 0;
-      }
-
-      .brand-card p {
-        font-size: 0.9rem;
-        color: rgba(255,255,255,0.6);
-        margin: 0;
-        line-height: 1.4;
-      }
-
-      @media (max-width: 1200px) {
-        .hp-brands-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1.25rem;
-        }
-      }
-
-      @media (max-width: 768px) {
-        .hp-brands-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1rem;
-        }
-
-        .brand-card {
-          padding: 1.5rem 1rem;
-        }
-
-        .brand-card .brand-logo {
-          width: 48px;
-          height: 48px;
-          font-size: 1.6rem;
-        }
-
-        .brand-card h3 {
-          font-size: 1.1rem;
-        }
-
-        .brand-card p {
-          font-size: 0.8rem;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .hp-brands-grid {
-          grid-template-columns: 1fr;
-          gap: 0.75rem;
-        }
-
-        .brand-card {
-          padding: 1.25rem;
-          flex-direction: row;
-          align-items: flex-start;
-          gap: 1rem;
-        }
-
-        .brand-card .brand-logo {
-          flex-shrink: 0;
-        }
-
-        .brand-card h3 {
-          font-size: 1rem;
-        }
-      }
-
-      .hp-3d-showcase {
-        padding: 7rem 0;
-        background: #0a0c12;
-        overflow: hidden;
-        position: relative;
-      }
-      .hp-3d-showcase::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0,85,184,0.18) 0%, transparent 70%);
-        pointer-events: none;
-      }
-      .hp-3d-showcase .hp-section-kicker { color: rgba(255,193,7,0.85); }
-      .hp-3d-showcase .hp-section-h2 { color: #fff; }
-      .hp-3d-scene {
-        perspective: 1200px;
-        perspective-origin: 50% 40%;
-        margin-top: 4rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 420px;
-        position: relative;
-      }
-      .hp-3d-ring {
-        position: relative;
-        width: 320px;
-        height: 320px;
-        transform-style: preserve-3d;
-        animation: ringRotate 18s linear infinite;
-      }
-      @keyframes ringRotate {
-        from { transform: rotateY(0deg) rotateX(12deg); }
-        to   { transform: rotateY(360deg) rotateX(12deg); }
-      }
-      .hp-3d-card {
-        position: absolute;
-        width: 160px;
-        height: 200px;
-        top: 50%;
-        left: 50%;
-        margin: -100px 0 0 -80px;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.1);
-        backdrop-filter: blur(8px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        padding: 1rem;
-        cursor: pointer;
-        transition: background 300ms ease, border-color 300ms ease;
-        backface-visibility: hidden;
-      }
-      .hp-3d-card:hover {
-        background: rgba(255,255,255,0.09);
-        border-color: rgba(255,193,7,0.4);
-      }
-      .hp-3d-card img {
-        width: 100px;
-        height: 100px;
-        object-fit: contain;
-        filter: drop-shadow(0 8px 20px rgba(0,85,184,0.5));
-      }
-      .hp-3d-card span {
-        font-family: var(--font-heading);
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        color: rgba(255,255,255,0.7);
-        text-align: center;
-        text-transform: uppercase;
-      }
-      /* position each card around the ring */
-      .hp-3d-card:nth-child(1) { transform: rotateY(0deg)   translateZ(220px); }
-      .hp-3d-card:nth-child(2) { transform: rotateY(72deg)  translateZ(220px); }
-      .hp-3d-card:nth-child(3) { transform: rotateY(144deg) translateZ(220px); }
-      .hp-3d-card:nth-child(4) { transform: rotateY(216deg) translateZ(220px); }
-      .hp-3d-card:nth-child(5) { transform: rotateY(288deg) translateZ(220px); }
-      /* ground reflection line */
-      .hp-3d-ground {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 600px;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255,193,7,0.3), transparent);
-      }
-
-      /* ══ MAGNETIC CARD EFFECT ══ */
-      .hp-testi, .hp-step {
-        transform-style: preserve-3d;
-        will-change: transform;
-      }
-
-      /* ══ HERO IMAGE 3D PARALLAX ══ */
-      .hp-hero-img {
-        transform-style: preserve-3d;
-        will-change: transform;
-        transition: transform 60ms linear;
-      }
-
-      /* ══ 3D FLIP STEPS ══ */
-      .hp-step-flip-wrap {
-        perspective: 800px;
-      }
-      .hp-step-flip-inner {
-        transform-style: preserve-3d;
-        transition: transform 600ms cubic-bezier(0.16,1,0.3,1);
-        position: relative;
-      }
-      .hp-step-flip-wrap:hover .hp-step-flip-inner {
-        transform: rotateX(-6deg) translateY(-6px);
-      }
-
-      /* ══ GLOWING ORBIT RING (hero bg) ══ */
-      .hp-orbit {
-        position: absolute;
-        border-radius: 50%;
-        border: 1px solid rgba(255,193,7,0.08);
-        pointer-events: none;
-        animation: orbitPulse 4s ease-in-out infinite;
-      }
-      .hp-orbit-1 { width: 500px; height: 500px; top: 50%; right: -100px; transform: translateY(-50%); animation-delay: 0s; }
-      .hp-orbit-2 { width: 700px; height: 700px; top: 50%; right: -200px; transform: translateY(-50%); animation-delay: 1s; border-color: rgba(0,85,184,0.06); }
-      .hp-orbit-3 { width: 900px; height: 900px; top: 50%; right: -300px; transform: translateY(-50%); animation-delay: 2s; border-color: rgba(255,193,7,0.04); }
-      @keyframes orbitPulse {
-        0%, 100% { opacity: 0.4; transform: translateY(-50%) scale(1); }
-        50%       { opacity: 1;   transform: translateY(-50%) scale(1.02); }
-      }
-
-      @media (max-width: 760px) {
-        .hp-3d-scene { height: 300px; }
-        .hp-3d-ring  { width: 220px; height: 220px; }
-        .hp-3d-card  { width: 120px; height: 150px; margin: -75px 0 0 -60px; }
-        .hp-3d-card:nth-child(1) { transform: rotateY(0deg)   translateZ(160px); }
-        .hp-3d-card:nth-child(2) { transform: rotateY(72deg)  translateZ(160px); }
-        .hp-3d-card:nth-child(3) { transform: rotateY(144deg) translateZ(160px); }
-        .hp-3d-card:nth-child(4) { transform: rotateY(216deg) translateZ(160px); }
-        .hp-3d-card:nth-child(5) { transform: rotateY(288deg) translateZ(160px); }
-        .hp-3d-card img { width: 70px; height: 70px; }
-        .hp-orbit-1, .hp-orbit-2, .hp-orbit-3 { display: none; }
-      }
-      .hp-hero-h1 .word {
-        display: inline-block;
-        opacity: 0;
-        transform: translateY(60px) skewY(4deg);
-        transition: opacity 700ms cubic-bezier(0.16,1,0.3,1),
-                    transform 700ms cubic-bezier(0.16,1,0.3,1);
-      }
-      .hp-hero-h1 .word.visible {
-        opacity: 1;
-        transform: translateY(0) skewY(0deg);
-      }
-      .hp-hero-eyebrow {
-        opacity: 0;
-        transform: translateY(16px);
-        transition: opacity 600ms ease 100ms, transform 600ms ease 100ms;
-      }
-      .hp-hero-eyebrow.visible { opacity: 1; transform: translateY(0); }
-      .hp-hero-sub {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 600ms ease, transform 600ms ease;
-      }
-      .hp-hero-sub.visible { opacity: 1; transform: translateY(0); }
-      .hp-hero-actions {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 600ms ease, transform 600ms ease;
-      }
-      .hp-hero-actions.visible { opacity: 1; transform: translateY(0); }
-
-      /* ══ PARTICLE CANVAS ══ */
-      #hp-canvas {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0.55;
-      }
-
-      /* ══ CURSOR GLOW ══ */
-      .hp-cursor-glow {
-        position: fixed;
-        width: 400px;
-        height: 400px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(255,193,7,0.08) 0%, transparent 70%);
-        pointer-events: none;
-        z-index: 9999;
-        transform: translate(-50%, -50%);
-        transition: left 80ms linear, top 80ms linear;
-        mix-blend-mode: screen;
-      }
-
-      /* ══ SECTION REVEAL ══ */
-      .hp-reveal {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: opacity 800ms cubic-bezier(0.16,1,0.3,1),
-                    transform 800ms cubic-bezier(0.16,1,0.3,1);
-      }
-      .hp-reveal.hp-visible {
+      to {
         opacity: 1;
         transform: translateY(0);
       }
-      .hp-reveal-delay-1 { transition-delay: 100ms; }
-      .hp-reveal-delay-2 { transition-delay: 200ms; }
-      .hp-reveal-delay-3 { transition-delay: 300ms; }
+    }
 
-      /* ══ COUNTER NUMBERS ══ */
-      .hp-stat-num {
-        display: block;
-        font-family: var(--font-heading);
-        font-size: 2.8rem;
-        line-height: 1;
-        letter-spacing: -0.02em;
-        color: var(--primary);
-        transition: color 300ms ease;
-      }
-      .hp-stat-label {
-        display: block;
-        font-family: var(--font-body);
-        font-size: 0.78rem;
-        color: var(--text-soft);
-        margin-top: 0.25rem;
+    .hp-brand-float img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      /* no filter — show the actual logo colours */
+      opacity: 1;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px;
+    }
+
+    .hp-brand-float span {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* ══ BRAND CATALOG ══ */
+    .hp-brands {
+      padding: 7rem 0;
+      background: #0a0c12;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hp-brands::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0, 85, 184, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hp-brands .hp-section-kicker {
+      color: rgba(255, 193, 7, 0.85);
+    }
+
+    .hp-brands .hp-section-h2 {
+      color: #fff;
+    }
+
+    .hp-brand-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+
+    .hp-brand-tile {
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      text-decoration: none;
+      overflow: hidden;
+      transition: border-color 280ms ease, background 280ms ease, transform 280ms ease;
+      cursor: pointer;
+    }
+
+    .hp-brand-tile:hover {
+      border-color: rgba(255, 193, 7, 0.35);
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-4px);
+    }
+
+    .hp-brand-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 193, 7, 0.07) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 300ms ease;
+      pointer-events: none;
+    }
+
+    .hp-brand-tile:hover::after {
+      opacity: 1;
+    }
+
+    .hp-brand-tile-logo {
+      height: 40px;
+      display: flex;
+      align-items: center;
+    }
+
+    .hp-brand-tile-logo img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 0.75;
+      transition: opacity 280ms ease;
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-logo img {
+      opacity: 1;
+    }
+
+    .hp-brand-tile-logo-text {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.75);
+      transition: color 280ms ease;
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-logo-text {
+      color: #fff;
+    }
+
+    .hp-brand-tile-products {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hp-brand-tile-products img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px;
+      transition: transform 220ms ease;
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-products img {
+      transform: translateY(-3px);
+    }
+
+    .hp-brand-tile h3 {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin: 0;
+    }
+
+    .hp-brand-tile p {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0;
+      flex: 1;
+    }
+
+    .hp-brand-tile-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ffc107;
+      letter-spacing: 0.02em;
+      transition: gap 180ms ease;
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-cta {
+      gap: 0.65rem;
+    }
+
+    /* featured tile spans 2 cols */
+    .hp-brand-tile-featured {
+      grid-column: span 2;
+      flex-direction: row;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .hp-brand-tile-featured .hp-brand-tile-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .hp-brand-tile-featured .hp-brand-tile-products img {
+      width: 72px;
+      height: 72px;
+    }
+
+    @media (max-width: 860px) {
+      .hp-brand-grid {
+        grid-template-columns: 1fr 1fr;
       }
 
-      /* ══ STATS BAR ══ */
-      .hp-stats-bar {
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-        padding: 2.5rem 0;
+      .hp-brand-tile-featured {
+        grid-column: span 2;
+        flex-direction: column;
       }
+    }
+
+    @media (max-width: 560px) {
+      .hp-brand-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hp-brand-tile-featured {
+        grid-column: span 1;
+      }
+    }
+
+    /* ══ Simplified Brand Cards ══ */
+    .hp-brands-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .brand-card {
+      position: relative;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition: all 280ms ease;
+      cursor: pointer;
+    }
+
+    .brand-card:hover {
+      border-color: rgba(255, 193, 7, 0.5);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0, 85, 184, 0.2);
+    }
+
+    .brand-card .brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 85, 184, 0.3) 0%, rgba(255, 193, 7, 0.1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.6);
+      transition: all 280ms ease;
+    }
+
+    .brand-card:hover .brand-logo {
+      background: linear-gradient(135deg, rgba(0, 85, 184, 0.5) 0%, rgba(255, 193, 7, 0.2) 100%);
+      color: #ffc107;
+      transform: scale(1.1);
+    }
+
+    .brand-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin: 0;
+    }
+
+    .brand-card p {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 1200px) {
+      .hp-brands-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hp-brands-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .brand-card {
+        padding: 1.5rem 1rem;
+      }
+
+      .brand-card .brand-logo {
+        width: 48px;
+        height: 48px;
+        font-size: 1.6rem;
+      }
+
+      .brand-card h3 {
+        font-size: 1.1rem;
+      }
+
+      .brand-card p {
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hp-brands-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .brand-card {
+        padding: 1.25rem;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .brand-card .brand-logo {
+        flex-shrink: 0;
+      }
+
+      .brand-card h3 {
+        font-size: 1rem;
+      }
+    }
+
+    .hp-3d-showcase {
+      padding: 7rem 0;
+      background: #0a0c12;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hp-3d-showcase::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(0, 85, 184, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hp-3d-showcase .hp-section-kicker {
+      color: rgba(255, 193, 7, 0.85);
+    }
+
+    .hp-3d-showcase .hp-section-h2 {
+      color: #fff;
+    }
+
+    .hp-3d-scene {
+      perspective: 1200px;
+      perspective-origin: 50% 40%;
+      margin-top: 4rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 420px;
+      position: relative;
+    }
+
+    .hp-3d-ring {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      transform-style: preserve-3d;
+      animation: ringRotate 18s linear infinite;
+    }
+
+    @keyframes ringRotate {
+      from {
+        transform: rotateY(0deg) rotateX(12deg);
+      }
+
+      to {
+        transform: rotateY(360deg) rotateX(12deg);
+      }
+    }
+
+    .hp-3d-card {
+      position: absolute;
+      width: 160px;
+      height: 200px;
+      top: 50%;
+      left: 50%;
+      margin: -100px 0 0 -80px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: background 300ms ease, border-color 300ms ease;
+      backface-visibility: hidden;
+    }
+
+    .hp-3d-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 193, 7, 0.4);
+    }
+
+    .hp-3d-card img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 20px rgba(0, 85, 184, 0.5));
+    }
+
+    .hp-3d-card span {
+      font-family: var(--font-heading);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* position each card around the ring */
+    .hp-3d-card:nth-child(1) {
+      transform: rotateY(0deg) translateZ(220px);
+    }
+
+    .hp-3d-card:nth-child(2) {
+      transform: rotateY(72deg) translateZ(220px);
+    }
+
+    .hp-3d-card:nth-child(3) {
+      transform: rotateY(144deg) translateZ(220px);
+    }
+
+    .hp-3d-card:nth-child(4) {
+      transform: rotateY(216deg) translateZ(220px);
+    }
+
+    .hp-3d-card:nth-child(5) {
+      transform: rotateY(288deg) translateZ(220px);
+    }
+
+    /* ground reflection line */
+    .hp-3d-ground {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.3), transparent);
+    }
+
+    /* ══ MAGNETIC CARD EFFECT ══ */
+    .hp-testi,
+    .hp-step {
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* ══ HERO IMAGE 3D PARALLAX ══ */
+    .hp-hero-img {
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 60ms linear;
+    }
+
+    /* ══ 3D FLIP STEPS ══ */
+    .hp-step-flip-wrap {
+      perspective: 800px;
+    }
+
+    .hp-step-flip-inner {
+      transform-style: preserve-3d;
+      transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .hp-step-flip-wrap:hover .hp-step-flip-inner {
+      transform: rotateX(-6deg) translateY(-6px);
+    }
+
+    /* ══ GLOWING ORBIT RING (hero bg) ══ */
+    .hp-orbit {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 193, 7, 0.08);
+      pointer-events: none;
+      animation: orbitPulse 4s ease-in-out infinite;
+    }
+
+    .hp-orbit-1 {
+      width: 500px;
+      height: 500px;
+      top: 50%;
+      right: -100px;
+      transform: translateY(-50%);
+      animation-delay: 0s;
+    }
+
+    .hp-orbit-2 {
+      width: 700px;
+      height: 700px;
+      top: 50%;
+      right: -200px;
+      transform: translateY(-50%);
+      animation-delay: 1s;
+      border-color: rgba(0, 85, 184, 0.06);
+    }
+
+    .hp-orbit-3 {
+      width: 900px;
+      height: 900px;
+      top: 50%;
+      right: -300px;
+      transform: translateY(-50%);
+      animation-delay: 2s;
+      border-color: rgba(255, 193, 7, 0.04);
+    }
+
+    @keyframes orbitPulse {
+
+      0%,
+      100% {
+        opacity: 0.4;
+        transform: translateY(-50%) scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.02);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hp-3d-scene {
+        height: 300px;
+      }
+
+      .hp-3d-ring {
+        width: 220px;
+        height: 220px;
+      }
+
+      .hp-3d-card {
+        width: 120px;
+        height: 150px;
+        margin: -75px 0 0 -60px;
+      }
+
+      .hp-3d-card:nth-child(1) {
+        transform: rotateY(0deg) translateZ(160px);
+      }
+
+      .hp-3d-card:nth-child(2) {
+        transform: rotateY(72deg) translateZ(160px);
+      }
+
+      .hp-3d-card:nth-child(3) {
+        transform: rotateY(144deg) translateZ(160px);
+      }
+
+      .hp-3d-card:nth-child(4) {
+        transform: rotateY(216deg) translateZ(160px);
+      }
+
+      .hp-3d-card:nth-child(5) {
+        transform: rotateY(288deg) translateZ(160px);
+      }
+
+      .hp-3d-card img {
+        width: 70px;
+        height: 70px;
+      }
+
+      .hp-orbit-1,
+      .hp-orbit-2,
+      .hp-orbit-3 {
+        display: none;
+      }
+    }
+
+    .hp-hero-h1 .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(60px) skewY(4deg);
+      transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hp-hero-h1 .word.visible {
+      opacity: 1;
+      transform: translateY(0) skewY(0deg);
+    }
+
+    .hp-hero-eyebrow {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 600ms ease 100ms, transform 600ms ease 100ms;
+    }
+
+    .hp-hero-eyebrow.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hp-hero-sub {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 600ms ease, transform 600ms ease;
+    }
+
+    .hp-hero-sub.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hp-hero-actions {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 600ms ease, transform 600ms ease;
+    }
+
+    .hp-hero-actions.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ══ PARTICLE CANVAS ══ */
+    #hp-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.55;
+    }
+
+    /* ══ CURSOR GLOW ══ */
+    .hp-cursor-glow {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 193, 7, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: left 80ms linear, top 80ms linear;
+      mix-blend-mode: screen;
+    }
+
+    /* ══ SECTION REVEAL ══ */
+    .hp-reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hp-reveal.hp-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hp-reveal-delay-1 {
+      transition-delay: 100ms;
+    }
+
+    .hp-reveal-delay-2 {
+      transition-delay: 200ms;
+    }
+
+    .hp-reveal-delay-3 {
+      transition-delay: 300ms;
+    }
+
+    /* ══ COUNTER NUMBERS ══ */
+    .hp-stat-num {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 2.8rem;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--primary);
+      transition: color 300ms ease;
+    }
+
+    .hp-stat-label {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-top: 0.25rem;
+    }
+
+    /* ══ STATS BAR ══ */
+    .hp-stats-bar {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 0;
+    }
+
+    .hp-stats-inner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+
+    .hp-stat-item {
+      text-align: center;
+      padding: 1rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .hp-stat-item:last-child {
+      border-right: none;
+    }
+
+    @media (max-width: 640px) {
       .hp-stats-inner {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0;
-      }
-      .hp-stat-item {
-        text-align: center;
-        padding: 1rem;
-        border-right: 1px solid var(--border);
-      }
-      .hp-stat-item:last-child { border-right: none; }
-
-      @media (max-width: 640px) {
-        .hp-stats-inner { grid-template-columns: repeat(2, 1fr); }
-        .hp-stat-item:nth-child(2) { border-right: none; }
-        .hp-stat-item:nth-child(3) { border-bottom: none; }
-      }
-      @media (max-width: 960px) {
-        .hp-hero-img { width: 50%; opacity: 0.5; }
-        .hp-steps { grid-template-columns: 1fr; }
-        .hp-step { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .hp-step:last-child { border-bottom: none; }
-        .hp-testi-grid { grid-template-columns: 1fr 1fr; }
-        .hp-cta-box { grid-template-columns: 1fr; }
-        .hp-cta-btns { flex-direction: row; flex-wrap: wrap; }
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      @media (max-width: 640px) {
-        .hp-hero { min-height: 100svh; padding-bottom: 3rem; }
-        .hp-hero-img { display: none; }
-        .hp-hero-h1 { font-size: clamp(2.8rem, 12vw, 4.5rem); }
-        .hp-section-top { flex-direction: column; align-items: flex-start; }
-        .hp-testi-grid { grid-template-columns: 1fr; }
-        .hp-cta-box { padding: 2.5rem 1.75rem; }
-        .hp-cta-btns { flex-direction: column; }
-        .hp-cta-btns .hp-btn-primary,
-        .hp-cta-btns .hp-btn-ghost { width: 100%; justify-content: center; }
+      .hp-stat-item:nth-child(2) {
+        border-right: none;
       }
-    </style>
-  </head>
-  <body>
-    <!-- No navbar on landing page -->
-    <div id="site-header" style="display:none"></div>
-    <main>
-      <!-- cursor glow -->
-      <div class="hp-cursor-glow" id="hp-cursor-glow" aria-hidden="true"></div>
 
-      <!-- ══ HERO ══ -->
-      <section class="hp-hero">
-        <canvas id="hp-canvas" aria-hidden="true"></canvas>
-        <!-- orbit rings -->
-        <div class="hp-orbit hp-orbit-1" aria-hidden="true"></div>
-        <div class="hp-orbit hp-orbit-2" aria-hidden="true"></div>
-        <div class="hp-orbit hp-orbit-3" aria-hidden="true"></div>
+      .hp-stat-item:nth-child(3) {
+        border-bottom: none;
+      }
+    }
 
-        <!-- floating brand mark -->
-        <a href="/products.html" class="hp-brand-float" aria-label="Hoinam Energy — go to store">
-          <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">
-          <span>Hoinam Energy</span>
-        </a>
-        <img
-          class="hp-hero-img"
-          src="/assets/images/home/ecoflow-delta-2-max.png"
-          alt="Delta 2 Max backup power station"
-          aria-hidden="true"
-        >
-        <div class="container hp-hero-content">
-          <p class="hp-hero-eyebrow" id="hp-eyebrow">Hoinam Energy &nbsp;·&nbsp; Aba, Nigeria</p>
-          <h1 class="hp-hero-h1" id="hp-h1">
-            Power your<br>
-            world with<br>
-            <span class="accent">solar.</span>
-          </h1>
-          <p class="hp-hero-sub" id="hp-sub">
-            We supply solar panels and backup power systems — and install them. Homes, shops, offices. Multiple brands. End-to-end support.
-          </p>
-          <div class="hp-hero-actions" id="hp-actions">
-            <a class="hp-btn-primary" href="/products.html">
-              Visit our store
-            </a>
-            <a class="hp-btn-ghost" href="/about.html">
-              Get started
-            </a>
-          </div>
-        </div>
-        <div class="hp-hero-scroll" aria-hidden="true">
-          <i class="fa-solid fa-chevron-down"></i>
-          <span>Scroll</span>
-        </div>
-      </section>
+    @media (max-width: 960px) {
+      .hp-hero-img {
+        width: 50%;
+        opacity: 0.5;
+      }
 
-      <!-- ══ MARQUEE ══ -->
-      <div class="hp-marquee-wrap" aria-hidden="true">
-        <div class="hp-marquee-track">
-          <span>Solar Panels</span><span>Backup Power</span><span>Installation</span>
-          <span>Multiple Brands</span><span>Aba, Nigeria</span><span>After-Service Support</span>
-          <span>Delivery Coordination</span><span>Homes &amp; Offices</span>
-          <span>Solar Panels</span><span>Backup Power</span><span>Installation</span>
-          <span>Multiple Brands</span><span>Aba, Nigeria</span><span>After-Service Support</span>
-          <span>Delivery Coordination</span><span>Homes &amp; Offices</span>
+      .hp-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .hp-step {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .hp-step:last-child {
+        border-bottom: none;
+      }
+
+      .hp-testi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hp-cta-box {
+        grid-template-columns: 1fr;
+      }
+
+      .hp-cta-btns {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hp-hero {
+        min-height: 100svh;
+        padding-bottom: 3rem;
+      }
+
+      .hp-hero-img {
+        display: none;
+      }
+
+      .hp-hero-h1 {
+        font-size: clamp(2.8rem, 12vw, 4.5rem);
+      }
+
+      .hp-section-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hp-testi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hp-cta-box {
+        padding: 2.5rem 1.75rem;
+      }
+
+      .hp-cta-btns {
+        flex-direction: column;
+      }
+
+      .hp-cta-btns .hp-btn-primary,
+      .hp-cta-btns .hp-btn-ghost {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- No navbar on landing page -->
+  <div id="site-header" style="display:none"></div>
+  <main>
+    <!-- cursor glow -->
+    <div class="hp-cursor-glow" id="hp-cursor-glow" aria-hidden="true"></div>
+
+    <!-- ══ HERO ══ -->
+    <section class="hp-hero">
+      <canvas id="hp-canvas" aria-hidden="true"></canvas>
+      <!-- orbit rings -->
+      <div class="hp-orbit hp-orbit-1" aria-hidden="true"></div>
+      <div class="hp-orbit hp-orbit-2" aria-hidden="true"></div>
+      <div class="hp-orbit hp-orbit-3" aria-hidden="true"></div>
+
+      <!-- floating brand mark -->
+      <a href="/products.html" class="hp-brand-float" aria-label="Hoinam Energy — go to store">
+        <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">
+        <span>Hoinam Energy</span>
+      </a>
+      <img class="hp-hero-img" src="/assets/images/home/ecoflow-delta-2-max.png" alt="Delta 2 Max backup power station"
+        aria-hidden="true">
+      <div class="container hp-hero-content">
+        <p class="hp-hero-eyebrow" id="hp-eyebrow">Hoinam Energy &nbsp;·&nbsp; Aba, Nigeria</p>
+        <h1 class="hp-hero-h1" id="hp-h1">
+          Power your<br>
+          world with<br>
+          <span class="accent">solar.</span>
+        </h1>
+        <p class="hp-hero-sub" id="hp-sub">
+          We supply solar panels and backup power systems — and install them. Homes, shops, offices. Multiple brands.
+          End-to-end support.
+        </p>
+        <div class="hp-hero-actions" id="hp-actions">
+          <a class="hp-btn-primary" href="/products.html">
+            Visit our store
+          </a>
+          <a class="hp-btn-ghost" href="/about.html">
+            Get started
+          </a>
         </div>
       </div>
+      <div class="hp-hero-scroll" aria-hidden="true">
+        <i class="fa-solid fa-chevron-down"></i>
+        <span>Scroll</span>
+      </div>
+    </section>
 
-      <!-- ══ STATS BAR ══ -->
-      <div class="hp-stats-bar">
-        <div class="container">
-          <div class="hp-stats-inner">
-            <div class="hp-stat-item hp-reveal">
-              <span class="hp-stat-num" data-count-up="0" id="hp-count-products">0</span>
-              <span class="hp-stat-label">Products in stock</span>
-            </div>
-            <div class="hp-stat-item hp-reveal hp-reveal-delay-1">
-              <span class="hp-stat-num" data-count-up="0" id="hp-count-stock">0</span>
-              <span class="hp-stat-label">Units available</span>
-            </div>
-            <div class="hp-stat-item hp-reveal hp-reveal-delay-2">
-              <span class="hp-stat-num" data-count-up="0" id="hp-count-cats">0</span>
-              <span class="hp-stat-label">Product categories</span>
-            </div>
-            <div class="hp-stat-item hp-reveal hp-reveal-delay-3">
-              <span class="hp-stat-num">100%</span>
-              <span class="hp-stat-label">End-to-end service</span>
-            </div>
+    <!-- ══ MARQUEE ══ -->
+    <div class="hp-marquee-wrap" aria-hidden="true">
+      <div class="hp-marquee-track">
+        <span>Solar Panels</span><span>Backup Power</span><span>Installation</span>
+        <span>Multiple Brands</span><span>Aba, Nigeria</span><span>After-Service Support</span>
+        <span>Delivery Coordination</span><span>Homes &amp; Offices</span>
+        <span>Solar Panels</span><span>Backup Power</span><span>Installation</span>
+        <span>Multiple Brands</span><span>Aba, Nigeria</span><span>After-Service Support</span>
+        <span>Delivery Coordination</span><span>Homes &amp; Offices</span>
+      </div>
+    </div>
+
+    <!-- ══ STATS BAR ══ -->
+    <div class="hp-stats-bar">
+      <div class="container">
+        <div class="hp-stats-inner">
+          <div class="hp-stat-item hp-reveal">
+            <span class="hp-stat-num" data-count-up="0" id="hp-count-products">0</span>
+            <span class="hp-stat-label">Products in stock</span>
+          </div>
+          <div class="hp-stat-item hp-reveal hp-reveal-delay-1">
+            <span class="hp-stat-num" data-count-up="0" id="hp-count-stock">0</span>
+            <span class="hp-stat-label">Units available</span>
+          </div>
+          <div class="hp-stat-item hp-reveal hp-reveal-delay-2">
+            <span class="hp-stat-num" data-count-up="0" id="hp-count-cats">0</span>
+            <span class="hp-stat-label">Product categories</span>
+          </div>
+          <div class="hp-stat-item hp-reveal hp-reveal-delay-3">
+            <span class="hp-stat-num">100%</span>
+            <span class="hp-stat-label">End-to-end service</span>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- ══ BRAND CATALOG ══ -->
-      <section class="hp-brands">
-        <div class="container">
-          <div class="hp-section-top hp-reveal">
-            <div>
-              <p class="hp-section-kicker">Brands we carry</p>
-              <h2 class="hp-section-h2">Solar &amp; backup brands<br>available through Hoinam</h2>
-            </div>
-            <a class="hp-btn-ghost" href="/products.html" style="border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.8)">
-              Browse all products <i class="fa-solid fa-arrow-right"></i>
-            </a>
+    <!-- ══ BRAND CATALOG ══ -->
+    <section class="hp-brands">
+      <div class="container">
+        <div class="hp-section-top hp-reveal">
+          <div>
+            <p class="hp-section-kicker">Brands we carry</p>
+            <h2 class="hp-section-h2">Solar &amp; backup brands<br>available through Hoinam</h2>
           </div>
-
-          <div class="hp-brand-grid">
-
-            <!-- EcoFlow — featured -->
-            <a class="hp-brand-tile hp-brand-tile-featured hp-reveal" href="/products.html">
-              <div class="hp-brand-tile-products">
-                <img src="/assets/images/products/delta-2-max.png"            alt="Delta 2 Max">
-                <img src="/assets/images/products/river-2-max.png"            alt="River 2 Max">
-                <img src="/assets/images/products/river-2-pro.png"            alt="River 2 Pro">
-                <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Solar Panel">
-              </div>
-              <div class="hp-brand-tile-body">
-                <div class="hp-brand-tile-logo">
-                  <img src="/assets/images/brands/ecoflow-logo.svg" alt="EcoFlow">
-                </div>
-                <h3>EcoFlow</h3>
-                <p>Portable power stations, home backup systems, and foldable solar panels. River and Delta series available in stock.</p>
-                <span class="hp-brand-tile-cta">Shop EcoFlow <i class="fa-solid fa-arrow-right"></i></span>
-              </div>
-            </a>
-
-            <!-- Generic Solar Panels -->
-            <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Solar%20Panels">
-              <div class="hp-brand-tile-logo">
-                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-solar-panel" style="font-size:1.6rem;color:#ffc107"></i></span>
-              </div>
-              <h3>Solar Panels</h3>
-              <p>Monocrystalline and foldable solar panels from multiple manufacturers — sized for homes, rooftops, and field deployments.</p>
-              <div class="hp-brand-tile-products">
-                <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="110W Panel">
-              </div>
-              <span class="hp-brand-tile-cta">Browse panels <i class="fa-solid fa-arrow-right"></i></span>
-            </a>
-
-            <!-- Backup Power Systems -->
-            <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Home%20Backup">
-              <div class="hp-brand-tile-logo">
-                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-battery-full" style="font-size:1.6rem;color:#4d8ef0"></i></span>
-              </div>
-              <h3>Home Backup</h3>
-              <p>High-capacity backup power systems for homes, offices, and businesses that need reliable energy storage and solar expansion.</p>
-              <div class="hp-brand-tile-products">
-                <img src="/assets/images/products/delta-2-max.png"      alt="Delta 2 Max">
-                <img src="/assets/images/products/delta-3-2000-air.png" alt="Delta 3 Air">
-              </div>
-              <span class="hp-brand-tile-cta">Browse backup <i class="fa-solid fa-arrow-right"></i></span>
-            </a>
-
-            <!-- Portable Power -->
-            <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/products.html?category=Portable%20Power">
-              <div class="hp-brand-tile-logo">
-                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-plug-circle-bolt" style="font-size:1.6rem;color:#ffc107"></i></span>
-              </div>
-              <h3>Portable Power</h3>
-              <p>Compact stations for everyday backup — lights, laptops, routers, and small appliances. Easy to carry, fast to recharge.</p>
-              <div class="hp-brand-tile-products">
-                <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
-                <img src="/assets/images/products/river-2-pro.png" alt="River 2 Pro">
-                <img src="/assets/images/products/river-2.png"     alt="River 2">
-              </div>
-              <span class="hp-brand-tile-cta">Browse portable <i class="fa-solid fa-arrow-right"></i></span>
-            </a>
-
-            <!-- Installation -->
-            <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/book-install.html">
-              <div class="hp-brand-tile-logo">
-                <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-screwdriver-wrench" style="font-size:1.6rem;color:#4d8ef0"></i></span>
-              </div>
-              <h3>Installation Service</h3>
-              <p>We don't just sell — we install. Book a site visit, get a load assessment, and have your system set up by our team in Aba.</p>
-              <span class="hp-brand-tile-cta" style="margin-top:auto">Book installation <i class="fa-solid fa-arrow-right"></i></span>
-            </a>
-
-          </div>
+          <a class="hp-btn-ghost" href="/products.html"
+            style="border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.8)">
+            Browse all products <i class="fa-solid fa-arrow-right"></i>
+          </a>
         </div>
-      </section>
 
-      <!-- ══ FEATURED PRODUCTS ══ -->
-      <section class="hp-products">
-        <div class="container">
-          <div class="hp-section-top hp-reveal">
-            <div>
-              <p class="hp-section-kicker">Featured products</p>
-              <h2 class="hp-section-h2">What customers ask for most</h2>
-            </div>
-            <a class="button button-ghost" href="/products.html">
-              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> See all
-            </a>
-          </div>
-          <div class="product-grid hp-reveal hp-reveal-delay-1" id="featured-products"></div>
-        </div>
-      </section>
+        <div class="hp-brand-grid">
 
-      <!-- ══ BRANDS WE CARRY ══ -->
-      <section class="hp-brands">
-        <div class="container">
-          <div class="hp-section-top hp-reveal">
-            <div>
-              <p class="hp-section-kicker">Trusted partners</p>
-              <h2 class="hp-section-h2">Brands we carry</h2>
+          <!-- EcoFlow — featured -->
+          <a class="hp-brand-tile hp-brand-tile-featured hp-reveal" href="/products.html">
+            <div class="hp-brand-tile-products">
+              <img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max">
+              <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
+              <img src="/assets/images/products/river-2-pro.png" alt="River 2 Pro">
+              <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Solar Panel">
             </div>
-            <a class="button button-ghost" href="/shop.html">
-              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Shop all
-            </a>
-          </div>
-          <div class="hp-brands-grid hp-reveal hp-reveal-delay-1">
-            <a href="/shop.html?store=ecoflow" class="brand-card hp-brand-card-1">
-              <div class="brand-logo">
-                <i class="fas fa-bolt"></i>
+            <div class="hp-brand-tile-body">
+              <div class="hp-brand-tile-logo">
+                <img src="/assets/images/brands/ecoflow-logo.svg" alt="EcoFlow">
               </div>
               <h3>EcoFlow</h3>
-              <p>Portable power stations</p>
-            </a>
-            <a href="/shop.html?store=deye" class="brand-card hp-brand-card-2">
-              <div class="brand-logo">
-                <i class="fas fa-sun"></i>
-              </div>
-              <h3>Deye</h3>
-              <p>Solar inverters & hybrid systems</p>
-            </a>
-            <a href="/shop.html?store=bluetti" class="brand-card hp-brand-card-3">
-              <div class="brand-logo">
-                <i class="fas fa-battery-full"></i>
-              </div>
-              <h3>Bluetti</h3>
-              <p>Power solutions & solar panels</p>
-            </a>
-            <a href="/shop.html?store=buttu" class="brand-card hp-brand-card-4">
-              <div class="brand-logo">
-                <i class="fas fa-cog"></i>
-              </div>
-              <h3>Buttu</h3>
-              <p>Solar components & installation</p>
-            </a>
-          </div>
-        </div>
-      </section>
-      <section class="hp-process">
-        <div class="container">
-          <div class="hp-section-top hp-reveal">
-            <div>
-              <p class="hp-section-kicker">How we work</p>
-              <h2 class="hp-section-h2">From product to installation</h2>
+              <p>Portable power stations, home backup systems, and foldable solar panels. River and Delta series
+                available in stock.</p>
+              <span class="hp-brand-tile-cta">Shop EcoFlow <i class="fa-solid fa-arrow-right"></i></span>
             </div>
-          </div>
-          <div class="hp-steps">
-            <div class="hp-step hp-reveal">
-              <div class="hp-step-num">01</div>
-              <div class="hp-step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-              <h3>Product guidance</h3>
-              <p>We help you choose the right station, panel, or system for your load and budget — no guesswork.</p>
-              <a class="hp-step-link" href="/products.html">Browse products <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-            <div class="hp-step hp-reveal hp-reveal-delay-1">
-              <div class="hp-step-num">02</div>
-              <div class="hp-step-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-              <h3>Installation coordination</h3>
-              <p>We handle delivery timing, site details, and installation booking so everything runs smoothly.</p>
-              <a class="hp-step-link" href="/book-install.html">Book installation <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-            <div class="hp-step hp-reveal hp-reveal-delay-2">
-              <div class="hp-step-num">03</div>
-              <div class="hp-step-icon"><i class="fa-solid fa-headset"></i></div>
-              <h3>After-service support</h3>
-              <p>We stay reachable after purchase for usage questions, add-ons, and the next stage of your setup.</p>
-              <a class="hp-step-link" href="/contact.html">Contact us <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-          </div>
-        </div>
-      </section>
+          </a>
 
-      <!-- ══ TESTIMONIALS ══ -->
-      <section class="hp-testimonials">
-        <div class="container">
-          <div class="hp-section-top hp-reveal">
-            <div>
-              <p class="hp-section-kicker">Customer feedback</p>
-              <h2 class="hp-section-h2">What customers say</h2>
+          <!-- Generic Solar Panels -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Solar%20Panels">
+            <div class="hp-brand-tile-logo">
+              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-solar-panel"
+                  style="font-size:1.6rem;color:#ffc107"></i></span>
             </div>
+            <h3>Solar Panels</h3>
+            <p>Monocrystalline and foldable solar panels from multiple manufacturers — sized for homes, rooftops, and
+              field deployments.</p>
+            <div class="hp-brand-tile-products">
+              <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="110W Panel">
+            </div>
+            <span class="hp-brand-tile-cta">Browse panels <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <!-- Backup Power Systems -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Home%20Backup">
+            <div class="hp-brand-tile-logo">
+              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-battery-full"
+                  style="font-size:1.6rem;color:#4d8ef0"></i></span>
+            </div>
+            <h3>Home Backup</h3>
+            <p>High-capacity backup power systems for homes, offices, and businesses that need reliable energy storage
+              and solar expansion.</p>
+            <div class="hp-brand-tile-products">
+              <img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max">
+              <img src="/assets/images/products/delta-3-2000-air.png" alt="Delta 3 Air">
+            </div>
+            <span class="hp-brand-tile-cta">Browse backup <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <!-- Portable Power -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/products.html?category=Portable%20Power">
+            <div class="hp-brand-tile-logo">
+              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-plug-circle-bolt"
+                  style="font-size:1.6rem;color:#ffc107"></i></span>
+            </div>
+            <h3>Portable Power</h3>
+            <p>Compact stations for everyday backup — lights, laptops, routers, and small appliances. Easy to carry,
+              fast to recharge.</p>
+            <div class="hp-brand-tile-products">
+              <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
+              <img src="/assets/images/products/river-2-pro.png" alt="River 2 Pro">
+              <img src="/assets/images/products/river-2.png" alt="River 2">
+            </div>
+            <span class="hp-brand-tile-cta">Browse portable <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+          <!-- Installation -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/book-install.html">
+            <div class="hp-brand-tile-logo">
+              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-screwdriver-wrench"
+                  style="font-size:1.6rem;color:#4d8ef0"></i></span>
+            </div>
+            <h3>Installation Service</h3>
+            <p>We don't just sell — we install. Book a site visit, get a load assessment, and have your system set up by
+              our team in Aba.</p>
+            <span class="hp-brand-tile-cta" style="margin-top:auto">Book installation <i
+                class="fa-solid fa-arrow-right"></i></span>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ FEATURED PRODUCTS ══ -->
+    <section class="hp-products">
+      <div class="container">
+        <div class="hp-section-top hp-reveal">
+          <div>
+            <p class="hp-section-kicker">Featured products</p>
+            <h2 class="hp-section-h2">What customers ask for most</h2>
           </div>
-          <div class="hp-testi-grid">
-            <article class="hp-testi hp-reveal">
-              <div class="hp-testi-stars">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-              </div>
-              <blockquote>"Hoinam checked our office load, aligned delivery, and made the installation feel organized from start to finish."</blockquote>
-              <div class="hp-testi-meta">
-                <strong>Operations Manager</strong>
-                <span>Port Harcourt</span>
-              </div>
-            </article>
-            <article class="hp-testi hp-reveal hp-reveal-delay-1">
-              <div class="hp-testi-stars">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-              </div>
-              <blockquote>"They explained the options clearly, helped us combine panels with portable stations, and stayed in touch after delivery."</blockquote>
-              <div class="hp-testi-meta">
-                <strong>Retail Director</strong>
-                <span>Lagos</span>
-              </div>
-            </article>
-            <article class="hp-testi hp-reveal hp-reveal-delay-2">
-              <div class="hp-testi-stars">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-              </div>
-              <blockquote>"The booking flow made sense, but what stood out was the follow-up. Dates, setup details, and next steps were always clear."</blockquote>
-              <div class="hp-testi-meta">
-                <strong>Facilities Lead</strong>
-                <span>Aba</span>
-              </div>
-            </article>
+          <a class="button button-ghost" href="/products.html">
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> See all
+          </a>
+        </div>
+        <div class="product-grid hp-reveal hp-reveal-delay-1" id="featured-products"></div>
+      </div>
+    </section>
+
+    <!-- ══ BRANDS WE CARRY ══ -->
+    <section class="hp-brands">
+      <div class="container">
+        <div class="hp-section-top hp-reveal">
+          <div>
+            <p class="hp-section-kicker">Trusted partners</p>
+            <h2 class="hp-section-h2">Brands we carry</h2>
+          </div>
+          <a class="button button-ghost" href="/shop.html">
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Shop all
+          </a>
+        </div>
+        <div class="hp-brands-grid hp-reveal hp-reveal-delay-1">
+          <a href="/shop.html?store=ecoflow" class="brand-card hp-brand-card-1">
+            <div class="brand-logo">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3>EcoFlow</h3>
+            <p>Portable power stations</p>
+          </a>
+          <a href="/shop.html?store=deye" class="brand-card hp-brand-card-2">
+            <div class="brand-logo">
+              <i class="fas fa-sun"></i>
+            </div>
+            <h3>Deye</h3>
+            <p>Solar inverters & hybrid systems</p>
+          </a>
+          <a href="/shop.html?store=bluetti" class="brand-card hp-brand-card-3">
+            <div class="brand-logo">
+              <i class="fas fa-battery-full"></i>
+            </div>
+            <h3>Bluetti</h3>
+            <p>Power solutions & solar panels</p>
+          </a>
+          <a href="/shop.html?store=buttu" class="brand-card hp-brand-card-4">
+            <div class="brand-logo">
+              <i class="fas fa-cog"></i>
+            </div>
+            <h3>Buttu</h3>
+            <p>Solar components & installation</p>
+          </a>
+        </div>
+      </div>
+    </section>
+    <section class="hp-process">
+      <div class="container">
+        <div class="hp-section-top hp-reveal">
+          <div>
+            <p class="hp-section-kicker">How we work</p>
+            <h2 class="hp-section-h2">From product to installation</h2>
           </div>
         </div>
-      </section>
-
-      <!-- ══ CTA ══ -->
-      <section class="hp-cta">
-        <div class="container">
-          <div class="hp-cta-box hp-reveal">
-            <div>
-              <h2>Ready to get started?</h2>
-              <p>Browse our products or book an installation — we'll handle everything from selection to setup.</p>
-            </div>
-            <div class="hp-cta-btns">
-              <a class="hp-btn-primary" href="/products.html">
-                <i class="fa-solid fa-store" aria-hidden="true"></i> Shop products
-              </a>
-              <a class="hp-btn-ghost" href="/book-install.html">
-                Book installation
-              </a>
-            </div>
+        <div class="hp-steps">
+          <div class="hp-step hp-reveal">
+            <div class="hp-step-num">01</div>
+            <div class="hp-step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <h3>Product guidance</h3>
+            <p>We help you choose the right station, panel, or system for your load and budget — no guesswork.</p>
+            <a class="hp-step-link" href="/products.html">Browse products <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="hp-step hp-reveal hp-reveal-delay-1">
+            <div class="hp-step-num">02</div>
+            <div class="hp-step-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+            <h3>Installation coordination</h3>
+            <p>We handle delivery timing, site details, and installation booking so everything runs smoothly.</p>
+            <a class="hp-step-link" href="/book-install.html">Book installation <i
+                class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="hp-step hp-reveal hp-reveal-delay-2">
+            <div class="hp-step-num">03</div>
+            <div class="hp-step-icon"><i class="fa-solid fa-headset"></i></div>
+            <h3>After-service support</h3>
+            <p>We stay reachable after purchase for usage questions, add-ons, and the next stage of your setup.</p>
+            <a class="hp-step-link" href="/contact.html">Contact us <i class="fa-solid fa-arrow-right"></i></a>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-    </main>
-    <div id="site-footer"></div>
-    <script src="/assets/js/site-config.js"></script>
-    <script type="module" src="/assets/js/pages/home.js"></script>
-    <script>
+    <!-- ══ TESTIMONIALS ══ -->
+    <section class="hp-testimonials">
+      <div class="container">
+        <div class="hp-section-top hp-reveal">
+          <div>
+            <p class="hp-section-kicker">Customer feedback</p>
+            <h2 class="hp-section-h2">What customers say</h2>
+          </div>
+        </div>
+        <div class="hp-testi-grid">
+          <article class="hp-testi hp-reveal">
+            <div class="hp-testi-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <blockquote>"Hoinam checked our office load, aligned delivery, and made the installation feel organized from
+              start to finish."</blockquote>
+            <div class="hp-testi-meta">
+              <strong>Operations Manager</strong>
+              <span>Port Harcourt</span>
+            </div>
+          </article>
+          <article class="hp-testi hp-reveal hp-reveal-delay-1">
+            <div class="hp-testi-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <blockquote>"They explained the options clearly, helped us combine panels with portable stations, and stayed
+              in touch after delivery."</blockquote>
+            <div class="hp-testi-meta">
+              <strong>Retail Director</strong>
+              <span>Lagos</span>
+            </div>
+          </article>
+          <article class="hp-testi hp-reveal hp-reveal-delay-2">
+            <div class="hp-testi-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <blockquote>"The booking flow made sense, but what stood out was the follow-up. Dates, setup details, and
+              next steps were always clear."</blockquote>
+            <div class="hp-testi-meta">
+              <strong>Facilities Lead</strong>
+              <span>Aba</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CTA ══ -->
+    <section class="hp-cta">
+      <div class="container">
+        <div class="hp-cta-box hp-reveal">
+          <div>
+            <h2>Ready to get started?</h2>
+            <p>Browse our products or book an installation — we'll handle everything from selection to setup.</p>
+          </div>
+          <div class="hp-cta-btns">
+            <a class="hp-btn-primary" href="/products.html">
+              <i class="fa-solid fa-store" aria-hidden="true"></i> Shop products
+            </a>
+            <a class="hp-btn-ghost" href="/book-install.html">
+              Book installation
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <div id="site-footer"></div>
+  <script src="/assets/js/site-config.js"></script>
+  <script type="module" src="/assets/js/pages/home.js"></script>
+  <script>
     /* ── Home page animations ── */
     (function () {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1397,7 +1700,7 @@
         const COUNT = 55;
 
         function resize() {
-          W = canvas.width  = canvas.offsetWidth;
+          W = canvas.width = canvas.offsetWidth;
           H = canvas.height = canvas.offsetHeight;
         }
         resize();
@@ -1432,12 +1735,12 @@
             for (let j = i + 1; j < particles.length; j++) {
               const dx = particles[i].x - particles[j].x;
               const dy = particles[i].y - particles[j].y;
-              const dist = Math.sqrt(dx*dx + dy*dy);
+              const dist = Math.sqrt(dx * dx + dy * dy);
               if (dist < 120) {
                 ctx.beginPath();
                 ctx.moveTo(particles[i].x, particles[i].y);
                 ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.strokeStyle = `rgba(255,255,255,${0.06 * (1 - dist/120)})`;
+                ctx.strokeStyle = `rgba(255,255,255,${0.06 * (1 - dist / 120)})`;
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
               }
@@ -1453,7 +1756,7 @@
       if (glow && !reduced && window.matchMedia("(pointer:fine)").matches) {
         document.addEventListener("mousemove", e => {
           glow.style.left = e.clientX + "px";
-          glow.style.top  = e.clientY + "px";
+          glow.style.top = e.clientY + "px";
         }, { passive: true });
       } else if (glow) {
         glow.style.display = "none";
@@ -1493,11 +1796,11 @@
 
         /* eyebrow, sub, actions staggered */
         const eyebrow = document.getElementById("hp-eyebrow");
-        const sub     = document.getElementById("hp-sub");
+        const sub = document.getElementById("hp-sub");
         const actions = document.getElementById("hp-actions");
-        const delay   = reduced ? 0 : 1;
+        const delay = reduced ? 0 : 1;
         setTimeout(() => eyebrow?.classList.add("visible"), delay * 200);
-        setTimeout(() => sub?.classList.add("visible"),     delay * 700);
+        setTimeout(() => sub?.classList.add("visible"), delay * 700);
         setTimeout(() => actions?.classList.add("visible"), delay * 950);
       }
 
@@ -1549,8 +1852,8 @@
         document.querySelectorAll(".hp-brand-tile").forEach(tile => {
           tile.addEventListener("mousemove", e => {
             const r = tile.getBoundingClientRect();
-            const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
-            const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+            const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+            const y = ((e.clientY - r.top) / r.height * 100).toFixed(1);
             tile.style.setProperty("--mx", x + "%");
             tile.style.setProperty("--my", y + "%");
           });
@@ -1564,9 +1867,9 @@
         heroSection.addEventListener("mousemove", e => {
           const rect = heroSection.getBoundingClientRect();
           const cx = rect.left + rect.width / 2;
-          const cy = rect.top  + rect.height / 2;
+          const cy = rect.top + rect.height / 2;
           const rx = ((e.clientY - cy) / rect.height) * -14;
-          const ry = ((e.clientX - cx) / rect.width)  *  14;
+          const ry = ((e.clientX - cx) / rect.width) * 14;
           heroImg.style.transform =
             `translateY(-50%) perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.04)`;
         }, { passive: true });
@@ -1580,8 +1883,8 @@
         document.querySelectorAll(".hp-testi, .hp-step").forEach(card => {
           card.addEventListener("mousemove", e => {
             const r = card.getBoundingClientRect();
-            const x = (e.clientX - r.left) / r.width  - 0.5;
-            const y = (e.clientY - r.top)  / r.height - 0.5;
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
             card.style.transform =
               `perspective(600px) rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) translateY(-4px)`;
             card.style.boxShadow = `${-x * 12}px ${-y * 12}px 30px rgba(0,85,184,0.12)`;
@@ -1631,4 +1934,4 @@
       }
 
     })();
-    </script>
+  </script>

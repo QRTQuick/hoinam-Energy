@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-    
+
   --bg: #f5f5f5;
   --bg-accent: #e6eef8;
   --surface: #ffffff;
@@ -484,11 +484,9 @@ button {
   pointer-events: none;
   opacity: 0;
   transition: opacity 220ms ease;
-  background: radial-gradient(
-    circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
-    rgba(255, 255, 255, 0.28),
-    transparent 42%
-  );
+  background: radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+      rgba(255, 255, 255, 0.28),
+      transparent 42%);
 }
 
 .solar-visual {
@@ -539,7 +537,7 @@ button {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.solar-visual > p {
+.solar-visual>p {
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -1772,12 +1770,19 @@ th {
   z-index: 10000;
   display: grid;
   place-items: center;
-  animation: cookieSlideUp 400ms cubic-bezier(0.16,1,0.3,1) both;
+  animation: cookieSlideUp 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes cookieSlideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .cookie-card {
@@ -1968,6 +1973,7 @@ th {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1979,6 +1985,7 @@ th {
     opacity: 0;
     transform: translateY(-12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1990,6 +1997,7 @@ th {
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(-12px);
@@ -2078,6 +2086,7 @@ th {
 }
 
 @media (max-width: 760px) {
+
   .hero,
   .page-hero,
   .section {
@@ -2311,17 +2320,32 @@ th {
 }
 
 /* Bebas Neue — tighten default tracking */
-h1, h2, h3, h4, h5, h6,
-.button, .nav-link, .nav-pill,
-.eyebrow, .chip, .badge,
-.stat-card strong, .price,
-label, th {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.button,
+.nav-link,
+.nav-pill,
+.eyebrow,
+.chip,
+.badge,
+.stat-card strong,
+.price,
+label,
+th {
   letter-spacing: -0.02em;
 }
 
 /* Dancing Script — slight tighten for readability */
-body, p, .muted, .section-copy,
-.product-summary, .panel-copy {
+body,
+p,
+.muted,
+.section-copy,
+.product-summary,
+.panel-copy {
   letter-spacing: -0.01em;
 }
 
@@ -2913,7 +2937,7 @@ body, p, .muted, .section-copy,
     linear-gradient(180deg, rgba(255, 193, 7, 0.08), transparent);
 }
 
-.catalog-hero > .container {
+.catalog-hero>.container {
   position: relative;
   z-index: 2;
 }
@@ -3694,13 +3718,13 @@ body[data-page="products"] .catalog-refine-controls {
   gap: 0.55rem;
 }
 
-body[data-page="products"] .catalog-refine-controls > .filter-group {
+body[data-page="products"] .catalog-refine-controls>.filter-group {
   flex: 1 1 210px;
   min-width: 0;
   margin: 0;
 }
 
-body[data-page="products"] .catalog-refine-controls > .catalog-toggle-group {
+body[data-page="products"] .catalog-refine-controls>.catalog-toggle-group {
   display: flex;
   flex: 2 1 430px;
   flex-wrap: wrap;
@@ -4149,13 +4173,13 @@ body[data-page="products"] .catalog-active-pill {
   }
 
   body[data-page="products"] .catalog-refine-controls,
-  body[data-page="products"] .catalog-refine-controls > .catalog-toggle-group {
+  body[data-page="products"] .catalog-refine-controls>.catalog-toggle-group {
     display: grid;
     gap: 0.55rem;
   }
 
-  body[data-page="products"] .catalog-refine-controls > .filter-group,
-  body[data-page="products"] .catalog-refine-controls > .catalog-toggle-group {
+  body[data-page="products"] .catalog-refine-controls>.filter-group,
+  body[data-page="products"] .catalog-refine-controls>.catalog-toggle-group {
     flex: initial;
   }
 
@@ -5284,7 +5308,7 @@ body[data-page="about"] .typed-heading {
   gap: 1rem;
 }
 
-.brand-section-heading > div {
+.brand-section-heading>div {
   display: grid;
   gap: 0.55rem;
   max-width: 34rem;
@@ -5446,6 +5470,7 @@ body[data-page="about"] .typed-heading {
 }
 
 @media (max-width: 980px) {
+
   .home-hero-grid,
   .trust-story,
   .brand-spotlight,
@@ -5531,6 +5556,7 @@ body[data-page="about"] .typed-heading {
 }
 
 @media (max-width: 520px) {
+
   .hero-showcase-main,
   .category-feature,
   .service-line,
@@ -5574,7 +5600,7 @@ body[data-page="about"] .typed-heading {
   left: -100%;
   width: 60%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
   transform: skewX(-20deg);
   transition: left 480ms ease;
   pointer-events: none;
@@ -5596,9 +5622,19 @@ body[data-page="about"] .typed-heading {
 
 /* Stat card count pop */
 @keyframes countPop {
-  0%   { transform: scale(0.85); opacity: 0; }
-  60%  { transform: scale(1.06); }
-  100% { transform: scale(1);    opacity: 1; }
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .stat-card strong {
@@ -5607,8 +5643,15 @@ body[data-page="about"] .typed-heading {
 
 /* Page fade-in */
 @keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 main {
@@ -5666,7 +5709,9 @@ main {
 }
 
 /* Smooth scroll */
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
 /* ===== BLACK & WHITE FOOTER ===== */
 .footer-bw {
@@ -5836,16 +5881,27 @@ html { scroll-behavior: smooth; }
 ═══════════════════════════════════════════════ */
 
 .site-nav-desktop {
-  display: none; /* hidden on mobile */
+  display: none;
+  /* hidden on mobile */
   align-items: center;
   gap: 0.25rem;
   margin-left: auto;
 }
 
 @media (min-width: 860px) {
-  .site-nav-desktop { display: flex; }
-  .nav-toggle        { display: none; }
-  .site-nav          { display: none !important; } /* mobile nav hidden on desktop */
+  .site-nav-desktop {
+    display: flex;
+  }
+
+  .nav-toggle {
+    display: none;
+  }
+
+  .site-nav {
+    display: none !important;
+  }
+
+  /* mobile nav hidden on desktop */
 }
 
 /* Base link */
@@ -5952,7 +6008,7 @@ html { scroll-behavior: smooth; }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
   padding: 1rem;
   opacity: 0;
   pointer-events: none;
@@ -6051,14 +6107,32 @@ html { scroll-behavior: smooth; }
    GLOBAL FONT RESET — Inter everywhere
 ═══════════════════════════════════════════ */
 body,
-p, span, a, li, td, th, label,
-input, select, textarea, button,
-.muted, .product-summary, .panel-copy,
-.section-copy, .nav-link, .snav-link,
-.footer-bw-col a, .footer-bw-about,
-.hp-hero-sub, .hp-step p, .hp-testi blockquote,
-.cookie-card p, .auth-side-card p,
-.about-points p, .list-reset li {
+p,
+span,
+a,
+li,
+td,
+th,
+label,
+input,
+select,
+textarea,
+button,
+.muted,
+.product-summary,
+.panel-copy,
+.section-copy,
+.nav-link,
+.snav-link,
+.footer-bw-col a,
+.footer-bw-about,
+.hp-hero-sub,
+.hp-step p,
+.hp-testi blockquote,
+.cookie-card p,
+.auth-side-card p,
+.about-points p,
+.list-reset li {
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -6069,7 +6143,10 @@ body {
   color: #1a1a1a;
 }
 
-p, .muted, .product-summary, .section-copy {
+p,
+.muted,
+.product-summary,
+.section-copy {
   font-size: 0.93rem;
   color: #333;
   line-height: 1.7;
@@ -6200,6 +6277,7 @@ p, .muted, .product-summary, .section-copy {
    MOBILE LANDING PAGE — logo + footer fix
 ═══════════════════════════════════════════ */
 @media (max-width: 640px) {
+
   /* show logo on mobile landing */
   .hp-brand-float {
     top: 1.25rem;
@@ -6305,6 +6383,7 @@ p, .muted, .product-summary, .section-copy {
    MOBILE TOUCH TARGET OPTIMIZATION
 ═══════════════════════════════════════════ */
 @media (hover: none) and (pointer: coarse) {
+
   /* Ensure all interactive elements have minimum 44x44px touch target */
   button,
   a[role="button"],
@@ -6350,7 +6429,8 @@ p, .muted, .product-summary, .section-copy {
   select {
     min-height: 44px;
     padding: 0.75rem;
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
+    /* Prevents zoom on iOS */
   }
 
   /* Disable double-tap zoom on buttons */
@@ -6362,6 +6442,7 @@ p, .muted, .product-summary, .section-copy {
 
 /* Extra mobile optimizations for smaller devices */
 @media (max-width: 480px) {
+
   button,
   a[role="button"],
   .button,
@@ -6381,7 +6462,8 @@ p, .muted, .product-summary, .section-copy {
   input[type="email"],
   input[type="password"],
   textarea {
-    font-size: 16px; /* Prevents auto-zoom on mobile */
+    font-size: 16px;
+    /* Prevents auto-zoom on mobile */
     min-height: 44px;
   }
 
