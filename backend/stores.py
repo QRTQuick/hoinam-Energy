@@ -40,9 +40,6 @@ STORES = {
         "featured": True,
     },
 }
-        "featured": True,
-    },
-}
 
 
 @dataclass
