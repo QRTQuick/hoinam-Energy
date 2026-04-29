@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timezone
 from pathlib import Path
 
 from flask import Flask, g, jsonify, request, send_from_directory
@@ -12,10 +12,11 @@ from .config import get_settings
 from .database import check_database_url, close_session, get_session, init_database
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, Order, Product, User
+from .models import Installation, Order, Payment, Product, User
 from .seed import seed_products
 from .services import apply_product_payload, calculate_order_items, flag_duplicate_full_name_users, sync_user_from_claims
-from .utils import generate_order_number, generate_payment_reference, resolve_product_image_url, slugify, to_decimal
+from .stores import get_all_stores, get_store_by_slug
+from .utils import generate_order_number, generate_payment_reference, generate_verification_code, resolve_product_image_url, slugify, to_decimal
 
 
 class ApiError(Exception):
@@ -145,15 +146,29 @@ def create_app() -> Flask:
         db_session().commit()
         return json_success(user.to_dict())
 
+    @app.get("/api/stores")
+    def list_stores():
+        stores = get_all_stores()
+        return json_success([store.to_dict() for store in stores])
+
+    @app.get("/api/stores/<store_slug>")
+    def get_store(store_slug: str):
+        store = get_store_by_slug(store_slug)
+        if not store:
+            raise ApiError("Store not found.", 404)
+        return json_success(store.to_dict())
+
     @app.get("/api/products")
     def list_products():
-        products = (
-            db_session()
-            .query(Product)
-            .filter(Product.active.is_(True))
-            .order_by(desc(Product.featured), Product.name.asc())
-            .all()
-        )
+        # Support filtering by store
+        store_slug = request.args.get("store", "").strip()
+        
+        query = db_session().query(Product).filter(Product.active.is_(True))
+        
+        if store_slug:
+            query = query.filter(Product.store_slug == store_slug)
+        
+        products = query.order_by(desc(Product.featured), Product.name.asc()).all()
         return json_success([product.to_dict() for product in products])
 
     @app.get("/api/products/<int:product_id>")
@@ -210,6 +225,14 @@ def create_app() -> Flask:
                     "account_name": settings.opay_account_name or settings.opay_merchant_name,
                 },
                 {
+                    "id": "bank_transfer",
+                    "label": "Bank transfer",
+                    "description": "Place the order now, then pay by direct bank transfer to the Hoinam Energy company account. You'll receive a verification code to include in the transfer narration.",
+                    "bank_name": settings.bank_transfer_bank_name,
+                    "account_number": settings.bank_transfer_account_number,
+                    "account_name": settings.bank_transfer_account_name,
+                },
+                {
                     "id": "pay_on_delivery",
                     "label": "Pay on delivery",
                     "description": "Reserve the order and pay when Hoinam Energy confirms delivery.",
@@ -226,12 +249,13 @@ def create_app() -> Flask:
         user = authenticate()
         payload = request.get_json(silent=True) or {}
         payment_method = (payload.get("payment_method") or "opay_transfer").strip()
-        allowed_payment_methods = {"opay_transfer", "pay_on_delivery"}
+        allowed_payment_methods = {"opay_transfer", "bank_transfer", "pay_on_delivery"}
         if payment_method not in allowed_payment_methods:
-            raise ApiError("Choose OPay transfer or pay on delivery.", 400)
+            raise ApiError("Choose OPay transfer, bank transfer, or pay on delivery.", 400)
 
         payment_reference = (payload.get("payment_reference") or "").strip() or generate_payment_reference(
-            "OPAY" if payment_method == "opay_transfer" else "POD"
+            "OPAY" if payment_method == "opay_transfer" else
+            "BANK" if payment_method == "bank_transfer" else "POD"
         )
         existing_order = db_session().query(Order).filter(Order.payment_reference == payment_reference).first()
         if existing_order:
@@ -254,8 +278,8 @@ def create_app() -> Flask:
             if product.stock > 0:
                 product.stock -= item["quantity"]
 
-        payment_status = "awaiting_transfer" if payment_method == "opay_transfer" else "pay_on_delivery"
-        order_status = "payment_pending" if payment_method == "opay_transfer" else "confirmed"
+        payment_status = "awaiting_transfer" if payment_method in {"opay_transfer", "bank_transfer"} else "pay_on_delivery"
+        order_status = "payment_pending" if payment_method in {"opay_transfer", "bank_transfer"} else "confirmed"
         order = Order(
             order_number=generate_order_number(),
             user_id=user.id,
@@ -270,9 +294,27 @@ def create_app() -> Flask:
             items=normalized_items,
         )
         db_session().add(order)
+        db_session().flush()
+
+        # Generate verification code for bank transfers
+        verification_code = None
+        if payment_method == "bank_transfer":
+            verification_code = generate_verification_code()
+            payment = Payment(
+                order_id=order.id,
+                verification_code=verification_code,
+                amount=to_decimal(total),
+                currency=settings.default_currency,
+                payment_method=payment_method,
+                status="pending",
+            )
+            db_session().add(payment)
+
         db_session().commit()
         order_payload = order.to_dict()
         order_payload["payment_options"] = payment_options_payload()
+        if verification_code:
+            order_payload["verification_code"] = verification_code
         return json_success(order_payload, status_code=201)
 
     @app.get("/api/orders/user")
@@ -303,6 +345,45 @@ def create_app() -> Flask:
             data["user"] = order.user.to_dict() if order.user else None
             payload.append(data)
         return json_success(payload)
+
+    @app.post("/api/payments/<verification_code>/receipt")
+    def upload_payment_receipt(verification_code: str):
+        user = authenticate()
+        
+        # Find the payment by verification code
+        payment = db_session().query(Payment).filter(Payment.verification_code == verification_code).first()
+        if not payment:
+            raise ApiError("Payment verification code not found.", 404)
+        
+        # Verify the order belongs to the authenticated user
+        order = payment.order
+        if order.user_id != user.id:
+            raise ApiError("You don't have permission to upload receipt for this payment.", 403)
+        
+        file_storage = request.files.get("receipt")
+        if not file_storage:
+            raise ApiError("Please attach a receipt file.", 400)
+        
+        # Handle different receipt formats (image or PDF)
+        allowed_extensions = {".pdf", ".png", ".jpg", ".jpeg", ".gif"}
+        file_extension = Path(file_storage.filename).suffix.lower()
+        if file_extension not in allowed_extensions:
+            raise ApiError("Allowed formats: PDF, PNG, JPG, JPEG, GIF", 400)
+        
+        # Store receipt URL or file path
+        receipt_filename = f"receipt_{verification_code}_{file_storage.filename}"
+        receipt_path = project_root / "receipts" / receipt_filename
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        file_storage.save(receipt_path)
+        
+        from datetime import datetime as dt
+        payment.receipt_url = f"/receipts/{receipt_filename}"
+        payment.receipt_uploaded_at = dt.now(timezone.utc)
+        payment.status = "confirmed"
+        order.payment_status = "confirmed"
+        db_session().commit()
+        
+        return json_success(payment.to_dict(), message="Receipt uploaded successfully.")
 
     @app.post("/api/installations")
     def create_installation():

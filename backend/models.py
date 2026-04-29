@@ -3,7 +3,17 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import JSON, Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -28,12 +38,16 @@ class User(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     firebase_uid: Mapped[str] = mapped_column(String(128), unique=True, index=True)
-    email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
-    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email: Mapped[str | None] = mapped_column(
+        String(255), unique=True, nullable=True, index=True
+    )
+    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    role: Mapped[str] = mapped_column(String(32), default="user", nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    needs_monitoring: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    role: Mapped[str] = mapped_column(String(32), default="user", nullable=False, index=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    needs_monitoring: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
     monitoring_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     orders = relationship("Order", back_populates="user")
@@ -59,14 +73,22 @@ class Product(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    slug: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
     sku: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     brand: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
-    store_slug: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
-    category: Mapped[str] = mapped_column(String(128), default="Portable Power", nullable=False)
+    store_slug: Mapped[str | None] = mapped_column(
+        String(80), nullable=True, index=True
+    )
+    category: Mapped[str] = mapped_column(
+        String(128), default="Portable Power", nullable=False
+    )
     summary: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    price: Mapped[Decimal] = mapped_column(Numeric(12, 2), default=Decimal("0.00"), nullable=False)
+    price: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), default=Decimal("0.00"), nullable=False
+    )
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
     stock: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -90,7 +112,9 @@ class Product(TimestampMixin, Base):
             "price": float(self.price),
             "currency": self.currency,
             "stock": self.stock,
-            "image_url": resolve_product_image_url(self.name, self.image_url, self.slug),
+            "image_url": resolve_product_image_url(
+                self.name, self.image_url, self.slug
+            ),
             "highlights": self.highlights or [],
             "featured": self.featured,
             "active": self.active,
@@ -103,12 +127,22 @@ class Order(TimestampMixin, Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    order_number: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    status: Mapped[str] = mapped_column(String(32), default="confirmed", nullable=False)
-    payment_status: Mapped[str] = mapped_column(String(32), default="paid", nullable=False)
-    payment_method: Mapped[str] = mapped_column(String(32), default="opay_transfer", nullable=False)
-    payment_reference: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)
+    order_number: Mapped[str] = mapped_column(
+        String(64), unique=True, nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(String(32), default="confirmed", nullable=False, index=True)
+    payment_status: Mapped[str] = mapped_column(
+        String(32), default="paid", nullable=False, index=True
+    )
+    payment_method: Mapped[str] = mapped_column(
+        String(32), default="opay_transfer", nullable=False, index=True
+    )
+    payment_reference: Mapped[str] = mapped_column(
+        String(128), unique=True, nullable=False, index=True
+    )
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
     shipping_address: Mapped[dict] = mapped_column(JSON, nullable=False)
@@ -139,10 +173,16 @@ class Installation(TimestampMixin, Base):
     __tablename__ = "installations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id"), nullable=True, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False, index=True
+    )
+    product_id: Mapped[int | None] = mapped_column(
+        ForeignKey("products.id"), nullable=True, index=True
+    )
     preferred_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    service_type: Mapped[str] = mapped_column(String(128), default="Solar Installation", nullable=False)
+    service_type: Mapped[str] = mapped_column(
+        String(128), default="Solar Installation", nullable=False
+    )
     address: Mapped[str] = mapped_column(Text, nullable=False)
     city: Mapped[str | None] = mapped_column(String(128), nullable=True)
     state: Mapped[str | None] = mapped_column(String(128), nullable=True)
@@ -159,7 +199,9 @@ class Installation(TimestampMixin, Base):
             "id": self.id,
             "user_id": self.user_id,
             "product_id": self.product_id,
-            "preferred_date": self.preferred_date.isoformat() if self.preferred_date else None,
+            "preferred_date": (
+                self.preferred_date.isoformat() if self.preferred_date else None
+            ),
             "service_type": self.service_type,
             "address": self.address,
             "city": self.city,
@@ -168,5 +210,55 @@ class Installation(TimestampMixin, Base):
             "notes": self.notes,
             "status": self.status,
             "assigned_to": self.assigned_to,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+class Payment(TimestampMixin, Base):
+    __tablename__ = "payments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id"), nullable=False, index=True
+    )
+    verification_code: Mapped[str] = mapped_column(
+        String(64), unique=True, nullable=False, index=True
+    )
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
+    payment_method: Mapped[str] = mapped_column(
+        String(32), nullable=False, index=True
+    )  # bank_transfer, opay_transfer, opay_app, pay_on_delivery
+    status: Mapped[str] = mapped_column(
+        String(32), default="pending", nullable=False, index=True
+    )  # pending, confirmed, failed
+    receipt_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    receipt_uploaded_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    transaction_details: Mapped[dict] = mapped_column(
+        JSON, default=dict, nullable=False
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    order = relationship("Order")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "verification_code": self.verification_code,
+            "amount": float(self.amount),
+            "currency": self.currency,
+            "payment_method": self.payment_method,
+            "status": self.status,
+            "receipt_url": self.receipt_url,
+            "receipt_uploaded_at": (
+                self.receipt_uploaded_at.isoformat()
+                if self.receipt_uploaded_at
+                else None
+            ),
+            "transaction_details": self.transaction_details,
+            "notes": self.notes,
             "created_at": self.created_at.isoformat(),
         }

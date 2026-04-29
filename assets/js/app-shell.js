@@ -3,11 +3,23 @@ import { waitForAuthReady } from "./firebase.js";
 import { refreshInteractions } from "./interactions.js";
 import { clearCachedProfile, getCachedProfile } from "./store.js";
 import { injectShell, refreshShell, showToast } from "./ui.js";
+import { MouseGlow } from "./mouse-glow.js";
 
 export async function bootstrapPage(activePage, options = {}) {
   document.body.dataset.page = activePage;
   injectShell(activePage);
   refreshInteractions();
+
+  // Initialize mouse glow effect
+  if (!window.mouseGlow) {
+    window.mouseGlow = new MouseGlow({
+      enabled: true,
+      glowSize: 400,
+      glowOpacity: 0.12,
+      glowColor: "rgba(102, 126, 234, 0.4)",
+      blurAmount: 80
+    });
+  }
 
   let profile = getCachedProfile();
 

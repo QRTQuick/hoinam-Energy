@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
-
 PRODUCT_IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".svg")
 
 
@@ -33,7 +32,9 @@ def _resolved_product_image_from_slug(slug: str) -> str | None:
     return None
 
 
-def resolve_product_image_url(name: str | None = None, image_url: str | None = None, slug: str | None = None) -> str | None:
+def resolve_product_image_url(
+    name: str | None = None, image_url: str | None = None, slug: str | None = None
+) -> str | None:
     if image_url and str(image_url).strip():
         return str(image_url).strip()
 
@@ -62,3 +63,11 @@ def to_decimal(value) -> Decimal:
 
 def to_minor_units(amount: Decimal) -> int:
     return int((amount * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+
+def generate_verification_code(prefix: str = "HN") -> str:
+    """Generate a unique verification code for bank transfer payments."""
+    safe_prefix = re.sub(r"[^A-Z0-9]+", "", prefix.upper()) or "HN"
+    # Generate a 10-character alphanumeric code
+    code = uuid.uuid4().hex[:10].upper()
+    return f"{safe_prefix}-{code}"

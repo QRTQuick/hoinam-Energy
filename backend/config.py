@@ -45,7 +45,9 @@ class Settings:
     )
     cors_origins: list[str] = field(default_factory=lambda: _env_list("CORS_ORIGINS"))
     frontend_url: str = field(
-        default_factory=lambda: os.getenv("FRONTEND_URL", "http://localhost:5000").rstrip("/")
+        default_factory=lambda: os.getenv(
+            "FRONTEND_URL", "http://localhost:5000"
+        ).rstrip("/")
     )
     opay_merchant_name: str = field(
         default_factory=lambda: os.getenv("OPAY_MERCHANT_NAME", "Hoinam Energy").strip()
@@ -56,7 +58,18 @@ class Settings:
     opay_account_number: str = field(
         default_factory=lambda: os.getenv("OPAY_ACCOUNT_NUMBER", "").strip()
     )
-    opay_account_name: str = field(default_factory=lambda: os.getenv("OPAY_ACCOUNT_NAME", "").strip())
+    opay_account_name: str = field(
+        default_factory=lambda: os.getenv("OPAY_ACCOUNT_NAME", "").strip()
+    )
+    bank_transfer_account_number: str = field(
+        default_factory=lambda: os.getenv("BANK_TRANSFER_ACCOUNT_NUMBER", "").strip()
+    )
+    bank_transfer_account_name: str = field(
+        default_factory=lambda: os.getenv("BANK_TRANSFER_ACCOUNT_NAME", "").strip()
+    )
+    bank_transfer_bank_name: str = field(
+        default_factory=lambda: os.getenv("BANK_TRANSFER_BANK_NAME", "").strip()
+    )
     admin_emails: set[str] = field(default_factory=_admin_email_set)
     firebase_credentials_json: str = field(
         default_factory=lambda: os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
