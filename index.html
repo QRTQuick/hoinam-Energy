@@ -482,11 +482,14 @@
         to   { opacity: 1; transform: translateY(0); }
       }
       .hp-brand-float img {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         object-fit: contain;
-        filter: brightness(0) invert(1);
-        opacity: 0.9;
+        /* no filter — show the actual logo colours */
+        opacity: 1;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.12);
+        padding: 4px;
       }
       .hp-brand-float span {
         font-family: var(--font-heading);

@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api/index.py"
+    },
+    {
       "source": "/__/auth/:path*",
       "destination": "https://hoinam-energy-workspace.firebaseapp.com/__/auth/:path*"
     },
