@@ -28,13 +28,6 @@ class ApiError(Exception):
 
 def create_app() -> Flask:
     settings = get_settings()
-    check_database_url()
-    init_database()
-    seed_session = get_session()
-    try:
-        seed_products(seed_session)
-    finally:
-        close_session()
     app = Flask(__name__)
     project_root = Path(__file__).resolve().parents[1]
     CORS(
@@ -43,9 +36,29 @@ def create_app() -> Flask:
         supports_credentials=True,
     )
 
+    _db_initialized = False
+
+    def ensure_db_initialized():
+        nonlocal _db_initialized
+        if _db_initialized:
+            return
+        check_database_url()
+        init_database()
+        seed_session = get_session()
+        try:
+            seed_products(seed_session)
+            seed_session.commit()
+        except Exception:
+            seed_session.rollback()
+            raise
+        finally:
+            close_session()
+        _db_initialized = True
+
     @app.before_request
     def attach_session():
         if request.path.startswith("/api/"):
+            ensure_db_initialized()
             g.db = get_session()
 
     @app.teardown_request
@@ -53,7 +66,7 @@ def create_app() -> Flask:
         if hasattr(g, "db"):
             if exc is not None:
                 g.db.rollback()
-        close_session()
+            close_session()
 
     @app.errorhandler(ApiError)
     def handle_api_error(error):

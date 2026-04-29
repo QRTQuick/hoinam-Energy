@@ -6261,3 +6261,93 @@ p, .muted, .product-summary, .section-copy {
 .login-form input {
   font-family: "Inter", sans-serif;
 }
+
+/* ═══════════════════════════════════════════
+   MOBILE TOUCH TARGET OPTIMIZATION
+═══════════════════════════════════════════ */
+@media (hover: none) and (pointer: coarse) {
+  /* Ensure all interactive elements have minimum 44x44px touch target */
+  button,
+  a[role="button"],
+  input[type="button"],
+  input[type="submit"],
+  .button,
+  .snav-link,
+  .snav-pill {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.6rem 1rem;
+  }
+
+  /* Improved button feedback on touch */
+  button:active,
+  a[role="button"]:active,
+  .button:active {
+    transform: scale(0.98);
+  }
+
+  /* Remove hover effects that don't work on touch */
+  .button:hover {
+    transform: none;
+  }
+
+  /* Add active state feedback */
+  .button:active {
+    opacity: 0.9;
+  }
+
+  /* Logout button mobile-friendly */
+  [data-logout-button] {
+    min-height: 44px;
+    padding: 0.65rem 1rem;
+  }
+
+  /* Form inputs touch-friendly */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  textarea,
+  select {
+    min-height: 44px;
+    padding: 0.75rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Disable double-tap zoom on buttons */
+  button,
+  a {
+    touch-action: manipulation;
+  }
+}
+
+/* Extra mobile optimizations for smaller devices */
+@media (max-width: 480px) {
+  button,
+  a[role="button"],
+  .button,
+  .snav-link {
+    min-height: 48px;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  /* Ensure clickable areas have proper spacing */
+  .snav-link {
+    margin: 0.25rem 0;
+  }
+
+  /* Mobile-friendly input sizing */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px; /* Prevents auto-zoom on mobile */
+    min-height: 44px;
+  }
+
+  /* Better tap feedback */
+  * {
+    -webkit-tap-highlight-color: rgba(0, 85, 184, 0.1);
+  }
+}

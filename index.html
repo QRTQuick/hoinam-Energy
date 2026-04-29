@@ -639,6 +639,126 @@
         .hp-brand-grid { grid-template-columns: 1fr; }
         .hp-brand-tile-featured { grid-column: span 1; }
       }
+
+      /* ══ Simplified Brand Cards ══ */
+      .hp-brands-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-top: 3rem;
+      }
+
+      .brand-card {
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        padding: 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition: all 280ms ease;
+        cursor: pointer;
+      }
+
+      .brand-card:hover {
+        border-color: rgba(255,193,7,0.5);
+        background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(0,85,184,0.2);
+      }
+
+      .brand-card .brand-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(0,85,184,0.3) 0%, rgba(255,193,7,0.1) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: rgba(255,255,255,0.6);
+        transition: all 280ms ease;
+      }
+
+      .brand-card:hover .brand-logo {
+        background: linear-gradient(135deg, rgba(0,85,184,0.5) 0%, rgba(255,193,7,0.2) 100%);
+        color: #ffc107;
+        transform: scale(1.1);
+      }
+
+      .brand-card h3 {
+        font-family: var(--font-heading);
+        font-size: 1.3rem;
+        letter-spacing: -0.01em;
+        color: #fff;
+        margin: 0;
+      }
+
+      .brand-card p {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.6);
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      @media (max-width: 1200px) {
+        .hp-brands-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.25rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .hp-brands-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+        }
+
+        .brand-card {
+          padding: 1.5rem 1rem;
+        }
+
+        .brand-card .brand-logo {
+          width: 48px;
+          height: 48px;
+          font-size: 1.6rem;
+        }
+
+        .brand-card h3 {
+          font-size: 1.1rem;
+        }
+
+        .brand-card p {
+          font-size: 0.8rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hp-brands-grid {
+          grid-template-columns: 1fr;
+          gap: 0.75rem;
+        }
+
+        .brand-card {
+          padding: 1.25rem;
+          flex-direction: row;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        .brand-card .brand-logo {
+          flex-shrink: 0;
+        }
+
+        .brand-card h3 {
+          font-size: 1rem;
+        }
+      }
+
       .hp-3d-showcase {
         padding: 7rem 0;
         background: #0a0c12;
@@ -1112,7 +1232,50 @@
         </div>
       </section>
 
-      <!-- ══ HOW WE WORK ══ -->
+      <!-- ══ BRANDS WE CARRY ══ -->
+      <section class="hp-brands">
+        <div class="container">
+          <div class="hp-section-top hp-reveal">
+            <div>
+              <p class="hp-section-kicker">Trusted partners</p>
+              <h2 class="hp-section-h2">Brands we carry</h2>
+            </div>
+            <a class="button button-ghost" href="/shop.html">
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Shop all
+            </a>
+          </div>
+          <div class="hp-brands-grid hp-reveal hp-reveal-delay-1">
+            <a href="/shop.html?store=ecoflow" class="brand-card hp-brand-card-1">
+              <div class="brand-logo">
+                <i class="fas fa-bolt"></i>
+              </div>
+              <h3>EcoFlow</h3>
+              <p>Portable power stations</p>
+            </a>
+            <a href="/shop.html?store=deye" class="brand-card hp-brand-card-2">
+              <div class="brand-logo">
+                <i class="fas fa-sun"></i>
+              </div>
+              <h3>Deye</h3>
+              <p>Solar inverters & hybrid systems</p>
+            </a>
+            <a href="/shop.html?store=bluetti" class="brand-card hp-brand-card-3">
+              <div class="brand-logo">
+                <i class="fas fa-battery-full"></i>
+              </div>
+              <h3>Bluetti</h3>
+              <p>Power solutions & solar panels</p>
+            </a>
+            <a href="/shop.html?store=buttu" class="brand-card hp-brand-card-4">
+              <div class="brand-logo">
+                <i class="fas fa-cog"></i>
+              </div>
+              <h3>Buttu</h3>
+              <p>Solar components & installation</p>
+            </a>
+          </div>
+        </div>
+      </section>
       <section class="hp-process">
         <div class="container">
           <div class="hp-section-top hp-reveal">

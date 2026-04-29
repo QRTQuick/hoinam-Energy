@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
-from sqlalchemy.pool import QueuePool
+from sqlalchemy.pool import NullPool
 
 from .config import get_settings
 
@@ -21,19 +21,16 @@ def get_engine():
         if not settings.database_url:
             raise RuntimeError("DATABASE_URL is required.")
 
-        # Configure connection pooling for high concurrency
-        # pool_size: number of connections to keep in the pool
-        # max_overflow: additional connections that can be created when pool is exhausted
-        # pool_recycle: recycle connections after this many seconds (helps with connection timeout issues)
-        # pool_pre_ping: test connections before using them
+        # Vercel serverless functions are stateless — each invocation may run in a
+        # fresh process, so persistent connection pools (QueuePool) cause connection
+        # exhaustion and timeout errors.  NullPool opens a fresh connection per
+        # request and closes it immediately, which is the correct behaviour for
+        # serverless / edge deployments.
         _engine = create_engine(
             settings.database_url,
             future=True,
-            pool_size=30,
-            max_overflow=60,
-            pool_recycle=3600,
+            poolclass=NullPool,
             pool_pre_ping=True,
-            poolclass=QueuePool,
             echo=False,
             connect_args={
                 "connect_timeout": 10,
