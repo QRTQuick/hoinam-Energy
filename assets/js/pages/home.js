@@ -34,7 +34,8 @@ async function init() {
     if (categoryCount) {
       categoryCount.dataset.countUp = String(categories.size);
       categoryCount.textContent = String(categories.size);
-    }    productGrid.innerHTML = spotlightProducts.map(renderProductCard).join("");
+    }
+    productGrid.innerHTML = spotlightProducts.map(renderProductCard).join("");
     refreshInteractions(productGrid);
     refreshInteractions(document.querySelector(".hero-stats") || document);
   } catch (error) {

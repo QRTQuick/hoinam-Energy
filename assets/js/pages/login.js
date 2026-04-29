@@ -1,4 +1,5 @@
 import { syncSession } from "../api.js";
+import authLoadingManager from "../auth-loading.js";
 import { bootstrapPage, redirectAfterAuth } from "../app-shell.js";
 import {
   firebaseEnabled,
@@ -10,43 +11,34 @@ import {
 } from "../firebase.js";
 import { showToast } from "../ui.js";
 
+const AUTH_SYNC_STATE = {
+  title: "Finalizing your Hoinam Energy session",
+  copy: "Checking your account and preparing your secure dashboard access.",
+  steps: ["Google verified", "Syncing account", "Opening dashboard"]
+};
+
+const DASHBOARD_NAVIGATION_STATE = {
+  title: "Opening your dashboard",
+  copy: "Your account is ready. Hoinam Energy is taking you to your dashboard now.",
+  steps: ["Google verified", "Account ready", "Opening dashboard"]
+};
+
+const GOOGLE_PICKER_STATE = {
+  title: "Opening Google sign-in",
+  copy: "Choose your Google account, then we will bring you back here automatically.",
+  steps: ["Connecting to Google", "Waiting for approval", "Returning to Hoinam"]
+};
+
+function beginDashboardNavigation() {
+  authLoadingManager.beginNavigation(DASHBOARD_NAVIGATION_STATE);
+}
+
 async function completeAuthSuccess() {
-  showAuthLoading("Finalizing your Hoinam Energy session", "Checking your account and opening your dashboard.");
+  authLoadingManager.show(AUTH_SYNC_STATE);
   await syncSession();
   showToast("Authentication successful.", "success");
+  beginDashboardNavigation();
   redirectAfterAuth();
-}
-
-function showAuthLoading(title = "Signing you in", copy = "Google sign-in is complete. Hoinam Energy is creating your secure session.") {
-  let loader = document.getElementById("auth-loading-screen");
-  if (!loader) {
-    loader = document.createElement("div");
-    loader.id = "auth-loading-screen";
-    loader.className = "auth-loading-screen";
-    document.body.append(loader);
-  }
-
-  loader.innerHTML = `
-    <div class="auth-loading-card">
-      <div class="auth-loading-mark">
-        <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">
-      </div>
-      <div class="auth-loading-spinner" aria-hidden="true"></div>
-      <h2>${title}</h2>
-      <p>${copy}</p>
-      <div class="auth-loading-steps">
-        <span>Google verified</span>
-        <span>Syncing account</span>
-        <span>Opening dashboard</span>
-      </div>
-    </div>
-  `;
-  document.body.dataset.authLoading = "true";
-}
-
-function hideAuthLoading() {
-  document.body.dataset.authLoading = "false";
-  document.getElementById("auth-loading-screen")?.remove();
 }
 
 function formatAuthError(error) {
@@ -63,6 +55,29 @@ function sleep(ms) {
   });
 }
 
+async function waitForProfileSync({ attempts = 18, delayMs = 500 } = {}) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const profile = await syncSession();
+      if (profile) {
+        return profile;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+
+    await sleep(delayMs);
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+
+  return null;
+}
+
 async function handleGoogleRedirect() {
   if (!firebaseEnabled) {
     return false;
@@ -71,34 +86,38 @@ async function handleGoogleRedirect() {
   let hadRedirectResult = false;
 
   try {
-    showAuthLoading();
+    authLoadingManager.show(AUTH_SYNC_STATE);
     const result = await getGoogleRedirectResult();
     hadRedirectResult = Boolean(result?.user);
   } catch (error) {
-    hideAuthLoading();
+    authLoadingManager.hide();
     showToast(formatAuthError(error), "error");
     return false;
   }
 
   const user = await waitForAuthReady();
   if (!user && !hadRedirectResult) {
-    hideAuthLoading();
+    authLoadingManager.hide();
     return false;
   }
 
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const profile = await syncSession();
-    if (profile) {
-      showToast("Authentication successful.", "success");
-      redirectAfterAuth();
-      return true;
+  try {
+    const profile = await waitForProfileSync();
+    if (!profile) {
+      authLoadingManager.hide();
+      showToast("Google sign-in completed, but the session could not be restored yet. Please try again.", "error");
+      return false;
     }
-    await sleep(250);
-  }
 
-  hideAuthLoading();
-  showToast("Google sign-in completed, but the session could not be restored yet. Please try again.", "error");
-  return false;
+    showToast("Authentication successful.", "success");
+    beginDashboardNavigation();
+    redirectAfterAuth();
+    return true;
+  } catch (error) {
+    authLoadingManager.hide();
+    showToast(formatAuthError(error), "error");
+    return false;
+  }
 }
 
 async function init() {
@@ -109,6 +128,7 @@ async function init() {
 
   const profile = await bootstrapPage(activePage);
   if (profile) {
+    beginDashboardNavigation();
     redirectAfterAuth();
     return;
   }
@@ -128,13 +148,18 @@ async function init() {
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
+        authLoadingManager.show({
+          title: "Signing you in",
+          copy: "Validating your details and preparing your dashboard access.",
+          steps: ["Checking details", "Syncing account", "Opening dashboard"]
+        });
         await loginWithEmail({
           email: loginForm.email.value.trim(),
           password: loginForm.password.value
         });
         await completeAuthSuccess();
       } catch (error) {
-        hideAuthLoading();
+        authLoadingManager.hide();
         showToast(formatAuthError(error), "error");
       }
     });
@@ -144,6 +169,11 @@ async function init() {
     registerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
+        authLoadingManager.show({
+          title: "Creating your account",
+          copy: "Saving your details and preparing your dashboard access.",
+          steps: ["Creating account", "Syncing profile", "Opening dashboard"]
+        });
         await registerWithEmail({
           name: registerForm.full_name.value.trim(),
           email: registerForm.email.value.trim(),
@@ -151,7 +181,7 @@ async function init() {
         });
         await completeAuthSuccess();
       } catch (error) {
-        hideAuthLoading();
+        authLoadingManager.hide();
         showToast(formatAuthError(error), "error");
       }
     });
@@ -160,10 +190,10 @@ async function init() {
   googleButtons.forEach((button) => {
     button.addEventListener("click", async () => {
       try {
-        showAuthLoading("Opening Google sign-in", "Choose your Google account, then we will bring you back here automatically.");
+        authLoadingManager.beginNavigation(GOOGLE_PICKER_STATE);
         await loginWithGoogle();
       } catch (error) {
-        hideAuthLoading();
+        authLoadingManager.hide();
         showToast(formatAuthError(error), "error");
       }
     });

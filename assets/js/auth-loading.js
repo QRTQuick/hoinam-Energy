@@ -1,111 +1,131 @@
-/**
- * Auth Loading Manager
- * Displays and manages loading overlay during authentication
- */
+const OVERLAY_ID = "auth-loading-screen";
+const STATE_KEY = "hoinam_auth_loading_state";
+const MAX_STATE_AGE_MS = 90 * 1000;
 
-export class AuthLoadingManager {
-  constructor() {
-    this.overlayId = 'auth-loading-overlay';
-    this.timeout = null;
-  }
+const DEFAULT_STATE = {
+  title: "Signing you in",
+  copy: "Google sign-in is complete. Hoinam Energy is creating your secure session.",
+  steps: ["Google verified", "Syncing account", "Opening dashboard"]
+};
 
-  /**
-   * Show the auth loading overlay
-   */
-  show() {
-    if (document.getElementById(this.overlayId)) {
-      return; // Already visible
-    }
+function normalizeState(state = {}) {
+  const steps = Array.isArray(state.steps) && state.steps.length
+    ? state.steps.filter(Boolean)
+    : DEFAULT_STATE.steps;
 
-    const overlay = document.createElement('div');
-    overlay.id = this.overlayId;
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      animation: fadeIn 0.3s ease-in;
-    `;
+  return {
+    title: state.title || DEFAULT_STATE.title,
+    copy: state.copy || DEFAULT_STATE.copy,
+    steps,
+    startedAt: Number(state.startedAt || Date.now()),
+    active: true
+  };
+}
 
-    overlay.innerHTML = `
-      <div style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2rem;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 3rem;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 400px;
-        text-align: center;
-        backdrop-filter: blur(10px);
-      ">
-        <div style="
-          width: 50px;
-          height: 50px;
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #667eea;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        "></div>
-        <div>
-          <h2 style="font-size: 1.5rem; color: #333; margin: 0 0 0.5rem 0;">Signing you in</h2>
-          <p style="font-size: 0.95rem; color: #666; margin: 0;">Please wait while we authenticate your account</p>
-        </div>
-        <div style="width: 100%; height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;">
-          <div style="
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-            animation: progress 2s ease-in-out infinite;
-          "></div>
-        </div>
+function buildOverlayMarkup(state) {
+  return `
+    <div class="auth-loading-card">
+      <div class="auth-loading-mark">
+        <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">
       </div>
+      <div class="auth-loading-spinner" aria-hidden="true"></div>
+      <h2>${state.title}</h2>
+      <p>${state.copy}</p>
+      <div class="auth-loading-steps">
+        ${state.steps.map((step) => `<span>${step}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
 
-      <style>
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        @keyframes progress {
-          0% { width: 0%; }
-          50% { width: 100%; }
-          100% { width: 0%; }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      </style>
-    `;
+function readPersistedState() {
+  try {
+    const raw = window.sessionStorage.getItem(STATE_KEY);
+    if (!raw) {
+      return null;
+    }
 
-    document.body.appendChild(overlay);
+    const parsed = JSON.parse(raw);
+    if (!parsed?.active) {
+      window.sessionStorage.removeItem(STATE_KEY);
+      return null;
+    }
 
-    // Auto-hide after 15 seconds with fallback redirect
-    this.timeout = setTimeout(() => {
-      this.hide();
-      window.location.href = '/';
-    }, 15000);
+    if (Date.now() - Number(parsed.startedAt || 0) > MAX_STATE_AGE_MS) {
+      window.sessionStorage.removeItem(STATE_KEY);
+      return null;
+    }
+
+    return normalizeState(parsed);
+  } catch (_error) {
+    window.sessionStorage.removeItem(STATE_KEY);
+    return null;
+  }
+}
+
+class AuthLoadingManager {
+  show(state = {}) {
+    if (!document.body) {
+      return null;
+    }
+
+    const nextState = normalizeState(state);
+    let overlay = document.getElementById(OVERLAY_ID);
+
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = OVERLAY_ID;
+      overlay.className = "auth-loading-screen";
+      document.body.append(overlay);
+    }
+
+    overlay.innerHTML = buildOverlayMarkup(nextState);
+    document.body.dataset.authLoading = "true";
+    return nextState;
   }
 
-  /**
-   * Hide the auth loading overlay
-   */
-  hide() {
-    const overlay = document.getElementById(this.overlayId);
-    if (overlay) {
-      overlay.style.animation = 'fadeOut 0.3s ease-out';
-      setTimeout(() => overlay.remove(), 300);
+  hide({ clearPersisted = true } = {}) {
+    if (document.body) {
+      document.body.dataset.authLoading = "false";
     }
-    if (this.timeout) {
-      clearTimeout(this.timeout);
+
+    document.getElementById(OVERLAY_ID)?.remove();
+    if (clearPersisted) {
+      this.clearPersisted();
+    }
+  }
+
+  persist(state = {}) {
+    const nextState = normalizeState(state);
+    try {
+      window.sessionStorage.setItem(STATE_KEY, JSON.stringify(nextState));
+    } catch (_error) {
+      // Ignore storage failures and still return the state for on-page rendering.
+    }
+    return nextState;
+  }
+
+  beginNavigation(state = {}) {
+    const nextState = this.persist(state);
+    this.show(nextState);
+    return nextState;
+  }
+
+  restorePersisted() {
+    const state = readPersistedState();
+    if (!state) {
+      return null;
+    }
+
+    this.show(state);
+    return state;
+  }
+
+  clearPersisted() {
+    try {
+      window.sessionStorage.removeItem(STATE_KEY);
+    } catch (_error) {
+      // Ignore storage failures.
     }
   }
 }

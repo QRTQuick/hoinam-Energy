@@ -1,4 +1,5 @@
 import { getUserInstallations, getUserOrders, updateProfile } from "../api.js";
+import authLoadingManager from "../auth-loading.js";
 import { bootstrapPage } from "../app-shell.js";
 import { formatDate, formatMoney, showToast, statusBadge } from "../ui.js";
 
@@ -86,8 +87,12 @@ function renderPhoneCompletion(profile) {
 }
 
 async function init() {
-  const profile = await bootstrapPage("dashboard", { requireAuth: true });
+  const profile = await bootstrapPage("dashboard", {
+    requireAuth: true,
+    preserveAuthLoading: true
+  });
   if (!profile) {
+    authLoadingManager.hide();
     return;
   }
 
@@ -156,6 +161,8 @@ async function init() {
       : `<div class="empty-state">No installation requests yet. Book your setup when you're ready.</div>`;
   } catch (error) {
     showToast(error.message, "error");
+  } finally {
+    authLoadingManager.hide();
   }
 }
 

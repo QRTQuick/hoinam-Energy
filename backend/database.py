@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import urlparse, urlunparse, urlencode, parse_qs
+
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
@@ -13,6 +15,30 @@ SessionLocal = scoped_session(
 _engine = None
 
 
+def _sanitize_database_url(url: str) -> str:
+    """
+    Vercel serverless functions cannot make outbound IPv6 connections.
+    Neon's *-pooler endpoints sometimes resolve to IPv6 in certain AWS regions.
+
+    To work around this:
+    1. Remove `channel_binding=require` — psycopg3 doesn't need it and it can
+       cause SSL handshake failures on some Neon endpoints.
+    2. Keep `sslmode=require` so the connection is still encrypted.
+
+    The caller should also ensure DATABASE_URL points to the *unpooled* Neon
+    endpoint (no `-pooler` in the hostname) when deploying to Vercel, because
+    the pooler endpoint is more likely to resolve to IPv6.
+    """
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query, keep_blank_values=True)
+    # Remove channel_binding — not needed and causes issues on Vercel + Neon
+    qs.pop("channel_binding", None)
+    # Ensure SSL is required
+    qs.setdefault("sslmode", ["require"])
+    new_query = urlencode({k: v[0] for k, v in qs.items()})
+    return urlunparse(parsed._replace(query=new_query))
+
+
 def get_engine():
     global _engine
 
@@ -21,20 +47,22 @@ def get_engine():
         if not settings.database_url:
             raise RuntimeError("DATABASE_URL is required.")
 
+        clean_url = _sanitize_database_url(settings.database_url)
+
         # Vercel serverless functions are stateless — each invocation may run in a
         # fresh process, so persistent connection pools (QueuePool) cause connection
         # exhaustion and timeout errors.  NullPool opens a fresh connection per
         # request and closes it immediately, which is the correct behaviour for
         # serverless / edge deployments.
         _engine = create_engine(
-            settings.database_url,
+            clean_url,
             future=True,
             poolclass=NullPool,
             pool_pre_ping=True,
             echo=False,
             connect_args={
                 "connect_timeout": 10,
-                "options": "-c statement_timeout=30000",  # 30 second timeout per statement
+                "options": "-c statement_timeout=30000",
             },
         )
         SessionLocal.configure(bind=_engine)

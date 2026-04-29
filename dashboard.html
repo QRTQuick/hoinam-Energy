@@ -20,6 +20,61 @@
     <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
   <body>
+    <script>
+      (function () {
+        try {
+          var raw = window.sessionStorage.getItem("hoinam_auth_loading_state");
+          if (!raw) {
+            return;
+          }
+
+          var state = JSON.parse(raw);
+          if (!state || !state.active) {
+            return;
+          }
+
+          if (Date.now() - Number(state.startedAt || 0) > 90000) {
+            window.sessionStorage.removeItem("hoinam_auth_loading_state");
+            return;
+          }
+
+          var escapeHtml = function (value) {
+            return String(value || "")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#39;");
+          };
+
+          var steps = Array.isArray(state.steps) && state.steps.length
+            ? state.steps
+            : ["Google verified", "Syncing account", "Opening dashboard"];
+
+          document.body.dataset.authLoading = "true";
+          document.body.insertAdjacentHTML(
+            "afterbegin",
+            '<div id="auth-loading-screen" class="auth-loading-screen">' +
+              '<div class="auth-loading-card">' +
+                '<div class="auth-loading-mark">' +
+                  '<img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">' +
+                "</div>" +
+                '<div class="auth-loading-spinner" aria-hidden="true"></div>' +
+                "<h2>" + escapeHtml(state.title || "Opening your dashboard") + "</h2>" +
+                "<p>" + escapeHtml(state.copy || "Your dashboard is being prepared.") + "</p>" +
+                '<div class="auth-loading-steps">' +
+                  steps.map(function (step) {
+                    return "<span>" + escapeHtml(step) + "</span>";
+                  }).join("") +
+                "</div>" +
+              "</div>" +
+            "</div>"
+          );
+        } catch (_error) {
+          // Ignore restore issues and allow the page to continue loading normally.
+        }
+      })();
+    </script>
     <div id="site-header"></div>
     <main>
       <section class="page-hero">

@@ -2,7 +2,7 @@
   const origin = window.location.origin;
   const hostname = window.location.hostname;
   const useCustomAuthDomain =
-    hostname.endsWith(".vercel.app") || hostname === "hoinam-energy.vercel.app" || hostname === "hoinamenergy.com";
+    hostname.endsWith(".vercel.app") || hostname === "hoinam-energy.vercel.app" || hostname === "hoinamenergy.com" || hostname === "www.hoinamenergy.com";
   const authDomain = useCustomAuthDomain ? hostname : "hoinam-energy-workspace.firebaseapp.com";
 
   window.HOINAM_CONFIG = {

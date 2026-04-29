@@ -12,7 +12,6 @@ import {
   signOut,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import authLoadingManager from "./auth-loading.js";
 
 const firebaseConfig = window.HOINAM_CONFIG?.firebase || {};
 export const firebaseEnabled = Boolean(
@@ -70,7 +69,6 @@ export async function loginWithEmail({ email, password }) {
 
 export async function loginWithGoogle() {
   ensureFirebase();
-  authLoadingManager.show();
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   await signInWithRedirect(auth, provider);
@@ -79,9 +77,7 @@ export async function loginWithGoogle() {
 
 export async function getGoogleRedirectResult() {
   ensureFirebase();
-  const result = await getRedirectResult(auth);
-  authLoadingManager.hide();
-  return result;
+  return getRedirectResult(auth);
 }
 
 export async function updateCurrentUserName(name) {

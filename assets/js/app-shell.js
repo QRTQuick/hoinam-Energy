@@ -1,4 +1,5 @@
 import { syncSession } from "./api.js";
+import authLoadingManager from "./auth-loading.js";
 import { waitForAuthReady } from "./firebase.js";
 import { refreshInteractions } from "./interactions.js";
 import { clearCachedProfile, getCachedProfile } from "./store.js";
@@ -6,6 +7,7 @@ import { injectShell, refreshShell, showToast } from "./ui.js";
 import { MouseGlow } from "./mouse-glow.js";
 
 export async function bootstrapPage(activePage, options = {}) {
+  const restoredAuthLoading = authLoadingManager.restorePersisted();
   document.body.dataset.page = activePage;
   injectShell(activePage);
   refreshInteractions();
@@ -39,20 +41,27 @@ export async function bootstrapPage(activePage, options = {}) {
   refreshShell();
 
   if (options.requireAuth && !profile) {
+    authLoadingManager.hide();
     redirectToLogin();
     return null;
   }
 
   if (options.requireAdmin && profile?.role !== "admin") {
+    authLoadingManager.hide();
     showToast("Admin access is required for this page.", "error");
     redirectToLogin("admin.html");
     return null;
+  }
+
+  if (restoredAuthLoading && !options.preserveAuthLoading) {
+    authLoadingManager.hide();
   }
 
   return profile;
 }
 
 export function redirectToLogin(nextOverride) {
+  authLoadingManager.clearPersisted();
   const next = nextOverride || window.location.pathname.split("/").pop() || "dashboard.html";
   window.location.href = `/login.html?next=${encodeURIComponent(next)}`;
 }
