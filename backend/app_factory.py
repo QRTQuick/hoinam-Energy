@@ -795,6 +795,25 @@ def create_app() -> Flask:
         )
         return json_success([post.to_dict() for post in posts])
 
+    @app.get("/api/blog/unsubscribe/<token>")
+    def blog_unsubscribe(token: str):
+        """Unsubscribe via token link.
+
+        NOTE: This route MUST be registered before GET /api/blog/<post_slug>
+        so Flask doesn't swallow it as a wildcard slug match.
+        """
+        subscriber = (
+            db_session()
+            .query(BlogSubscriber)
+            .filter(BlogSubscriber.unsubscribe_token == token)
+            .first()
+        )
+        if not subscriber:
+            raise ApiError("Unsubscribe link not found or already used.", 404)
+        subscriber.is_active = False
+        db_session().commit()
+        return json_success({"email": subscriber.email}, message="You've been unsubscribed.")
+
     @app.get("/api/blog/<post_slug>")
     def get_blog_post(post_slug: str):
         """Get a single published blog post by slug (public)."""
@@ -989,21 +1008,6 @@ def create_app() -> Flask:
             status_code=201,
             message="Subscribed! Check your inbox for a confirmation.",
         )
-
-    @app.get("/api/blog/unsubscribe/<token>")
-    def blog_unsubscribe(token: str):
-        """Unsubscribe via token link."""
-        subscriber = (
-            db_session()
-            .query(BlogSubscriber)
-            .filter(BlogSubscriber.unsubscribe_token == token)
-            .first()
-        )
-        if not subscriber:
-            raise ApiError("Unsubscribe link not found or already used.", 404)
-        subscriber.is_active = False
-        db_session().commit()
-        return json_success({"email": subscriber.email}, message="You've been unsubscribed.")
 
     @app.get("/api/admin/blog/subscribers")
     def list_blog_subscribers():
