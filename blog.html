@@ -47,6 +47,36 @@
                 </div>
             </div>
         </section>
+
+        <!-- Subscribe / unsubscribe section -->
+        <section class="section blog-subscribe-section">
+            <div class="container">
+                <div class="blog-subscribe-card panel" id="blog-subscribe-card">
+                    <div class="blog-subscribe-copy">
+                        <span class="eyebrow"><i class="fa-solid fa-bell" aria-hidden="true"></i> Stay updated</span>
+                        <h2>Get new posts in your inbox</h2>
+                        <p class="muted">Subscribe and we'll email you whenever we publish a new article — solar tips, product news, and energy guides. No spam, unsubscribe any time.</p>
+                    </div>
+                    <form class="blog-subscribe-form" id="blog-subscribe-form" novalidate>
+                        <div class="blog-subscribe-fields">
+                            <input type="text" name="sub_name" placeholder="Your name (optional)" autocomplete="name">
+                            <input type="email" name="sub_email" placeholder="Your email address" required autocomplete="email">
+                        </div>
+                        <button class="button" type="submit" id="blog-subscribe-btn">
+                            <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Subscribe
+                        </button>
+                        <p class="blog-subscribe-status hidden" id="blog-subscribe-status"></p>
+                    </form>
+                </div>
+                <!-- Unsubscribe confirmation (shown when ?unsubscribe=token in URL) -->
+                <div class="blog-unsubscribe-card panel hidden" id="blog-unsubscribe-card">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true" style="font-size:2rem;color:#1a7a4a;margin-bottom:0.5rem;display:block;"></i>
+                    <h3 id="blog-unsubscribe-msg">You've been unsubscribed.</h3>
+                    <p class="muted">You won't receive any more blog notifications from Hoinam Energy.</p>
+                    <a href="/blog.html" class="button button-ghost" style="margin-top:1rem;">Back to blog</a>
+                </div>
+            </div>
+        </section>
     </main>
     <div id="site-footer"></div>
     <script src="/assets/js/site-config.js"></script>

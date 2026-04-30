@@ -736,6 +736,53 @@ def create_app() -> Flask:
         users = db_session().query(User).order_by(User.created_at.desc()).all()
         return json_success([user.to_dict() for user in users])
 
+    def _notify_subscribers_of_new_post(post: BlogPost) -> None:
+        """Email all active subscribers about a newly published blog post."""
+        if not smtp_is_configured(settings):
+            app.logger.warning("SMTP not configured — skipping subscriber notifications for %s.", post.slug)
+            return
+
+        subscribers = (
+            db_session()
+            .query(BlogSubscriber)
+            .filter(BlogSubscriber.is_active.is_(True))
+            .all()
+        )
+        if not subscribers:
+            return
+
+        post_url = f"{settings.frontend_url}/blog-post.html?slug={post.slug}"
+        sent = 0
+        failed = 0
+        for subscriber in subscribers:
+            try:
+                msg = build_new_post_notification_message(
+                    settings=settings,
+                    subscriber_email=subscriber.email,
+                    subscriber_name=subscriber.name,
+                    post_title=post.title,
+                    post_excerpt=post.excerpt or "",
+                    post_url=post_url,
+                    unsubscribe_token=subscriber.unsubscribe_token,
+                    frontend_url=settings.frontend_url,
+                )
+                send_message_via_smtp(settings, msg)
+                sent += 1
+            except Exception:
+                app.logger.exception(
+                    "Failed to send new-post notification to %s for post %s.",
+                    subscriber.email,
+                    post.slug,
+                )
+                failed += 1
+
+        app.logger.info(
+            "New-post notifications for '%s': %d sent, %d failed.",
+            post.title,
+            sent,
+            failed,
+        )
+
     @app.get("/api/blog")
     def list_blog_posts():
         """Get all published blog posts (public)."""
@@ -808,6 +855,13 @@ def create_app() -> Flask:
         )
         db_session().add(post)
         db_session().commit()
+
+        if post.is_published:
+            try:
+                _notify_subscribers_of_new_post(post)
+            except Exception:
+                app.logger.exception("Subscriber notification failed for new post %s.", post.slug)
+
         return json_success(post.to_dict(), status_code=201, message="Blog post created.")
 
     @app.put("/api/admin/blog/<int:post_id>")
@@ -845,16 +899,25 @@ def create_app() -> Flask:
         if "tags" in payload:
             post.tags = payload.get("tags", [])
 
-        # Handle publish/unpublish
+        # Handle publish/unpublish — track transition before mutating
+        just_published = False
         if "is_published" in payload:
             was_published = post.is_published
             post.is_published = bool(payload.get("is_published"))
             if post.is_published and not was_published:
                 post.published_at = datetime.now(timezone.utc)
+                just_published = True
             elif not post.is_published:
                 post.published_at = None
 
         db_session().commit()
+
+        if just_published:
+            try:
+                _notify_subscribers_of_new_post(post)
+            except Exception:
+                app.logger.exception("Subscriber notification failed for post %s.", post.slug)
+
         return json_success(post.to_dict(), message="Blog post updated.")
 
     @app.delete("/api/admin/blog/<int:post_id>")
@@ -867,6 +930,93 @@ def create_app() -> Flask:
         db_session().delete(post)
         db_session().commit()
         return json_success({"id": post_id}, message="Blog post deleted.")
+
+    # ── Blog subscriptions ────────────────────────────────────────────────────
+
+    @app.post("/api/blog/subscribe")
+    def blog_subscribe():
+        """Subscribe an email address to blog post notifications."""
+        payload = request.get_json(silent=True) or {}
+        email = (payload.get("email") or "").strip().lower()
+        name = (payload.get("name") or "").strip() or None
+        if not email or "@" not in email:
+            raise ApiError("A valid email address is required.", 400)
+
+        existing = (
+            db_session()
+            .query(BlogSubscriber)
+            .filter(BlogSubscriber.email == email)
+            .first()
+        )
+        if existing:
+            if existing.is_active:
+                return json_success(
+                    existing.to_dict(),
+                    message="You're already subscribed.",
+                )
+            # Re-activate a previously unsubscribed address
+            existing.is_active = True
+            existing.name = name or existing.name
+            db_session().commit()
+            subscriber = existing
+        else:
+            subscriber = BlogSubscriber(
+                email=email,
+                name=name,
+                is_active=True,
+                unsubscribe_token=generate_unsubscribe_token(),
+            )
+            db_session().add(subscriber)
+            db_session().commit()
+
+        if smtp_is_configured(settings):
+            try:
+                msg = build_subscription_confirmation_message(
+                    settings=settings,
+                    subscriber_email=subscriber.email,
+                    subscriber_name=subscriber.name,
+                    unsubscribe_token=subscriber.unsubscribe_token,
+                    frontend_url=settings.frontend_url,
+                )
+                send_message_via_smtp(settings, msg)
+            except Exception:
+                app.logger.exception(
+                    "Subscription confirmation email failed for %s.", email
+                )
+
+        return json_success(
+            subscriber.to_dict(),
+            status_code=201,
+            message="Subscribed! Check your inbox for a confirmation.",
+        )
+
+    @app.get("/api/blog/unsubscribe/<token>")
+    def blog_unsubscribe(token: str):
+        """Unsubscribe via token link."""
+        subscriber = (
+            db_session()
+            .query(BlogSubscriber)
+            .filter(BlogSubscriber.unsubscribe_token == token)
+            .first()
+        )
+        if not subscriber:
+            raise ApiError("Unsubscribe link not found or already used.", 404)
+        subscriber.is_active = False
+        db_session().commit()
+        return json_success({"email": subscriber.email}, message="You've been unsubscribed.")
+
+    @app.get("/api/admin/blog/subscribers")
+    def list_blog_subscribers():
+        """List all blog subscribers (admin only)."""
+        authenticate(admin=True)
+        subscribers = (
+            db_session()
+            .query(BlogSubscriber)
+            .filter(BlogSubscriber.is_active.is_(True))
+            .order_by(BlogSubscriber.created_at.desc())
+            .all()
+        )
+        return json_success([s.to_dict() for s in subscribers])
 
     @app.get("/api/admin/stats")
     def admin_stats():

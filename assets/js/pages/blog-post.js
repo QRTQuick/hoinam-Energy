@@ -1,4 +1,4 @@
-import { getBlogPost } from "../api.js";
+import { getBlogPost, subscribeToBlog } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { formatDate, showToast } from "../ui.js";
 
@@ -94,6 +94,36 @@ async function init() {
     document.getElementById("blog-post-container").style.display = "block";
     document.getElementById("blog-post-loading").style.display = "none";
     document.getElementById("blog-post-error").style.display = "none";
+
+    // Wire subscribe form
+    const form = document.getElementById("blog-subscribe-form");
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = form.sub_email.value.trim();
+        const name = form.sub_name.value.trim();
+        const btn = document.getElementById("blog-subscribe-btn");
+        const status = document.getElementById("blog-subscribe-status");
+        if (!email) { showToast("Please enter your email address.", "error"); return; }
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Subscribing…`;
+        try {
+          await subscribeToBlog(email, name);
+          form.reset();
+          btn.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Subscribed!`;
+          status.className = "blog-subscribe-status blog-subscribe-success";
+          status.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> You're subscribed! Check your inbox for a confirmation.`;
+          status.classList.remove("hidden");
+        } catch (error) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Subscribe`;
+          status.className = "blog-subscribe-status blog-subscribe-error";
+          status.innerHTML = `<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${error.message}`;
+          status.classList.remove("hidden");
+          showToast(error.message, "error");
+        }
+      });
+    }
 
   } catch (error) {
     console.error("Error loading blog post:", error);

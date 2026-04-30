@@ -221,3 +221,14 @@ export function uploadPaymentReceipt(verificationCode, file) {
 export function getOrderPayment(verificationCode) {
   return apiFetch(`/payments/${verificationCode}`, { authRequired: true });
 }
+
+export function subscribeToBlog(email, name = "") {
+  return apiFetch("/blog/subscribe", {
+    method: "POST",
+    body: { email, name }
+  });
+}
+
+export function unsubscribeFromBlog(token) {
+  return apiFetch(`/blog/unsubscribe/${token}`);
+}
