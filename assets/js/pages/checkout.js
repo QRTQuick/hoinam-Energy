@@ -135,6 +135,7 @@ function renderPaymentOptions() {
   const availableTransfers = transferOptions();
   const hasTransfers = availableTransfers.length > 0;
   const initialTransfer = availableTransfers[0];
+  const unavailableMethods = paymentOptions.filter((o) => o._unavailable);
 
   target.innerHTML = `
     ${
@@ -146,7 +147,7 @@ function renderPaymentOptions() {
               <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
             </span>
             <span class="payment-option-copy">
-              <strong>Transfer</strong>
+              <strong>Transfer before delivery</strong>
               <small>Place the order first, then transfer from your banking app and use the bank account you choose below.</small>
             </span>
           </label>
@@ -163,6 +164,21 @@ function renderPaymentOptions() {
         <small>Reserve the order and pay when Hoinam Energy confirms delivery.</small>
       </span>
     </label>
+    ${unavailableMethods
+      .map(
+        (opt) => `
+      <div class="payment-option-card payment-option-card--unavailable" aria-disabled="true">
+        <span class="payment-option-icon">
+          <i class="fa-solid fa-wrench" aria-hidden="true"></i>
+        </span>
+        <span class="payment-option-copy">
+          <strong><s>${opt.label}</s></strong>
+          <small class="payment-option-maintenance"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${opt.reason || "Currently under maintenance"}</small>
+        </span>
+      </div>
+    `
+      )
+      .join("")}
   `;
 
   if (hasTransfers) {
@@ -554,6 +570,9 @@ async function init() {
   try {
     const optionsPayload = await getPaymentOptions();
     paymentOptions = optionsPayload.methods || [];
+    // Tag unavailable methods so the UI can render them as disabled/strikethrough
+    const unavailable = (optionsPayload.unavailable || []).map((opt) => ({ ...opt, _unavailable: true }));
+    paymentOptions = [...paymentOptions, ...unavailable];
     renderPaymentOptions();
   } catch (error) {
     showToast(error.message, "error");

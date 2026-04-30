@@ -101,7 +101,7 @@ class Settings:
     )
     order_notification_email: str = field(
         default_factory=lambda: os.getenv(
-            "ORDER_NOTIFICATION_EMAIL", "hoinamenergy@gmail.com"
+            "ORDER_NOTIFICATION_EMAIL", "sales@hoinamenergy.com"
         ).strip()
     )
     admin_emails: set[str] = field(default_factory=_admin_email_set)

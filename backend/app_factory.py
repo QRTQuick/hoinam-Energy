@@ -365,19 +365,9 @@ def create_app() -> Flask:
         return {
             "methods": [
                 {
-                    "id": "opay_transfer",
-                    "kind": "transfer",
-                    "label": "OPay merchant transfer",
-                    "description": "Place the order now, then pay by transfer to the Hoinam Energy OPay merchant account.",
-                    "bank_name": settings.opay_bank_name,
-                    "account_number": settings.opay_account_number,
-                    "account_name": settings.opay_account_name
-                    or settings.opay_merchant_name,
-                },
-                {
                     "id": "bank_transfer",
                     "kind": "transfer",
-                    "label": "Bank transfer",
+                    "label": "Transfer before delivery",
                     "description": "Place the order now, then pay by direct bank transfer to the Hoinam Energy company account. You'll receive a verification code to include in the transfer narration.",
                     "bank_name": settings.bank_transfer_bank_name,
                     "account_number": settings.bank_transfer_account_number,
@@ -389,7 +379,14 @@ def create_app() -> Flask:
                     "label": "Pay on delivery",
                     "description": "Reserve the order and pay when Hoinam Energy confirms delivery.",
                 },
-            ]
+            ],
+            "unavailable": [
+                {
+                    "id": "opay_transfer",
+                    "label": "OPay merchant",
+                    "reason": "Under maintenance — coming soon.",
+                },
+            ],
         }
 
     def payment_option_by_id(payment_method: str) -> dict | None:
@@ -437,19 +434,17 @@ def create_app() -> Flask:
     def create_order():
         user = authenticate()
         payload = request.get_json(silent=True) or {}
-        payment_method = (payload.get("payment_method") or "opay_transfer").strip()
-        allowed_payment_methods = {"opay_transfer", "bank_transfer", "pay_on_delivery"}
+        payment_method = (payload.get("payment_method") or "bank_transfer").strip()
+        allowed_payment_methods = {"bank_transfer", "pay_on_delivery"}
         if payment_method not in allowed_payment_methods:
             raise ApiError(
-                "Choose OPay transfer, bank transfer, or pay on delivery.", 400
+                "Choose transfer before delivery or pay on delivery.", 400
             )
 
         payment_reference = (
             payload.get("payment_reference") or ""
         ).strip() or generate_payment_reference(
-            "OPAY"
-            if payment_method == "opay_transfer"
-            else "BANK" if payment_method == "bank_transfer" else "POD"
+            "BANK" if payment_method == "bank_transfer" else "POD"
         )
         existing_order = (
             db_session()
@@ -485,12 +480,12 @@ def create_app() -> Flask:
 
         payment_status = (
             "awaiting_transfer"
-            if payment_method in {"opay_transfer", "bank_transfer"}
+            if payment_method == "bank_transfer"
             else "pay_on_delivery"
         )
         order_status = (
             "payment_pending"
-            if payment_method in {"opay_transfer", "bank_transfer"}
+            if payment_method == "bank_transfer"
             else "confirmed"
         )
         order = Order(
