@@ -1047,21 +1047,104 @@ def create_app() -> Flask:
         return json_success([s.to_dict() for s in subscribers])
 
     @app.get("/api/admin/stats")
+    @app.get("/api/admin/stats")
     def admin_stats():
         authenticate(admin=True)
-        revenue = (
-            db_session().query(func.coalesce(func.sum(Order.total_amount), 0)).scalar()
-        )
+
+        # Revenue — confirmed orders only
+        confirmed_revenue = db_session().query(
+            func.coalesce(func.sum(Order.total_amount), 0)
+        ).filter(Order.payment_status == "confirmed").scalar()
+
+        # All-time revenue (including pending)
+        total_revenue = db_session().query(
+            func.coalesce(func.sum(Order.total_amount), 0)
+        ).scalar()
+
+        # Order counts by status
+        orders_total = db_session().query(func.count(Order.id)).scalar()
+        orders_pending = db_session().query(func.count(Order.id)).filter(
+            Order.payment_status.in_(["awaiting_transfer", "receipt_uploaded"])
+        ).scalar()
+        orders_confirmed = db_session().query(func.count(Order.id)).filter(
+            Order.payment_status == "confirmed"
+        ).scalar()
+        orders_pod = db_session().query(func.count(Order.id)).filter(
+            Order.payment_method == "pay_on_delivery"
+        ).scalar()
+
+        # Receipts awaiting admin review
+        receipts_pending = db_session().query(func.count(Payment.id)).filter(
+            Payment.status == "receipt_uploaded"
+        ).scalar()
+
+        # Users
+        users_total = db_session().query(func.count(User.id)).scalar()
+        users_flagged = db_session().query(func.count(User.id)).filter(
+            User.needs_monitoring.is_(True)
+        ).scalar()
+
+        # Products
+        products_active = db_session().query(func.count(Product.id)).filter(
+            Product.active.is_(True)
+        ).scalar()
+        products_low_stock = db_session().query(func.count(Product.id)).filter(
+            Product.active.is_(True),
+            Product.stock > 0,
+            Product.stock <= 3,
+        ).scalar()
+        products_out_of_stock = db_session().query(func.count(Product.id)).filter(
+            Product.active.is_(True),
+            Product.stock == 0,
+        ).scalar()
+
+        # Installations
+        installations_total = db_session().query(func.count(Installation.id)).scalar()
+        installations_pending = db_session().query(func.count(Installation.id)).filter(
+            Installation.status == "pending"
+        ).scalar()
+
+        # Blog
+        blog_posts_published = db_session().query(func.count(BlogPost.id)).filter(
+            BlogPost.is_published.is_(True)
+        ).scalar()
+        blog_subscribers = db_session().query(func.count(BlogSubscriber.id)).filter(
+            BlogSubscriber.is_active.is_(True)
+        ).scalar()
+
+        # Feedback
+        feedback_new = db_session().query(func.count(Feedback.id)).filter(
+            Feedback.status == "new"
+        ).scalar()
+        feedback_total = db_session().query(func.count(Feedback.id)).scalar()
+
         payload = {
-            "users": db_session().query(func.count(User.id)).scalar(),
-            "products": db_session()
-            .query(func.count(Product.id))
-            .filter(Product.active.is_(True))
-            .scalar(),
-            "orders": db_session().query(func.count(Order.id)).scalar(),
-            "installations": db_session().query(func.count(Installation.id)).scalar(),
-            "revenue": float(revenue or 0),
+            # Revenue
+            "revenue": float(confirmed_revenue or 0),
+            "revenue_total": float(total_revenue or 0),
             "currency": settings.default_currency,
+            # Orders
+            "orders": orders_total,
+            "orders_pending": orders_pending,
+            "orders_confirmed": orders_confirmed,
+            "orders_pod": orders_pod,
+            "receipts_pending": receipts_pending,
+            # Users
+            "users": users_total,
+            "users_flagged": users_flagged,
+            # Products
+            "products": products_active,
+            "products_low_stock": products_low_stock,
+            "products_out_of_stock": products_out_of_stock,
+            # Installations
+            "installations": installations_total,
+            "installations_pending": installations_pending,
+            # Blog
+            "blog_posts": blog_posts_published,
+            "blog_subscribers": blog_subscribers,
+            # Feedback
+            "feedback_new": feedback_new,
+            "feedback_total": feedback_total,
         }
         return json_success(payload)
 

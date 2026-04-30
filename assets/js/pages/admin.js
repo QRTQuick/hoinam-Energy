@@ -5,6 +5,7 @@ import {
   getAdminOrders,
   getAdminStats,
   getAdminUsers,
+  getAdminFeedback,
   listProducts,
   updateInstallationAdmin,
   updateProduct,
@@ -315,46 +316,158 @@ function renderInstallations() {
   `;
 }
 
+function renderFeedback(feedbackItems) {
+  const target = document.getElementById("admin-feedback");
+  if (!target) return;
+
+  if (!feedbackItems.length) {
+    target.innerHTML = `<p class="muted" style="padding:1rem;">No feedback submissions yet.</p>`;
+    return;
+  }
+
+  const stars = (n) => n ? "★".repeat(n) + "☆".repeat(5 - n) : "—";
+  const typeLabels = {
+    general: "General",
+    pre_service: "Before service",
+    post_service: "After service",
+    product: "Product",
+    installation: "Installation",
+  };
+
+  target.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>From</th>
+          <th>Type</th>
+          <th>Rating</th>
+          <th>Message</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${feedbackItems.map((f) => `
+          <tr>
+            <td>
+              <strong>${f.name}</strong><br>
+              ${f.email ? `<a href="mailto:${f.email}" class="muted">${f.email}</a>` : ""}
+              ${f.phone ? `<br><span class="muted">${f.phone}</span>` : ""}
+            </td>
+            <td><span class="badge">${typeLabels[f.service_type] || f.service_type}</span></td>
+            <td style="color:#f5a623;letter-spacing:2px;">${stars(f.rating)}</td>
+            <td style="max-width:280px;white-space:pre-wrap;">${f.message}</td>
+            <td>${f.order_number || "—"}</td>
+            <td>${statusBadge(f.status)}</td>
+            <td>${formatDate(f.created_at)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
 async function loadAdminData() {
-  const [stats, loadedProducts, users, orders, loadedInstallations] = await Promise.all([
+  const [stats, loadedProducts, users, orders, loadedInstallations, feedbackItems] = await Promise.all([
     getAdminStats(),
     listProducts(),
     getAdminUsers(),
     getAdminOrders(),
-    getAdminInstallations()
+    getAdminInstallations(),
+    getAdminFeedback()
   ]);
 
   products = loadedProducts;
   installations = loadedInstallations;
 
   document.getElementById("admin-stats").innerHTML = `
-    <article class="stat-card">
+    <!-- Revenue -->
+    <article class="stat-card stat-card-wide">
       <div class="stat-card-head">
         <i class="fa-solid fa-sack-dollar" aria-hidden="true"></i>
-        <span>Revenue</span>
+        <span>Confirmed revenue</span>
       </div>
       <strong>${formatMoney(stats.revenue, stats.currency)}</strong>
+      <small class="muted">All-time incl. pending: ${formatMoney(stats.revenue_total, stats.currency)}</small>
     </article>
-    <article class="stat-card">
-      <div class="stat-card-head">
-        <i class="fa-solid fa-users" aria-hidden="true"></i>
-        <span>Users</span>
-      </div>
-      <strong>${stats.users}</strong>
-    </article>
+
+    <!-- Orders -->
     <article class="stat-card">
       <div class="stat-card-head">
         <i class="fa-solid fa-cart-flatbed" aria-hidden="true"></i>
-        <span>Orders</span>
+        <span>Total orders</span>
       </div>
       <strong>${stats.orders}</strong>
+      <small class="muted">${stats.orders_confirmed} confirmed · ${stats.orders_pod} pay-on-delivery</small>
     </article>
+
+    <article class="stat-card ${stats.orders_pending > 0 ? "stat-card-alert" : ""}">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-clock" aria-hidden="true"></i>
+        <span>Awaiting transfer</span>
+      </div>
+      <strong>${stats.orders_pending}</strong>
+      <small class="muted">Orders waiting for payment</small>
+    </article>
+
+    <article class="stat-card ${stats.receipts_pending > 0 ? "stat-card-alert" : ""}">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-file-image" aria-hidden="true"></i>
+        <span>Receipts to review</span>
+      </div>
+      <strong>${stats.receipts_pending}</strong>
+      <small class="muted">Proof of payment uploaded</small>
+    </article>
+
+    <!-- Users -->
+    <article class="stat-card">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-users" aria-hidden="true"></i>
+        <span>Registered users</span>
+      </div>
+      <strong>${stats.users}</strong>
+      <small class="muted">${stats.users_flagged > 0 ? `<span style="color:#c0392b">${stats.users_flagged} flagged for review</span>` : "No flags"}</small>
+    </article>
+
+    <!-- Products -->
+    <article class="stat-card">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+        <span>Active products</span>
+      </div>
+      <strong>${stats.products}</strong>
+      <small class="muted">${stats.products_out_of_stock} out of stock · ${stats.products_low_stock} low stock</small>
+    </article>
+
+    <!-- Installations -->
     <article class="stat-card">
       <div class="stat-card-head">
         <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
         <span>Installations</span>
       </div>
       <strong>${stats.installations}</strong>
+      <small class="muted">${stats.installations_pending} pending assignment</small>
+    </article>
+
+    <!-- Blog -->
+    <article class="stat-card">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-newspaper" aria-hidden="true"></i>
+        <span>Blog</span>
+      </div>
+      <strong>${stats.blog_posts} posts</strong>
+      <small class="muted">${stats.blog_subscribers} subscribers</small>
+    </article>
+
+    <!-- Feedback -->
+    <article class="stat-card ${stats.feedback_new > 0 ? "stat-card-alert" : ""}">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-star" aria-hidden="true"></i>
+        <span>Feedback</span>
+      </div>
+      <strong>${stats.feedback_new} new</strong>
+      <small class="muted">${stats.feedback_total} total submissions</small>
     </article>
   `;
 
@@ -363,6 +476,7 @@ async function loadAdminData() {
   renderPendingDeliveries(orders);
   renderOrders(orders);
   renderInstallations();
+  renderFeedback(feedbackItems);
 }
 
 async function init() {

@@ -6913,3 +6913,36 @@ p,
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin stat card variants */
+.stat-card small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.stat-card-alert {
+  border-color: rgba(192, 57, 43, 0.35) !important;
+  background: #fff8f7 !important;
+}
+
+.stat-card-alert .stat-card-head i,
+.stat-card-alert .stat-card-head span {
+  color: #c0392b;
+}
+
+.stat-card-alert strong {
+  color: #c0392b;
+}
+
+.stat-card-wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 600px) {
+  .stat-card-wide {
+    grid-column: span 1;
+  }
+}
