@@ -6946,3 +6946,338 @@ p,
     grid-column: span 1;
   }
 }
+
+/* ── Stock error modal ─────────────────────────────────────────────────────── */
+.stock-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 40, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: stock-modal-fade-in 200ms ease;
+}
+
+@keyframes stock-modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.stock-modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 2rem 2rem 1.75rem;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  animation: stock-modal-slide-up 220ms ease;
+  text-align: center;
+}
+
+@keyframes stock-modal-slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.stock-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff3cd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.75rem;
+  color: #c0392b;
+}
+
+.stock-modal-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  color: var(--heading);
+}
+
+.stock-modal-card p {
+  margin: 0 0 0.75rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+  font-size: 0.97rem;
+}
+
+.stock-modal-advice {
+  font-size: 0.9rem !important;
+  color: var(--text-soft) !important;
+}
+
+.stock-modal-discount {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: #f0faf5;
+  border: 1px solid #a3e4c1;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin: 1.25rem 0 1.5rem;
+  text-align: left;
+}
+
+.stock-modal-discount > i {
+  color: #1a7a4a;
+  font-size: 1.1rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.stock-modal-discount strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #1a7a4a;
+  margin-bottom: 0.5rem;
+}
+
+.stock-modal-code {
+  font-family: "Courier New", monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #0055b8;
+  margin-bottom: 0.4rem;
+}
+
+.stock-modal-copy-btn {
+  background: none;
+  border: 1px solid #a3e4c1;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.82rem;
+  color: #1a7a4a;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.stock-modal-copy-btn:hover {
+  background: #d4f5e5;
+}
+
+.stock-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Coupon input (checkout) ───────────────────────────────────────────────── */
+.coupon-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.coupon-input-row input {
+  flex: 1;
+}
+
+.coupon-status {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.coupon-valid {
+  background: #eafaf1;
+  color: #1a7a4a;
+  border: 1px solid #a3e4c1;
+}
+
+.coupon-invalid {
+  background: #fef0f0;
+  color: #c0392b;
+  border: 1px solid #f5c6c6;
+}
+
+.summary-row-discount {
+  color: #1a7a4a;
+}
+
+.discount-amount {
+  color: #1a7a4a !important;
+}
+
+.summary-row-total {
+  border-top: 2px solid var(--line);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* Coupon form in admin */
+.coupon-form {
+  border: 1px dashed rgba(0, 85, 184, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: #f8fafd;
+}
+
+/* ── Season banner ─────────────────────────────────────────────────────────── */
+.season-banner {
+  width: 100%;
+  text-align: center;
+  padding: 0.55rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  position: relative;
+  z-index: 200;
+}
+
+/* ── Season picker (admin) ─────────────────────────────────────────────────── */
+.season-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.season-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(0, 85, 184, 0.12);
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  min-width: 80px;
+}
+
+.season-tile:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.season-tile.is-active {
+  border-color: var(--primary);
+  background: rgba(0, 85, 184, 0.07);
+}
+
+.season-tile-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.season-tile-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.season-tile.is-active .season-tile-label {
+  color: var(--primary);
+}
+
+/* ── Christmas theme ───────────────────────────────────────────────────────── */
+[data-season="christmas"] .season-banner {
+  background: linear-gradient(90deg, #c0392b, #922b21, #c0392b);
+  color: #fff;
+}
+
+[data-season="christmas"] .site-header {
+  border-bottom-color: rgba(192, 57, 43, 0.25);
+}
+
+[data-season="christmas"] .button {
+  background: #c0392b;
+}
+
+[data-season="christmas"] .button:hover {
+  background: #a93226;
+}
+
+[data-season="christmas"] .brand-mark img {
+  filter: drop-shadow(0 0 6px rgba(192, 57, 43, 0.4));
+}
+
+/* ── New Year theme ────────────────────────────────────────────────────────── */
+[data-season="new_year"] .season-banner {
+  background: linear-gradient(90deg, #0d1b2a, #1a3a5c, #0d1b2a);
+  color: #ffd700;
+}
+
+[data-season="new_year"] .button {
+  background: #1a3a5c;
+}
+
+/* ── Easter theme ──────────────────────────────────────────────────────────── */
+[data-season="easter"] .season-banner {
+  background: linear-gradient(90deg, #a8e6cf, #dcedc1, #ffd3b6);
+  color: #2d6a4f;
+}
+
+[data-season="easter"] .button {
+  background: #27ae60;
+}
+
+[data-season="easter"] .button:hover {
+  background: #1e8449;
+}
+
+/* ── Eid theme ─────────────────────────────────────────────────────────────── */
+[data-season="eid"] .season-banner {
+  background: linear-gradient(90deg, #1a5276, #154360, #1a5276);
+  color: #f0e68c;
+}
+
+[data-season="eid"] .button {
+  background: #1a5276;
+}
+
+/* ── Independence Day (Nigeria) theme ─────────────────────────────────────── */
+[data-season="independence"] .season-banner {
+  background: linear-gradient(90deg, #008751, #006400, #008751);
+  color: #fff;
+}
+
+[data-season="independence"] .button {
+  background: #008751;
+}
+
+[data-season="independence"] .button:hover {
+  background: #006400;
+}
+
+/* ── Valentine's Day theme ─────────────────────────────────────────────────── */
+[data-season="valentine"] .season-banner {
+  background: linear-gradient(90deg, #e91e8c, #c0392b, #e91e8c);
+  color: #fff;
+}
+
+[data-season="valentine"] .button {
+  background: #c0392b;
+}
+
+/* ── Halloween theme ───────────────────────────────────────────────────────── */
+[data-season="halloween"] .season-banner {
+  background: linear-gradient(90deg, #1a1a2e, #e67e22, #1a1a2e);
+  color: #e67e22;
+}
+
+[data-season="halloween"] .button {
+  background: #e67e22;
+}
+
+[data-season="halloween"] .button:hover {
+  background: #ca6f1e;
+}
+
+/* ── Custom theme ──────────────────────────────────────────────────────────── */
+[data-season="custom"] .season-banner {
+  background: linear-gradient(90deg, #0055b8, #0b79de, #0055b8);
+  color: #fff;
+}

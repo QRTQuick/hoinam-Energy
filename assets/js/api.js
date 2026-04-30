@@ -37,7 +37,13 @@ export async function apiFetch(path, options = {}) {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.success === false) {
-    throw new Error(payload.message || "The request could not be completed.");
+    const err = new Error(payload.message || "The request could not be completed.");
+    // Attach structured error data for special cases like stock errors
+    if (payload.error_type) {
+      err.errorType = payload.error_type;
+      err.errorData = payload;
+    }
+    throw err;
   }
 
   return payload.data;
@@ -276,4 +282,50 @@ export function submitFeedback(payload) {
 
 export function getAdminFeedback() {
   return apiFetch("/admin/feedback", { authRequired: true });
+}
+
+export function validateCoupon(code, subtotal) {
+  return apiFetch("/coupons/validate", {
+    method: "POST",
+    body: { code, subtotal }
+  });
+}
+
+export function getAdminCoupons() {
+  return apiFetch("/admin/coupons", { authRequired: true });
+}
+
+export function createCoupon(payload) {
+  return apiFetch("/admin/coupons", {
+    method: "POST",
+    authRequired: true,
+    body: payload
+  });
+}
+
+export function updateCoupon(couponId, payload) {
+  return apiFetch(`/admin/coupons/${couponId}`, {
+    method: "PUT",
+    authRequired: true,
+    body: payload
+  });
+}
+
+export function deleteCoupon(couponId) {
+  return apiFetch(`/admin/coupons/${couponId}`, {
+    method: "DELETE",
+    authRequired: true
+  });
+}
+
+export function getSeason() {
+  return apiFetch("/season");
+}
+
+export function setSeason(payload) {
+  return apiFetch("/admin/season", {
+    method: "POST",
+    authRequired: true,
+    body: payload
+  });
 }

@@ -6,6 +6,12 @@ import {
   getAdminStats,
   getAdminUsers,
   getAdminFeedback,
+  getAdminCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  getSeason,
+  setSeason,
   listProducts,
   updateInstallationAdmin,
   updateProduct,
@@ -14,6 +20,7 @@ import {
   confirmDelivery
 } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
+import { SEASON_META, applySeason } from "../app-shell.js";
 import { formatDate, formatMoney, productMedia, showToast, statusBadge } from "../ui.js";
 
 let products = [];
@@ -368,14 +375,131 @@ function renderFeedback(feedbackItems) {
   `;
 }
 
+let currentSeason = "default";
+
+function renderSeasonPicker(active) {
+  currentSeason = active || "default";
+  const picker = document.getElementById("season-picker");
+  if (!picker) return;
+
+  picker.innerHTML = Object.entries(SEASON_META).map(([key, meta]) => `
+    <button
+      type="button"
+      class="season-tile ${currentSeason === key ? "is-active" : ""}"
+      data-season-key="${key}"
+      title="${meta.label}"
+    >
+      <span class="season-tile-emoji">${meta.emoji || "🌐"}</span>
+      <span class="season-tile-label">${meta.label}</span>
+    </button>
+  `).join("");
+
+  picker.querySelectorAll("[data-season-key]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentSeason = btn.dataset.seasonKey;
+      picker.querySelectorAll("[data-season-key]").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+    });
+  });
+}
+
+async function loadSeasonData() {
+  try {
+    const data = await getSeason();
+    renderSeasonPicker(data.season);
+    const bannerInput = document.querySelector('input[name="season_banner"]');
+    if (bannerInput) bannerInput.value = data.banner || "";
+  } catch (_) {
+    renderSeasonPicker("default");
+  }
+}
+
+function renderCoupons(coupons) {
+  const target = document.getElementById("admin-coupons");
+  if (!target) return;
+
+  if (!coupons.length) {
+    target.innerHTML = `<p class="muted" style="padding:1rem;">No coupons yet. Click "New coupon" to create one.</p>`;
+    return;
+  }
+
+  target.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Discount</th>
+          <th>Min order</th>
+          <th>Uses</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${coupons.map((c) => `
+          <tr>
+            <td>
+              <strong style="font-family:monospace;letter-spacing:0.05em;">${c.code}</strong>
+              ${c.description ? `<br><span class="muted">${c.description}</span>` : ""}
+            </td>
+            <td>${c.discount_type === "percent" ? `${c.discount_value}%` : formatMoney(c.discount_value)} off</td>
+            <td>${c.min_order_amount > 0 ? formatMoney(c.min_order_amount) : "None"}</td>
+            <td>${c.uses}${c.max_uses ? ` / ${c.max_uses}` : " / ∞"}</td>
+            <td>${c.expires_at ? formatDate(c.expires_at) : "Never"}</td>
+            <td>${c.is_active ? '<span class="badge">Active</span>' : '<span class="badge" style="background:var(--soft);">Inactive</span>'}</td>
+            <td>
+              <div class="inline-actions">
+                <button class="button button-ghost" type="button" data-edit-coupon="${c.id}">Edit</button>
+                <button class="button button-danger" type="button" data-delete-coupon="${c.id}">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function couponFormPayload(form) {
+  const f = (name) => form.elements.namedItem(name);
+  return {
+    code: f("code").value.trim().toUpperCase(),
+    description: f("description").value.trim() || null,
+    discount_type: f("discount_type").value,
+    discount_value: Number(f("discount_value").value || 0),
+    min_order_amount: Number(f("min_order_amount").value || 0),
+    max_uses: f("max_uses").value ? Number(f("max_uses").value) : null,
+    is_active: f("is_active").checked,
+    expires_at: f("expires_at").value ? new Date(f("expires_at").value).toISOString() : null,
+  };
+}
+
+function populateCouponForm(coupon) {
+  const form = document.getElementById("coupon-form");
+  const f = (name) => form.elements.namedItem(name);
+  f("coupon_id").value = coupon?.id || "";
+  f("code").value = coupon?.code || "";
+  f("description").value = coupon?.description || "";
+  f("discount_type").value = coupon?.discount_type || "percent";
+  f("discount_value").value = coupon?.discount_value || "";
+  f("min_order_amount").value = coupon?.min_order_amount || 0;
+  f("max_uses").value = coupon?.max_uses || "";
+  f("is_active").checked = coupon ? Boolean(coupon.is_active) : true;
+  f("expires_at").value = coupon?.expires_at
+    ? new Date(coupon.expires_at).toISOString().slice(0, 16)
+    : "";
+}
+
 async function loadAdminData() {
-  const [stats, loadedProducts, users, orders, loadedInstallations, feedbackItems] = await Promise.all([
+  const [stats, loadedProducts, users, orders, loadedInstallations, feedbackItems, coupons] = await Promise.all([
     getAdminStats(),
     listProducts(),
     getAdminUsers(),
     getAdminOrders(),
     getAdminInstallations(),
-    getAdminFeedback()
+    getAdminFeedback(),
+    getAdminCoupons()
   ]);
 
   products = loadedProducts;
@@ -477,6 +601,7 @@ async function loadAdminData() {
   renderOrders(orders);
   renderInstallations();
   renderFeedback(feedbackItems);
+  renderCoupons(coupons);
 }
 
 async function init() {
@@ -493,9 +618,53 @@ async function init() {
   try {
     await loadAdminData();
     populateProductForm(null);
+    await loadSeasonData();
   } catch (error) {
     showToast(error.message, "error");
   }
+
+  // Season form
+  document.getElementById("season-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("season-save-btn");
+    const statusEl = document.getElementById("season-status");
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Applying…`;
+    try {
+      const banner = document.querySelector('input[name="season_banner"]')?.value.trim() || "";
+      const data = await setSeason({ season: currentSeason, banner, active: currentSeason !== "default" });
+      // Bust the session cache so the change shows immediately
+      sessionStorage.removeItem("hoinam_season_cache");
+      applySeason(data);
+      statusEl.className = "coupon-valid coupon-status";
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Theme set to <strong>${SEASON_META[currentSeason]?.label || currentSeason}</strong>. All visitors will see it immediately.`;
+      statusEl.classList.remove("hidden");
+      showToast("Season theme applied.", "success");
+    } catch (error) {
+      showToast(error.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Apply theme`;
+    }
+  });
+
+  document.getElementById("season-reset-btn")?.addEventListener("click", async () => {
+    const statusEl = document.getElementById("season-status");
+    try {
+      await setSeason({ season: "default", banner: "", active: false });
+      sessionStorage.removeItem("hoinam_season_cache");
+      applySeason({ season: "default", active: false });
+      renderSeasonPicker("default");
+      const bannerInput = document.querySelector('input[name="season_banner"]');
+      if (bannerInput) bannerInput.value = "";
+      statusEl.className = "coupon-valid coupon-status";
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Theme reset to default.`;
+      statusEl.classList.remove("hidden");
+      showToast("Theme reset to default.", "success");
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
 
   imageUrlInput.addEventListener("input", () => {
     setProductImagePreview(productForm);
@@ -547,6 +716,46 @@ async function init() {
   document.getElementById("clear-product-form").addEventListener("click", () => {
     productForm.reset();
     populateProductForm(null);
+  });
+
+  // Coupon form
+  const couponForm = document.getElementById("coupon-form");
+  document.getElementById("show-coupon-form-btn")?.addEventListener("click", () => {
+    couponForm.classList.toggle("hidden");
+    if (!couponForm.classList.contains("hidden")) {
+      populateCouponForm(null);
+      couponForm.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+  document.getElementById("clear-coupon-form-btn")?.addEventListener("click", () => {
+    couponForm.reset();
+    populateCouponForm(null);
+  });
+  couponForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("coupon-submit-btn");
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Saving…`;
+    try {
+      const payload = couponFormPayload(couponForm);
+      const couponId = couponForm.elements.namedItem("coupon_id").value;
+      if (couponId) {
+        await updateCoupon(couponId, payload);
+        showToast("Coupon updated.", "success");
+      } else {
+        await createCoupon(payload);
+        showToast("Coupon created.", "success");
+      }
+      couponForm.reset();
+      populateCouponForm(null);
+      couponForm.classList.add("hidden");
+      await loadAdminData();
+    } catch (error) {
+      showToast(error.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save coupon`;
+    }
   });
 
   inventoryForm.addEventListener("submit", async (event) => {
@@ -626,6 +835,34 @@ async function init() {
         showToast("Installation updated.", "success");
       } catch (error) {
         showToast(error.message, "error");
+      }
+    }
+
+    const editCoupon = event.target.closest("[data-edit-coupon]");
+    if (editCoupon) {
+      const couponId = Number(editCoupon.dataset.editCoupon);
+      const coupons = await getAdminCoupons();
+      const coupon = coupons.find((c) => c.id === couponId);
+      if (coupon) {
+        const couponForm = document.getElementById("coupon-form");
+        couponForm.classList.remove("hidden");
+        populateCouponForm(coupon);
+        couponForm.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
+
+    const deleteCouponBtn = event.target.closest("[data-delete-coupon]");
+    if (deleteCouponBtn) {
+      const couponId = Number(deleteCouponBtn.dataset.deleteCoupon);
+      if (window.confirm("Delete this coupon? This cannot be undone.")) {
+        try {
+          await deleteCoupon(couponId);
+          await loadAdminData();
+          showToast("Coupon deleted.", "success");
+        } catch (error) {
+          showToast(error.message, "error");
+        }
       }
     }
   });

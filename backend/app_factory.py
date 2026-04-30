@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 
 from flask import Flask, g, jsonify, request, send_from_directory
@@ -23,13 +24,14 @@ from .emailer import (
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, Order, Payment, Product, User, BlogPost, BlogSubscriber, Feedback
-from .seed import seed_products
+from .models import Installation, Order, Payment, Product, User, BlogPost, BlogSubscriber, Feedback, Coupon
+from .seed import seed_products, seed_coupons
 from .services import (
     apply_product_payload,
     calculate_order_items,
     flag_duplicate_full_name_users,
     sync_user_from_claims,
+    StockError,
 )
 from .stores import get_all_stores, get_store_by_slug
 from .utils import (
@@ -69,6 +71,7 @@ def create_app() -> Flask:
         _seed_session = get_session()
         try:
             seed_products(_seed_session)
+            seed_coupons(_seed_session)
             _seed_session.commit()
         except Exception:
             _seed_session.rollback()
@@ -477,16 +480,34 @@ def create_app() -> Flask:
                 f"Missing shipping fields: {', '.join(missing_fields)}.", 400
             )
 
-        normalized_items, total, locked_products = calculate_order_items(
-            db_session(), payload.get("items") or [], lock_products=True
-        )
+        try:
+            normalized_items, total, locked_products = calculate_order_items(
+                db_session(), payload.get("items") or [], lock_products=True
+            )
+        except StockError as stock_err:
+            # Return a structured stock error so the frontend can show the modal
+            return jsonify({
+                "success": False,
+                "error_type": "stock_error",
+                "message": f"Not enough stock for {stock_err.product_name}.",
+                "product_name": stock_err.product_name,
+                "requested": stock_err.requested,
+                "available": stock_err.available,
+                "discount_code": "SORRY2",
+            }), 409
 
         for item in normalized_items:
             product = locked_products[item["product_id"]]
             if product.stock > 0 and product.stock < item["quantity"]:
-                raise ApiError(
-                    f"{product.name} is no longer available in that quantity.", 409
-                )
+                return jsonify({
+                    "success": False,
+                    "error_type": "stock_error",
+                    "message": f"Not enough stock for {product.name}.",
+                    "product_name": product.name,
+                    "requested": item["quantity"],
+                    "available": product.stock,
+                    "discount_code": "SORRY2",
+                }), 409
             if product.stock > 0:
                 product.stock -= item["quantity"]
 
@@ -500,6 +521,51 @@ def create_app() -> Flask:
             if payment_method == "bank_transfer"
             else "confirmed"
         )
+
+        # ── Coupon validation ─────────────────────────────────────────────────
+        coupon_code = (payload.get("coupon_code") or "").strip().upper()
+        coupon = None
+        discount_amount = Decimal("0.00")
+        coupon_error = None
+
+        if coupon_code:
+            coupon = (
+                db_session()
+                .query(Coupon)
+                .filter(
+                    Coupon.code == coupon_code,
+                    Coupon.is_active.is_(True),
+                )
+                .first()
+            )
+            if not coupon:
+                coupon_error = "Coupon code not found or is no longer active."
+            elif coupon.expires_at and coupon.expires_at < datetime.now(timezone.utc):
+                coupon_error = "This coupon has expired."
+            elif coupon.max_uses is not None and coupon.uses >= coupon.max_uses:
+                coupon_error = "This coupon has reached its usage limit."
+            elif total < coupon.min_order_amount:
+                coupon_error = (
+                    f"This coupon requires a minimum order of "
+                    f"{float(coupon.min_order_amount):,.2f} {settings.default_currency}."
+                )
+            else:
+                if coupon.discount_type == "percent":
+                    discount_amount = (total * coupon.discount_value / Decimal("100")).quantize(
+                        Decimal("0.01")
+                    )
+                else:
+                    discount_amount = min(coupon.discount_value, total)
+
+            if coupon_error:
+                return jsonify({
+                    "success": False,
+                    "error_type": "coupon_error",
+                    "message": coupon_error,
+                }), 400
+
+        final_total = max(total - discount_amount, Decimal("0.00"))
+
         order = Order(
             order_number=generate_order_number(),
             user_id=user.id,
@@ -507,8 +573,11 @@ def create_app() -> Flask:
             payment_status=payment_status,
             payment_method=payment_method,
             payment_reference=payment_reference,
-            payment_details=payment_details_payload(payment_method),
-            total_amount=to_decimal(total),
+            payment_details={
+                **payment_details_payload(payment_method),
+                **({"coupon_code": coupon_code, "discount_amount": float(discount_amount)} if coupon else {}),
+            },
+            total_amount=to_decimal(final_total),
             currency=settings.default_currency,
             shipping_address=shipping_address,
             notes=payload.get("notes"),
@@ -516,6 +585,10 @@ def create_app() -> Flask:
         )
         db_session().add(order)
         db_session().flush()
+
+        # Increment coupon usage
+        if coupon:
+            coupon.uses += 1
 
         # Generate verification code for bank transfers
         verification_code = None
@@ -1284,6 +1357,196 @@ def create_app() -> Flask:
             message=f"Order {order.order_number} approved. Customer notified by email.",
         )
 
+    # ── Seasonal UI ───────────────────────────────────────────────────────────
+
+    @app.get("/api/season")
+    def get_season():
+        """Get the current active season theme (public)."""
+        # Stored in a simple in-memory + file-backed config
+        import json as _json
+        season_file = project_root / ".season.json"
+        if season_file.is_file():
+            try:
+                data = _json.loads(season_file.read_text())
+                return json_success(data)
+            except Exception:
+                pass
+        return json_success({"season": "default", "banner": "", "active": False})
+
+    @app.post("/api/admin/season")
+    def set_season():
+        """Set the active season theme (admin only)."""
+        import json as _json
+        authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+        allowed_seasons = {
+            "default", "christmas", "new_year", "easter", "eid",
+            "independence", "valentine", "halloween", "custom"
+        }
+        season = (payload.get("season") or "default").strip().lower()
+        if season not in allowed_seasons:
+            season = "default"
+        data = {
+            "season": season,
+            "banner": (payload.get("banner") or "").strip(),
+            "active": bool(payload.get("active", season != "default")),
+        }
+        season_file = project_root / ".season.json"
+        season_file.write_text(_json.dumps(data))
+        return json_success(data, message="Season theme updated.")
+
+    # ── Coupons ───────────────────────────────────────────────────────────────
+
+    @app.post("/api/coupons/validate")
+    def validate_coupon():
+        """Validate a coupon code against a subtotal (public — no auth required)."""
+        payload = request.get_json(silent=True) or {}
+        code = (payload.get("code") or "").strip().upper()
+        subtotal = to_decimal(payload.get("subtotal") or 0)
+
+        if not code:
+            raise ApiError("Coupon code is required.", 400)
+
+        coupon = (
+            db_session()
+            .query(Coupon)
+            .filter(Coupon.code == code, Coupon.is_active.is_(True))
+            .first()
+        )
+
+        if not coupon:
+            raise ApiError("Coupon code not found or is no longer active.", 404)
+        if coupon.expires_at and coupon.expires_at < datetime.now(timezone.utc):
+            raise ApiError("This coupon has expired.", 400)
+        if coupon.max_uses is not None and coupon.uses >= coupon.max_uses:
+            raise ApiError("This coupon has reached its usage limit.", 400)
+        if subtotal > 0 and subtotal < coupon.min_order_amount:
+            raise ApiError(
+                f"This coupon requires a minimum order of "
+                f"{float(coupon.min_order_amount):,.2f} {settings.default_currency}.",
+                400,
+            )
+
+        if coupon.discount_type == "percent":
+            discount = (subtotal * coupon.discount_value / Decimal("100")).quantize(Decimal("0.01"))
+        else:
+            discount = min(coupon.discount_value, subtotal)
+
+        return json_success({
+            "code": coupon.code,
+            "description": coupon.description,
+            "discount_type": coupon.discount_type,
+            "discount_value": float(coupon.discount_value),
+            "discount_amount": float(discount),
+            "final_total": float(max(subtotal - discount, Decimal("0.00"))),
+            "currency": settings.default_currency,
+        })
+
+    @app.get("/api/admin/coupons")
+    def list_coupons():
+        authenticate(admin=True)
+        coupons = (
+            db_session()
+            .query(Coupon)
+            .order_by(Coupon.created_at.desc())
+            .all()
+        )
+        return json_success([c.to_dict() for c in coupons])
+
+    @app.post("/api/admin/coupons")
+    def create_coupon():
+        authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+
+        code = (payload.get("code") or "").strip().upper()
+        if not code:
+            raise ApiError("Coupon code is required.", 400)
+
+        existing = db_session().query(Coupon).filter(Coupon.code == code).first()
+        if existing:
+            raise ApiError("A coupon with this code already exists.", 409)
+
+        discount_type = (payload.get("discount_type") or "percent").strip()
+        if discount_type not in {"percent", "fixed"}:
+            raise ApiError("discount_type must be 'percent' or 'fixed'.", 400)
+
+        discount_value = to_decimal(payload.get("discount_value") or 0)
+        if discount_value <= 0:
+            raise ApiError("Discount value must be greater than zero.", 400)
+        if discount_type == "percent" and discount_value > 100:
+            raise ApiError("Percentage discount cannot exceed 100.", 400)
+
+        expires_at = None
+        if payload.get("expires_at"):
+            try:
+                expires_at = datetime.fromisoformat(payload["expires_at"].replace("Z", "+00:00"))
+            except ValueError:
+                raise ApiError("Invalid expires_at date format. Use ISO 8601.", 400)
+
+        coupon = Coupon(
+            code=code,
+            description=(payload.get("description") or "").strip() or None,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            min_order_amount=to_decimal(payload.get("min_order_amount") or 0),
+            max_uses=int(payload["max_uses"]) if payload.get("max_uses") else None,
+            is_active=bool(payload.get("is_active", True)),
+            expires_at=expires_at,
+        )
+        db_session().add(coupon)
+        db_session().commit()
+        return json_success(coupon.to_dict(), status_code=201, message="Coupon created.")
+
+    @app.put("/api/admin/coupons/<int:coupon_id>")
+    def update_coupon(coupon_id: int):
+        authenticate(admin=True)
+        coupon = db_session().query(Coupon).filter(Coupon.id == coupon_id).first()
+        if not coupon:
+            raise ApiError("Coupon not found.", 404)
+
+        payload = request.get_json(silent=True) or {}
+        if "description" in payload:
+            coupon.description = (payload.get("description") or "").strip() or None
+        if "discount_type" in payload:
+            dt = (payload.get("discount_type") or "percent").strip()
+            if dt not in {"percent", "fixed"}:
+                raise ApiError("discount_type must be 'percent' or 'fixed'.", 400)
+            coupon.discount_type = dt
+        if "discount_value" in payload:
+            dv = to_decimal(payload.get("discount_value") or 0)
+            if dv <= 0:
+                raise ApiError("Discount value must be greater than zero.", 400)
+            coupon.discount_value = dv
+        if "min_order_amount" in payload:
+            coupon.min_order_amount = to_decimal(payload.get("min_order_amount") or 0)
+        if "max_uses" in payload:
+            coupon.max_uses = int(payload["max_uses"]) if payload.get("max_uses") else None
+        if "is_active" in payload:
+            coupon.is_active = bool(payload.get("is_active"))
+        if "expires_at" in payload:
+            if payload["expires_at"]:
+                try:
+                    coupon.expires_at = datetime.fromisoformat(
+                        payload["expires_at"].replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    raise ApiError("Invalid expires_at date format.", 400)
+            else:
+                coupon.expires_at = None
+
+        db_session().commit()
+        return json_success(coupon.to_dict(), message="Coupon updated.")
+
+    @app.delete("/api/admin/coupons/<int:coupon_id>")
+    def delete_coupon(coupon_id: int):
+        authenticate(admin=True)
+        coupon = db_session().query(Coupon).filter(Coupon.id == coupon_id).first()
+        if not coupon:
+            raise ApiError("Coupon not found.", 404)
+        db_session().delete(coupon)
+        db_session().commit()
+        return json_success({"id": coupon_id}, message="Coupon deleted.")
+
     # ── Feedback ──────────────────────────────────────────────────────────────
 
     @app.post("/api/feedback")
@@ -1401,6 +1664,10 @@ def create_app() -> Flask:
             if index_candidate.is_file():
                 return send_from_directory(project_root, f"{path}/index.html")
 
+        # Serve the custom 404 page for unknown frontend routes
+        four_oh_four = project_root / "404.html"
+        if four_oh_four.is_file():
+            return send_from_directory(project_root, "404.html"), 404
         raise ApiError("Page not found.", 404)
 
     return app

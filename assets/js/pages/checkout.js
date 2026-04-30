@@ -1,9 +1,10 @@
-import { createOrder, getPaymentOptions, uploadPaymentReceipt } from "../api.js";
+import { createOrder, getPaymentOptions, uploadPaymentReceipt, validateCoupon } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { clearCart, getCart, getCartSubtotal } from "../store.js";
 import { formatDate, formatMoney, showToast } from "../ui.js";
 
 let paymentOptions = [];
+let appliedCoupon = null; // { code, discount_amount, final_total, description, discount_type, discount_value }
 
 function orderItemsFromCart() {
   return getCart().map((item) => ({
@@ -53,32 +54,45 @@ function renderSummary() {
   const summary = document.getElementById("checkout-summary");
 
   if (!cart.length) {
-    summary.innerHTML = `
-      <div class="empty-state">
-        Your cart is empty. Add products before checkout.
-      </div>
-    `;
+    summary.innerHTML = `<div class="empty-state">Your cart is empty. Add products before checkout.</div>`;
     return;
   }
+
+  const subtotal = getCartSubtotal();
+  const discountAmount = appliedCoupon?.discount_amount || 0;
+  const finalTotal = appliedCoupon ? appliedCoupon.final_total : subtotal;
 
   summary.innerHTML = `
     <div class="panel checkout-summary-panel">
       <h3>Order summary</h3>
       <div class="summary-list">
-        ${cart
-          .map(
-            (item) => `
-              <div class="summary-row">
-                <span>${item.name} x ${item.quantity}</span>
-                <strong>${formatMoney(item.price * item.quantity, item.currency)}</strong>
-              </div>
-            `
-          )
-          .join("")}
+        ${cart.map((item) => `
+          <div class="summary-row">
+            <span>${item.name} x ${item.quantity}</span>
+            <strong>${formatMoney(item.price * item.quantity, item.currency)}</strong>
+          </div>
+        `).join("")}
         <div class="summary-row">
-          <span>Total</span>
-          <strong class="price">${formatMoney(getCartSubtotal())}</strong>
+          <span>Subtotal</span>
+          <strong>${formatMoney(subtotal)}</strong>
         </div>
+        ${appliedCoupon ? `
+          <div class="summary-row summary-row-discount">
+            <span><i class="fa-solid fa-tag" aria-hidden="true"></i> Coupon <strong>${appliedCoupon.code}</strong>
+              (${appliedCoupon.discount_type === "percent" ? `${appliedCoupon.discount_value}% off` : `${formatMoney(appliedCoupon.discount_value)} off`})
+            </span>
+            <strong class="discount-amount">−${formatMoney(discountAmount)}</strong>
+          </div>
+          <div class="summary-row summary-row-total">
+            <span>Total</span>
+            <strong class="price">${formatMoney(finalTotal)}</strong>
+          </div>
+        ` : `
+          <div class="summary-row">
+            <span>Total</span>
+            <strong class="price">${formatMoney(subtotal)}</strong>
+          </div>
+        `}
       </div>
       <p class="muted checkout-note">Orders are confirmed by Hoinam Energy after transfer confirmation or delivery scheduling.</p>
     </div>
@@ -205,6 +219,80 @@ function renderPaymentOptions() {
   });
 
   syncPaymentModeUi();
+}
+
+function showStockErrorModal({ productName, requested, available, discountCode }) {
+  // Remove any existing modal
+  document.getElementById("stock-error-modal")?.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "stock-error-modal";
+  modal.className = "stock-modal-overlay";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-labelledby", "stock-modal-title");
+
+  modal.innerHTML = `
+    <div class="stock-modal-card">
+      <div class="stock-modal-icon">
+        <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+      </div>
+      <h2 id="stock-modal-title">Not enough stock</h2>
+      <p>
+        Sorry — we only have <strong>${available} unit${available !== 1 ? "s" : ""}</strong> of
+        <strong>${escapeHtml(productName)}</strong> available right now.
+        You requested <strong>${requested}</strong>.
+      </p>
+      <p class="stock-modal-advice">
+        Please update your cart to the available quantity and try again.
+        New stock arrives weekly — check back next week for more.
+      </p>
+      <div class="stock-modal-discount">
+        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+        <div>
+          <strong>Sorry for the inconvenience — here's a 2% discount on your next order:</strong>
+          <div class="stock-modal-code" id="stock-modal-code-text">${escapeHtml(discountCode || "SORRY2")}</div>
+          <button class="stock-modal-copy-btn" type="button" id="stock-modal-copy-btn">
+            <i class="fa-regular fa-copy" aria-hidden="true"></i> Copy code
+          </button>
+        </div>
+      </div>
+      <div class="stock-modal-actions">
+        <a class="button" href="/cart.html">
+          <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i> Update cart
+        </a>
+        <button class="button button-ghost" type="button" id="stock-modal-close">
+          Close
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.append(modal);
+
+  // Copy discount code
+  document.getElementById("stock-modal-copy-btn")?.addEventListener("click", () => {
+    const code = document.getElementById("stock-modal-code-text")?.textContent || "";
+    navigator.clipboard?.writeText(code).then(() => {
+      const btn = document.getElementById("stock-modal-copy-btn");
+      if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-check" aria-hidden="true"></i> Copied!`;
+        window.setTimeout(() => {
+          btn.innerHTML = `<i class="fa-regular fa-copy" aria-hidden="true"></i> Copy code`;
+        }, 2000);
+      }
+    });
+  });
+
+  // Close on button or backdrop click
+  const close = () => modal.remove();
+  document.getElementById("stock-modal-close")?.addEventListener("click", close);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) close();
+  });
+  document.addEventListener("keydown", function onKey(e) {
+    if (e.key === "Escape") { close(); document.removeEventListener("keydown", onKey); }
+  });
 }
 
 function escapeHtml(value) {
@@ -656,6 +744,50 @@ async function init() {
   form.full_name.value = profile.full_name || "";
   form.phone.value = profile.phone || "";
 
+  // Coupon apply button
+  document.getElementById("apply-coupon-btn")?.addEventListener("click", async () => {
+    const code = (form.coupon_code.value || "").trim().toUpperCase();
+    const statusEl = document.getElementById("coupon-status");
+    const btn = document.getElementById("apply-coupon-btn");
+
+    if (!code) { showToast("Enter a coupon code first.", "error"); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Checking…";
+
+    try {
+      const result = await validateCoupon(code, getCartSubtotal());
+      appliedCoupon = { ...result, code };
+      form.coupon_code.value = code;
+      statusEl.className = "coupon-status coupon-valid";
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> <strong>${code}</strong> applied — ${result.discount_type === "percent" ? `${result.discount_value}% off` : formatMoney(result.discount_value) + " off"}. You save ${formatMoney(result.discount_amount)}.`;
+      statusEl.classList.remove("hidden");
+      btn.textContent = "Applied ✓";
+      renderSummary();
+    } catch (error) {
+      appliedCoupon = null;
+      statusEl.className = "coupon-status coupon-invalid";
+      statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${error.message}`;
+      statusEl.classList.remove("hidden");
+      btn.disabled = false;
+      btn.textContent = "Apply";
+      renderSummary();
+    }
+  });
+
+  // Clear coupon if code is manually changed
+  form.coupon_code.addEventListener("input", () => {
+    if (appliedCoupon) {
+      appliedCoupon = null;
+      const statusEl = document.getElementById("coupon-status");
+      statusEl.classList.add("hidden");
+      const btn = document.getElementById("apply-coupon-btn");
+      btn.disabled = false;
+      btn.textContent = "Apply";
+      renderSummary();
+    }
+  });
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -675,7 +807,8 @@ async function init() {
         items: orderItemsFromCart(),
         shipping_address: shippingAddress,
         notes: form.notes.value.trim(),
-        payment_method: selectedPaymentMethod(form)
+        payment_method: selectedPaymentMethod(form),
+        coupon_code: appliedCoupon?.code || null
       });
 
       clearCart();
@@ -686,7 +819,17 @@ async function init() {
       const submitButton = form.querySelector('button[type="submit"]');
       submitButton.disabled = false;
       submitButton.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Place order`;
-      showToast(error.message, "error");
+
+      if (error.errorType === "stock_error") {
+        showStockErrorModal({
+          productName: error.errorData.product_name,
+          requested: error.errorData.requested,
+          available: error.errorData.available,
+          discountCode: error.errorData.discount_code,
+        });
+      } else {
+        showToast(error.message, "error");
+      }
     }
   });
 }

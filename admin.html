@@ -207,6 +207,100 @@
         <div class="panel">
           <div class="section-heading">
             <div>
+              <span class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Site theme</span>
+              <h2>Seasonal UI</h2>
+            </div>
+          </div>
+          <p class="muted" style="margin-bottom:1.5rem;">Change the site's look for celebrations and seasons. The theme applies to all visitors instantly.</p>
+          <div id="season-picker" class="season-picker"></div>
+          <form class="form-grid" id="season-form" style="margin-top:1.5rem;">
+            <label class="field field-full">
+              <span>Announcement banner <span class="muted">(optional — shown at the top of every page)</span></span>
+              <input name="season_banner" type="text" placeholder="e.g. 🎄 Merry Christmas! Enjoy 10% off all orders this week.">
+            </label>
+            <div class="field field-full inline-actions">
+              <button class="button" type="submit" id="season-save-btn">
+                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Apply theme
+              </button>
+              <button class="button button-ghost" type="button" id="season-reset-btn">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset to default
+              </button>
+            </div>
+          </form>
+          <div id="season-status" class="hidden" style="margin-top:0.75rem;"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow"><i class="fa-solid fa-tag" aria-hidden="true"></i> Coupons</span>
+              <h2>Discount codes</h2>
+            </div>
+            <button class="button" type="button" id="show-coupon-form-btn">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i> New coupon
+            </button>
+          </div>
+
+          <form class="form-grid coupon-form hidden" id="coupon-form" style="margin-bottom:1.5rem;">
+            <input name="coupon_id" type="hidden">
+            <label class="field">
+              <span>Code</span>
+              <input name="code" type="text" required placeholder="e.g. SAVE10" style="text-transform:uppercase">
+            </label>
+            <label class="field">
+              <span>Type</span>
+              <select name="discount_type">
+                <option value="percent">Percentage (%)</option>
+                <option value="fixed">Fixed amount (₦)</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Discount value</span>
+              <input name="discount_value" type="number" min="0.01" step="0.01" required placeholder="e.g. 10 for 10%">
+            </label>
+            <label class="field">
+              <span>Min order amount (₦)</span>
+              <input name="min_order_amount" type="number" min="0" step="0.01" value="0" placeholder="0 = no minimum">
+            </label>
+            <label class="field">
+              <span>Max uses</span>
+              <input name="max_uses" type="number" min="1" placeholder="Leave blank for unlimited">
+            </label>
+            <label class="field">
+              <span>Expires at</span>
+              <input name="expires_at" type="datetime-local">
+            </label>
+            <label class="field field-full">
+              <span>Description</span>
+              <input name="description" type="text" placeholder="Internal note about this coupon">
+            </label>
+            <label class="field">
+              <span><input name="is_active" type="checkbox" checked> Active</span>
+            </label>
+            <div class="field field-full inline-actions">
+              <button class="button" type="submit" id="coupon-submit-btn">
+                <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save coupon
+              </button>
+              <button class="button button-ghost" type="button" id="clear-coupon-form-btn">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Clear
+              </button>
+            </div>
+          </form>
+
+          <div class="table-wrap" id="admin-coupons"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="panel">
+          <div class="section-heading">
+            <div>
               <span class="eyebrow"><i class="fa-solid fa-star" aria-hidden="true"></i> Feedback</span>
               <h2>Customer feedback submissions</h2>
             </div>

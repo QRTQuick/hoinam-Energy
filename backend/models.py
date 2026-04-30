@@ -361,3 +361,43 @@ class Feedback(TimestampMixin, Base):
             "status": self.status,
             "created_at": self.created_at.isoformat(),
         }
+
+
+class Coupon(TimestampMixin, Base):
+    __tablename__ = "coupons"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(
+        String(64), unique=True, nullable=False, index=True
+    )
+    description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    discount_type: Mapped[str] = mapped_column(
+        String(16), default="percent", nullable=False
+    )  # percent | fixed
+    discount_value: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False
+    )  # e.g. 2.00 for 2% or 500.00 for ₦500 off
+    min_order_amount: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), default=Decimal("0.00"), nullable=False
+    )
+    max_uses: Mapped[int | None] = mapped_column(Integer, nullable=True)  # None = unlimited
+    uses: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "code": self.code,
+            "description": self.description,
+            "discount_type": self.discount_type,
+            "discount_value": float(self.discount_value),
+            "min_order_amount": float(self.min_order_amount),
+            "max_uses": self.max_uses,
+            "uses": self.uses,
+            "is_active": self.is_active,
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
+            "created_at": self.created_at.isoformat(),
+        }

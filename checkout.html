@@ -66,6 +66,14 @@
                 <div class="transfer-account-picker hidden" id="transfer-account-picker"></div>
               </div>
               <div class="field field-full">
+                <span>Coupon code <span class="muted">(optional)</span></span>
+                <div class="coupon-input-row">
+                  <input name="coupon_code" type="text" placeholder="Enter coupon code" autocomplete="off" style="text-transform:uppercase">
+                  <button class="button button-ghost" type="button" id="apply-coupon-btn">Apply</button>
+                </div>
+                <div id="coupon-status" class="coupon-status hidden"></div>
+              </div>
+              <div class="field field-full">
                 <button class="button button-full" type="submit"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Place order</button>
               </div>
             </form>

@@ -10,6 +10,18 @@ from .models import Product, User
 from .utils import resolve_product_image_url, slugify, to_decimal
 
 
+class StockError(Exception):
+    """Raised when a requested quantity exceeds available stock."""
+
+    def __init__(self, *, product_name: str, requested: int, available: int):
+        self.product_name = product_name
+        self.requested = requested
+        self.available = available
+        super().__init__(
+            f"Not enough stock for {product_name}: requested {requested}, available {available}."
+        )
+
+
 def ensure_unique_full_name(session, full_name: str | None, *, exclude_user_id: int | None = None) -> None:
     return
 
@@ -149,7 +161,11 @@ def calculate_order_items(session, raw_items: Iterable[dict], *, lock_products: 
     for product_id, quantity in quantities.items():
         product = products[product_id]
         if lock_products and product.stock > 0 and quantity > product.stock:
-            raise ValueError(f"Not enough stock available for {product.name}.")
+            raise StockError(
+                product_name=product.name,
+                requested=quantity,
+                available=product.stock,
+            )
 
         line_total = (product.price or Decimal("0.00")) * quantity
         total += line_total

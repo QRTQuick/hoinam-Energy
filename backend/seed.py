@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from decimal import Decimal
+
 from .config import get_settings
 from .inventory import parse_stock_inventory
-from .models import Product
+from .models import Coupon, Product
 from .utils import slugify, to_decimal
 
 
@@ -117,6 +119,24 @@ def seed_products(session) -> None:
         session.add(product)
 
     session.commit()
+
+
+def seed_coupons(session) -> None:
+    """Ensure the default SORRY2 coupon exists."""
+    existing = session.query(Coupon).filter(Coupon.code == "SORRY2").first()
+    if not existing:
+        coupon = Coupon(
+            code="SORRY2",
+            description="2% apology discount — issued when a product is out of stock.",
+            discount_type="percent",
+            discount_value=Decimal("2.00"),
+            min_order_amount=Decimal("0.00"),
+            max_uses=None,
+            is_active=True,
+            expires_at=None,
+        )
+        session.add(coupon)
+        session.commit()
 
 
 def upsert_inventory_products(session, inventory_products: list[dict]) -> None:

@@ -14,3 +14,4 @@ outdated/
 *.log
 *.err
 *.out
+.season.json
