@@ -48,6 +48,12 @@ If you want phone OTP login, set:
 
 - `enablePhoneAuth: true`
 
+For production redirect auth, use the live site domain as the Firebase `authDomain`
+and make sure your deployed host serves both Firebase-compatible auth endpoints:
+
+- `https://www.hoinamenergy.com/__/auth/handler`
+- `https://www.hoinamenergy.com/login/_auth/handler`
+
 ## Local Run
 
 1. Install Python dependencies:

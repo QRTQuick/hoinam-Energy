@@ -6,6 +6,10 @@
       "destination": "/api/index.py"
     },
     {
+      "source": "/login/_auth/:path*",
+      "destination": "https://hoinam-energy-workspace.firebaseapp.com/__/auth/:path*"
+    },
+    {
       "source": "/__/auth/:path*",
       "destination": "https://hoinam-energy-workspace.firebaseapp.com/__/auth/:path*"
     },

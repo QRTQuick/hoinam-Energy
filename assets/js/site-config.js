@@ -1,8 +1,13 @@
 (function () {
   const origin = window.location.origin;
-  // Use the Firebase-managed auth domain for redirect sign-in so Google OAuth
-  // does not require every storefront hostname to be registered as a redirect URI.
-  const authDomain = "hoinam-energy-workspace.firebaseapp.com";
+  const hostname = window.location.hostname;
+  const productionAuthDomain = "www.hoinamenergy.com";
+  const defaultAuthDomain = "hoinam-energy-workspace.firebaseapp.com";
+  // Keep redirect sign-in on the production site domain for same-site auth
+  // flows, while falling back to the Firebase-managed domain locally.
+  const authDomain = /(^|\.)hoinamenergy\.com$/i.test(hostname)
+    ? productionAuthDomain
+    : defaultAuthDomain;
 
   window.HOINAM_CONFIG = {
     apiBaseUrl: `${origin}/api`,
