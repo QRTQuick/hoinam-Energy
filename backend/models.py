@@ -264,3 +264,45 @@ class Payment(TimestampMixin, Base):
             "notes": self.notes,
             "created_at": self.created_at.isoformat(),
         }
+
+
+class BlogPost(TimestampMixin, Base):
+    __tablename__ = "blog_posts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    slug: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
+    excerpt: Mapped[str] = mapped_column(String(500), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    author_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False, index=True
+    )
+    is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    category: Mapped[str] = mapped_column(String(100), default="News", nullable=False, index=True)
+    tags: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+
+    author = relationship("User")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "slug": self.slug,
+            "excerpt": self.excerpt,
+            "content": self.content,
+            "image_url": self.image_url,
+            "author_id": self.author_id,
+            "author": self.author.to_dict() if self.author else None,
+            "is_published": self.is_published,
+            "published_at": self.published_at.isoformat() if self.published_at else None,
+            "category": self.category,
+            "tags": self.tags or [],
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }

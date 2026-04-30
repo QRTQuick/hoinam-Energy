@@ -172,3 +172,38 @@ export function archiveProduct(productId) {
     authRequired: true
   });
 }
+
+export function listBlogPosts() {
+  return apiFetch("/blog");
+}
+
+export function getBlogPost(slug) {
+  return apiFetch(`/blog/${slug}`);
+}
+
+export function getAdminBlogPosts() {
+  return apiFetch("/admin/blog", { authRequired: true });
+}
+
+export function createBlogPost(payload) {
+  return apiFetch("/admin/blog", {
+    method: "POST",
+    authRequired: true,
+    body: payload
+  });
+}
+
+export function updateBlogPost(postId, payload) {
+  return apiFetch(`/admin/blog/${postId}`, {
+    method: "PUT",
+    authRequired: true,
+    body: payload
+  });
+}
+
+export function deleteBlogPost(postId) {
+  return apiFetch(`/admin/blog/${postId}`, {
+    method: "DELETE",
+    authRequired: true
+  });
+}

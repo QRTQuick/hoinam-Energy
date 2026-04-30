@@ -1,10 +1,16 @@
 User-agent: *
 Allow: /
+Allow: /blog.html
+Allow: /blog-post.html
 Disallow: /admin.html
+Disallow: /admin-blog.html
 Disallow: /dashboard.html
 Disallow: /cart.html
 Disallow: /checkout.html
 Disallow: /login.html
 Disallow: /register.html
+Disallow: /api/
+Disallow: /assets/js/pages/admin.js
+Disallow: /assets/js/pages/admin-blog.js
 
 Sitemap: https://hoinam-energy.vercel.app/sitemap.xml

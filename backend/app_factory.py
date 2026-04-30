@@ -18,7 +18,7 @@ from .emailer import (
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, Order, Payment, Product, User
+from .models import Installation, Order, Payment, Product, User, BlogPost
 from .seed import seed_products
 from .services import (
     apply_product_payload,
@@ -707,6 +707,138 @@ def create_app() -> Flask:
         authenticate(admin=True)
         users = db_session().query(User).order_by(User.created_at.desc()).all()
         return json_success([user.to_dict() for user in users])
+
+    @app.get("/api/blog")
+    def list_blog_posts():
+        """Get all published blog posts (public)."""
+        posts = (
+            db_session()
+            .query(BlogPost)
+            .filter(BlogPost.is_published.is_(True))
+            .order_by(BlogPost.published_at.desc())
+            .all()
+        )
+        return json_success([post.to_dict() for post in posts])
+
+    @app.get("/api/blog/<post_slug>")
+    def get_blog_post(post_slug: str):
+        """Get a single published blog post by slug (public)."""
+        post = (
+            db_session()
+            .query(BlogPost)
+            .filter(BlogPost.slug == post_slug, BlogPost.is_published.is_(True))
+            .first()
+        )
+        if not post:
+            raise ApiError("Blog post not found.", 404)
+        return json_success(post.to_dict())
+
+    @app.get("/api/admin/blog")
+    def list_admin_blog_posts():
+        """Get all blog posts for admin (published and drafts)."""
+        authenticate(admin=True)
+        posts = (
+            db_session()
+            .query(BlogPost)
+            .order_by(BlogPost.created_at.desc())
+            .all()
+        )
+        return json_success([post.to_dict() for post in posts])
+
+    @app.post("/api/admin/blog")
+    def create_blog_post():
+        """Create a new blog post (admin only)."""
+        user = authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+
+        title = (payload.get("title") or "").strip()
+        if not title:
+            raise ApiError("Blog post title is required.", 400)
+
+        slug = (payload.get("slug") or "").strip() or slugify(title)
+        excerpt = (payload.get("excerpt") or "").strip()
+        content = (payload.get("content") or "").strip()
+        if not content:
+            raise ApiError("Blog post content is required.", 400)
+
+        # Check for duplicate slug
+        existing = db_session().query(BlogPost).filter(BlogPost.slug == slug).first()
+        if existing:
+            raise ApiError("A blog post with this slug already exists.", 409)
+
+        post = BlogPost(
+            title=title,
+            slug=slug,
+            excerpt=excerpt or title,
+            content=content,
+            image_url=payload.get("image_url"),
+            author_id=user.id,
+            is_published=payload.get("is_published", False),
+            published_at=datetime.now(timezone.utc) if payload.get("is_published") else None,
+            category=payload.get("category", "News"),
+            tags=payload.get("tags", []),
+        )
+        db_session().add(post)
+        db_session().commit()
+        return json_success(post.to_dict(), status_code=201, message="Blog post created.")
+
+    @app.put("/api/admin/blog/<int:post_id>")
+    def update_blog_post(post_id: int):
+        """Update a blog post (admin only)."""
+        user = authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+
+        post = db_session().query(BlogPost).filter(BlogPost.id == post_id).first()
+        if not post:
+            raise ApiError("Blog post not found.", 404)
+
+        if "title" in payload:
+            post.title = (payload.get("title") or "").strip() or post.title
+        if "slug" in payload:
+            slug = (payload.get("slug") or "").strip()
+            if slug and slug != post.slug:
+                existing = (
+                    db_session()
+                    .query(BlogPost)
+                    .filter(BlogPost.slug == slug, BlogPost.id != post_id)
+                    .first()
+                )
+                if existing:
+                    raise ApiError("A blog post with this slug already exists.", 409)
+                post.slug = slug
+        if "excerpt" in payload:
+            post.excerpt = (payload.get("excerpt") or "").strip() or post.excerpt
+        if "content" in payload:
+            post.content = (payload.get("content") or "").strip() or post.content
+        if "image_url" in payload:
+            post.image_url = payload.get("image_url")
+        if "category" in payload:
+            post.category = payload.get("category", "News")
+        if "tags" in payload:
+            post.tags = payload.get("tags", [])
+
+        # Handle publish/unpublish
+        if "is_published" in payload:
+            was_published = post.is_published
+            post.is_published = bool(payload.get("is_published"))
+            if post.is_published and not was_published:
+                post.published_at = datetime.now(timezone.utc)
+            elif not post.is_published:
+                post.published_at = None
+
+        db_session().commit()
+        return json_success(post.to_dict(), message="Blog post updated.")
+
+    @app.delete("/api/admin/blog/<int:post_id>")
+    def delete_blog_post(post_id: int):
+        """Delete a blog post (admin only)."""
+        authenticate(admin=True)
+        post = db_session().query(BlogPost).filter(BlogPost.id == post_id).first()
+        if not post:
+            raise ApiError("Blog post not found.", 404)
+        db_session().delete(post)
+        db_session().commit()
+        return json_success({"id": post_id}, message="Blog post deleted.")
 
     @app.get("/api/admin/stats")
     def admin_stats():
