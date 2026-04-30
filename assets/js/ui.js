@@ -22,16 +22,21 @@ const PRODUCT_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
 
 function resolveProductImageUrls(product = {}) {
   const explicitImage = String(product.image_url || "").trim();
+  const urls = [];
   if (explicitImage) {
-    return [explicitImage];
+    urls.push(explicitImage);
   }
 
   const slug = String(product.slug || "").trim() || slugifyName(product.name || "");
   if (!slug) {
-    return [];
+    return urls;
   }
 
-  return PRODUCT_IMAGE_EXTENSIONS.map((extension) => `/assets/images/products/${slug}${extension}`);
+  urls.push(
+    ...PRODUCT_IMAGE_EXTENSIONS.map((extension) => `/assets/images/products/${slug}${extension}`)
+  );
+
+  return [...new Set(urls)];
 }
 
 export function formatMoney(amount, currency = "NGN") {

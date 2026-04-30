@@ -147,6 +147,35 @@ def create_app() -> Flask:
             raise ApiError("The uploaded workbook is empty or does not match the stock inventory layout.", 400)
         return rows
 
+    def find_existing_inventory_product(row: dict, product_sku: str, product_slug: str, legacy_slug: str | None):
+        reference_text = (row.get("reference") or "").strip()
+        session = db_session()
+
+        exact_conditions = [
+            Product.sku == product_sku,
+            Product.slug == product_slug,
+            Product.name == row["name"],
+        ]
+        if legacy_slug:
+            exact_conditions.append(Product.slug == legacy_slug)
+
+        for condition in exact_conditions:
+            product = session.query(Product).filter(condition).first()
+            if product is not None:
+                return product
+
+        if legacy_slug:
+            product = session.query(Product).filter(Product.slug.endswith(f"-{legacy_slug}")).first()
+            if product is not None:
+                return product
+
+        if reference_text:
+            product = session.query(Product).filter(Product.name.endswith(f" {reference_text}")).first()
+            if product is not None:
+                return product
+
+        return None
+
     @app.get("/api/health")
     def health_check():
         return json_success({"status": "ok"})
@@ -518,17 +547,7 @@ def create_app() -> Flask:
             product_slug = row.get("slug") or slugify(row["name"])
             product_sku = row.get("sku") or product_slug.upper().replace("-", "_")
             legacy_slug = row.get("legacy_slug")
-            product = (
-                db_session()
-                .query(Product)
-                .filter(
-                    (Product.sku == product_sku)
-                    | (Product.slug == product_slug)
-                    | (Product.slug == legacy_slug)
-                    | (Product.name == row["name"])
-                )
-                .first()
-            )
+            product = find_existing_inventory_product(row, product_sku, product_slug, legacy_slug)
             if product is None:
                 product = Product(
                     name=row["name"],

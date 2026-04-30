@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
+from urllib.parse import urlparse
 
 PRODUCT_IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".svg")
 
@@ -17,6 +18,10 @@ def slugify(value: str) -> str:
 
 def _product_image_dir() -> Path:
     return Path(__file__).resolve().parents[1] / "assets" / "images" / "products"
+
+
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[1]
 
 
 def _resolved_product_image_from_slug(slug: str) -> str | None:
@@ -32,11 +37,37 @@ def _resolved_product_image_from_slug(slug: str) -> str | None:
     return None
 
 
+def _resolved_explicit_product_image(image_url: str | None) -> str | None:
+    explicit = str(image_url or "").strip()
+    if not explicit:
+        return None
+
+    parsed = urlparse(explicit)
+    if parsed.scheme in {"http", "https", "data", "blob"}:
+        return explicit
+
+    project_root = _project_root()
+    if explicit.startswith("/"):
+        candidate = project_root / explicit.lstrip("/")
+        return explicit if candidate.is_file() else None
+
+    candidate = (project_root / explicit.lstrip("./")).resolve()
+    if candidate.is_file():
+        try:
+            relative = candidate.relative_to(project_root).as_posix()
+        except ValueError:
+            return explicit
+        return f"/{relative}"
+
+    return None
+
+
 def resolve_product_image_url(
     name: str | None = None, image_url: str | None = None, slug: str | None = None
 ) -> str | None:
-    if image_url and str(image_url).strip():
-        return str(image_url).strip()
+    resolved_explicit = _resolved_explicit_product_image(image_url)
+    if resolved_explicit:
+        return resolved_explicit
 
     lookup_slug = (slug or slugify(name or "")).strip()
     if not lookup_slug:

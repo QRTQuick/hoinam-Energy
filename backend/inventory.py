@@ -39,6 +39,18 @@ def clean_text(value) -> str:
     return " ".join(str(value or "").replace("_", " ").split())
 
 
+def is_brand_header_row(
+    sn: str | None, row_name: str | None, reference: str | None, description: str | None
+) -> bool:
+    return bool(clean_text(sn)) and not any(
+        [
+            clean_text(row_name),
+            clean_text(reference),
+            clean_text(description),
+        ]
+    )
+
+
 def display_brand(raw_brand: str | None) -> str:
     key = clean_text(raw_brand).upper()
     return BRAND_NAMES.get(key, clean_text(raw_brand) or "Hoinam")
@@ -95,11 +107,14 @@ def parse_stock_inventory(path: str | Path | None = None) -> list[dict]:
     for row in sheet.iter_rows(min_row=2, values_only=True):
         sn, row_name, reference, description, quantity, rate = (list(row) + [None] * 6)[:6]
 
-        if sn and not any([row_name, reference, description, quantity, rate]):
+        row_name_text = clean_text(row_name)
+        reference_text = clean_text(reference)
+        description_text = clean_text(description)
+
+        if is_brand_header_row(sn, row_name_text, reference_text, description_text):
             current_brand = clean_text(sn)
             continue
 
-        reference_text = clean_text(reference)
         if not reference_text:
             continue
 
@@ -108,8 +123,7 @@ def parse_stock_inventory(path: str | Path | None = None) -> list[dict]:
         name = product_display_name(brand, reference_text)
         slug = slugify(name)
         legacy_slug = slugify(reference_text)
-        description_text = clean_text(description)
-        category = infer_category(row_name, reference_text, description_text, brand)
+        category = infer_category(row_name_text, reference_text, description_text, brand)
         stock = int(quantity) if quantity not in (None, "") else 0
         price = to_decimal(rate)
         image_url = (
