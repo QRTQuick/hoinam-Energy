@@ -2,6 +2,17 @@ import { bootstrapPage } from "../app-shell.js";
 import { getCart, getCartSubtotal, removeCartItem, updateCartItem } from "../store.js";
 import { formatMoney, refreshShell, showToast } from "../ui.js";
 
+function showRestoredCartNotice() {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("restoredCart") !== "1") {
+    return;
+  }
+
+  url.searchParams.delete("restoredCart");
+  window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+  showToast("Your saved cart is ready on this device.", "success");
+}
+
 function cartThumb(item) {
   if (item.image_url) {
     return `<img src="${item.image_url}" alt="${item.name}">`;
@@ -82,6 +93,7 @@ function renderCart() {
 async function init() {
   await bootstrapPage("cart");
   renderCart();
+  showRestoredCartNotice();
 
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-action]");

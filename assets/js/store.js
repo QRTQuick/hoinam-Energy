@@ -1,6 +1,7 @@
 const CART_KEY = "hoinam_cart";
 const PROFILE_KEY = "hoinam_profile";
 const PENDING_ORDER_KEY = "hoinam_pending_order";
+const GUEST_CART_RESTORE_KEY = "hoinam_guest_cart_restore";
 
 function readStorage(key, fallback) {
   try {
@@ -15,17 +16,40 @@ function writeStorage(key, value) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
+function countCartItems(cart = []) {
+  return cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+}
+
+function syncGuestCartRestoreState(cart) {
+  if (getCachedProfile()) {
+    return;
+  }
+
+  const itemCount = countCartItems(cart);
+  if (itemCount > 0) {
+    writeStorage(GUEST_CART_RESTORE_KEY, {
+      itemCount,
+      updated_at: Date.now()
+    });
+    return;
+  }
+
+  window.localStorage.removeItem(GUEST_CART_RESTORE_KEY);
+}
+
 export function getCart() {
   return readStorage(CART_KEY, []);
 }
 
 export function saveCart(cart) {
   writeStorage(CART_KEY, cart);
+  syncGuestCartRestoreState(cart);
   return cart;
 }
 
 export function clearCart() {
   window.localStorage.removeItem(CART_KEY);
+  window.localStorage.removeItem(GUEST_CART_RESTORE_KEY);
 }
 
 export function addToCart(product, quantity = 1) {
@@ -67,7 +91,7 @@ export function removeCartItem(productId) {
 }
 
 export function getCartCount() {
-  return getCart().reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  return countCartItems(getCart());
 }
 
 export function getCartSubtotal() {
@@ -84,6 +108,21 @@ export function getCachedProfile() {
 
 export function clearCachedProfile() {
   window.localStorage.removeItem(PROFILE_KEY);
+}
+
+export function consumeGuestCartRestore() {
+  const state = readStorage(GUEST_CART_RESTORE_KEY, null);
+  const itemCount = countCartItems(getCart());
+  window.localStorage.removeItem(GUEST_CART_RESTORE_KEY);
+
+  if (!state || itemCount < 1) {
+    return null;
+  }
+
+  return {
+    itemCount,
+    updated_at: state.updated_at || null
+  };
 }
 
 export function setPendingOrder(orderData) {

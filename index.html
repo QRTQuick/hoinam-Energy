@@ -606,22 +606,57 @@
     }
 
     .hp-brand-tile-logo {
-      height: 40px;
+      min-height: 58px;
       display: flex;
       align-items: center;
     }
 
+    .hp-brand-tile-logo-badge {
+      min-width: 150px;
+      min-height: 58px;
+      padding: 0.9rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+        rgba(2, 7, 16, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 16px 26px rgba(0, 0, 0, 0.2);
+      transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
+    }
+
     .hp-brand-tile-logo img {
-      height: 100%;
       width: auto;
+      height: 26px;
+      max-width: 100%;
       object-fit: contain;
+      opacity: 0.88;
+      transition: transform 260ms ease, opacity 260ms ease, filter 260ms ease;
+    }
+
+    .hp-brand-tile-logo .is-invert {
       filter: brightness(0) invert(1);
-      opacity: 0.75;
-      transition: opacity 280ms ease;
+    }
+
+    .hp-brand-tile-logo .is-screen {
+      mix-blend-mode: screen;
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-logo-badge {
+      transform: translateY(-4px) scale(1.03);
+      border-color: rgba(255, 193, 7, 0.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 22px 34px rgba(0, 0, 0, 0.24);
     }
 
     .hp-brand-tile:hover .hp-brand-tile-logo img {
       opacity: 1;
+      transform: scale(1.04);
     }
 
     .hp-brand-tile-logo-text {
@@ -649,11 +684,21 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.06);
       padding: 4px;
-      transition: transform 220ms ease;
+      transition: transform 240ms ease, box-shadow 240ms ease, background 240ms ease;
     }
 
     .hp-brand-tile:hover .hp-brand-tile-products img {
-      transform: translateY(-3px);
+      transform: translateY(-6px) rotate(-3deg);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-products img:nth-child(2) {
+      transform: translateY(-10px) rotate(2deg);
+    }
+
+    .hp-brand-tile:hover .hp-brand-tile-products img:nth-child(3) {
+      transform: translateY(-4px) rotate(-1deg);
     }
 
     .hp-brand-tile h3 {
@@ -754,6 +799,16 @@
       cursor: pointer;
     }
 
+    .brand-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 193, 7, 0.12) 0%, transparent 62%);
+      opacity: 0;
+      transition: opacity 280ms ease;
+      pointer-events: none;
+    }
+
     .brand-card:hover {
       border-color: rgba(255, 193, 7, 0.5);
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
@@ -761,23 +816,71 @@
       box-shadow: 0 12px 40px rgba(0, 85, 184, 0.2);
     }
 
+    .brand-card:hover::after {
+      opacity: 1;
+    }
+
     .brand-card .brand-logo {
-      width: 60px;
-      height: 60px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(0, 85, 184, 0.3) 0%, rgba(255, 193, 7, 0.1) 100%);
+      width: 100%;
+      min-height: 84px;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%),
+        rgba(2, 7, 16, 0.92);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      color: rgba(255, 255, 255, 0.6);
-      transition: all 280ms ease;
+      padding: 1.15rem 1rem;
+      transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 14px 24px rgba(0, 0, 0, 0.18);
     }
 
     .brand-card:hover .brand-logo {
-      background: linear-gradient(135deg, rgba(0, 85, 184, 0.5) 0%, rgba(255, 193, 7, 0.2) 100%);
-      color: #ffc107;
-      transform: scale(1.1);
+      transform: translateY(-4px) scale(1.03);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 20px 30px rgba(0, 0, 0, 0.24);
+      border-color: rgba(255, 193, 7, 0.22);
+    }
+
+    .brand-card .brand-logo img {
+      width: auto;
+      height: 34px;
+      max-width: 100%;
+      object-fit: contain;
+      transition: transform 280ms ease, opacity 280ms ease, filter 280ms ease;
+      opacity: 0.92;
+    }
+
+    .brand-card:hover .brand-logo img {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+
+    .brand-card .brand-logo .is-invert {
+      filter: brightness(0) invert(1);
+    }
+
+    .brand-card .brand-logo .is-screen {
+      mix-blend-mode: screen;
+    }
+
+    .brand-wordmark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 1.55rem;
+      letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .brand-card-copy {
+      display: grid;
+      gap: 0.35rem;
     }
 
     .brand-card h3 {
@@ -813,9 +916,8 @@
       }
 
       .brand-card .brand-logo {
-        width: 48px;
-        height: 48px;
-        font-size: 1.6rem;
+        min-height: 68px;
+        padding: 0.95rem 0.85rem;
       }
 
       .brand-card h3 {
@@ -842,6 +944,8 @@
 
       .brand-card .brand-logo {
         flex-shrink: 0;
+        width: 86px;
+        min-height: 86px;
       }
 
       .brand-card h3 {
@@ -1432,7 +1536,7 @@
         <div class="hp-brand-grid">
 
           <!-- EcoFlow — featured -->
-          <a class="hp-brand-tile hp-brand-tile-featured hp-reveal" href="/products.html">
+          <a class="hp-brand-tile hp-brand-tile-featured hp-reveal" href="/shop.html?store=ecoflow">
             <div class="hp-brand-tile-products">
               <img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max">
               <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
@@ -1441,7 +1545,9 @@
             </div>
             <div class="hp-brand-tile-body">
               <div class="hp-brand-tile-logo">
-                <img src="/assets/images/brands/ecoflow-logo.svg" alt="EcoFlow">
+                <span class="hp-brand-tile-logo-badge">
+                  <img src="/assets/images/brands/ecoflow-logo.svg" alt="EcoFlow">
+                </span>
               </div>
               <h3>EcoFlow</h3>
               <p>Portable power stations, home backup systems, and foldable solar panels. River and Delta series
@@ -1450,52 +1556,58 @@
             </div>
           </a>
 
-          <!-- Generic Solar Panels -->
-          <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Solar%20Panels">
+          <!-- Bluetti -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/shop.html?store=bluetti">
             <div class="hp-brand-tile-logo">
-              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-solar-panel"
-                  style="font-size:1.6rem;color:#ffc107"></i></span>
+              <span class="hp-brand-tile-logo-badge">
+                <img class="is-invert" src="/assets/images/brands/bluetti-logo.svg" alt="Bluetti">
+              </span>
             </div>
-            <h3>Solar Panels</h3>
-            <p>Monocrystalline and foldable solar panels from multiple manufacturers — sized for homes, rooftops, and
-              field deployments.</p>
+            <h3>Bluetti</h3>
+            <p>Portable stations, expandable battery systems, and solar-ready backup kits for homes, work sites, and
+              mobile teams.</p>
             <div class="hp-brand-tile-products">
-              <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="110W Panel">
+              <img src="/assets/images/products/bluetti-ac180.png" alt="Bluetti AC180">
+              <img src="/assets/images/products/bluetti-ac300.png" alt="Bluetti AC300">
+              <img src="/assets/images/products/bluetti-b300.png" alt="Bluetti B300">
             </div>
-            <span class="hp-brand-tile-cta">Browse panels <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="hp-brand-tile-cta">Shop Bluetti <i class="fa-solid fa-arrow-right"></i></span>
           </a>
 
-          <!-- Backup Power Systems -->
-          <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/products.html?category=Home%20Backup">
+          <!-- Deye -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-1" href="/shop.html?store=deye">
             <div class="hp-brand-tile-logo">
-              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-battery-full"
-                  style="font-size:1.6rem;color:#4d8ef0"></i></span>
+              <span class="hp-brand-tile-logo-badge">
+                <img class="is-screen" src="/assets/images/brands/deye-logo.webp" alt="Deye">
+              </span>
             </div>
-            <h3>Home Backup</h3>
-            <p>High-capacity backup power systems for homes, offices, and businesses that need reliable energy storage
-              and solar expansion.</p>
+            <h3>Deye</h3>
+            <p>Hybrid inverters, commercial backup platforms, and scalable solar storage hardware for homes, shops,
+              offices, and larger energy projects.</p>
             <div class="hp-brand-tile-products">
-              <img src="/assets/images/products/delta-2-max.png" alt="Delta 2 Max">
-              <img src="/assets/images/products/delta-3-2000-air.png" alt="Delta 3 Air">
+              <img src="/assets/images/products/deye-sun-6k-sg04lp1-eu-sm2.png" alt="Deye 6K inverter">
+              <img src="/assets/images/products/deye-sun-16k-sg05lp3-eu-sm2.png" alt="Deye 16K inverter">
+              <img src="/assets/images/products/deye-sun-50k-sg01hp3-eu-bm4.png" alt="Deye 50K inverter">
             </div>
-            <span class="hp-brand-tile-cta">Browse backup <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="hp-brand-tile-cta">Shop Deye <i class="fa-solid fa-arrow-right"></i></span>
           </a>
 
-          <!-- Portable Power -->
-          <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/products.html?category=Portable%20Power">
+          <!-- Buttu -->
+          <a class="hp-brand-tile hp-reveal hp-reveal-delay-2" href="/shop.html?store=buttu">
             <div class="hp-brand-tile-logo">
-              <span class="hp-brand-tile-logo-text"><i class="fa-solid fa-plug-circle-bolt"
-                  style="font-size:1.6rem;color:#ffc107"></i></span>
+              <span class="hp-brand-tile-logo-badge">
+                <span class="brand-wordmark">BUTTU</span>
+              </span>
             </div>
-            <h3>Portable Power</h3>
-            <p>Compact stations for everyday backup — lights, laptops, routers, and small appliances. Easy to carry,
-              fast to recharge.</p>
+            <h3>Buttu</h3>
+            <p>Solar accessories, field components, and on-request sourcing support for installation add-ons and
+              complete energy system builds.</p>
             <div class="hp-brand-tile-products">
-              <img src="/assets/images/products/river-2-max.png" alt="River 2 Max">
-              <img src="/assets/images/products/river-2-pro.png" alt="River 2 Pro">
-              <img src="/assets/images/products/river-2.png" alt="River 2">
+              <img src="/assets/images/products/110w-solar-panel-foldable.png" alt="Foldable solar panel">
+              <img src="/assets/images/products/deye-bos-g-pro-5kwh.png" alt="Battery system">
+              <img src="/assets/images/products/ecoflow-delta-pro-ultra-battery-6kwh.png" alt="Battery module">
             </div>
-            <span class="hp-brand-tile-cta">Browse portable <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="hp-brand-tile-cta">Browse Buttu <i class="fa-solid fa-arrow-right"></i></span>
           </a>
 
           <!-- Installation -->
@@ -1537,7 +1649,7 @@
         <div class="hp-section-top hp-reveal">
           <div>
             <p class="hp-section-kicker">Trusted partners</p>
-            <h2 class="hp-section-h2">Brands we carry</h2>
+            <h2 class="hp-section-h2">Shop by brand</h2>
           </div>
           <a class="button button-ghost" href="/shop.html">
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> Shop all
@@ -1546,31 +1658,39 @@
         <div class="hp-brands-grid hp-reveal hp-reveal-delay-1">
           <a href="/shop.html?store=ecoflow" class="brand-card hp-brand-card-1">
             <div class="brand-logo">
-              <i class="fas fa-bolt"></i>
+              <img src="/assets/images/brands/ecoflow-logo.svg" alt="EcoFlow">
             </div>
-            <h3>EcoFlow</h3>
-            <p>Portable power stations</p>
+            <div class="brand-card-copy">
+              <h3>EcoFlow</h3>
+              <p>Portable power stations</p>
+            </div>
           </a>
           <a href="/shop.html?store=deye" class="brand-card hp-brand-card-2">
             <div class="brand-logo">
-              <i class="fas fa-sun"></i>
+              <img class="is-screen" src="/assets/images/brands/deye-logo.webp" alt="Deye">
             </div>
-            <h3>Deye</h3>
-            <p>Solar inverters & hybrid systems</p>
+            <div class="brand-card-copy">
+              <h3>Deye</h3>
+              <p>Solar inverters & hybrid systems</p>
+            </div>
           </a>
           <a href="/shop.html?store=bluetti" class="brand-card hp-brand-card-3">
             <div class="brand-logo">
-              <i class="fas fa-battery-full"></i>
+              <img class="is-invert" src="/assets/images/brands/bluetti-logo.svg" alt="Bluetti">
             </div>
-            <h3>Bluetti</h3>
-            <p>Power solutions & solar panels</p>
+            <div class="brand-card-copy">
+              <h3>Bluetti</h3>
+              <p>Power solutions & solar panels</p>
+            </div>
           </a>
           <a href="/shop.html?store=buttu" class="brand-card hp-brand-card-4">
             <div class="brand-logo">
-              <i class="fas fa-cog"></i>
+              <span class="brand-wordmark">BUTTU</span>
             </div>
-            <h3>Buttu</h3>
-            <p>Solar components & installation</p>
+            <div class="brand-card-copy">
+              <h3>Buttu</h3>
+              <p>Solar components & installation</p>
+            </div>
           </a>
         </div>
       </div>
@@ -1849,7 +1969,7 @@
 
       /* 6. Brand tile mouse-tracking glow */
       if (!reduced && window.matchMedia("(pointer:fine)").matches) {
-        document.querySelectorAll(".hp-brand-tile").forEach(tile => {
+        document.querySelectorAll(".hp-brand-tile, .brand-card").forEach(tile => {
           tile.addEventListener("mousemove", e => {
             const r = tile.getBoundingClientRect();
             const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);

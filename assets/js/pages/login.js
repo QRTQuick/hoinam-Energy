@@ -9,6 +9,7 @@ import {
   registerWithEmail,
   waitForAuthReady
 } from "../firebase.js";
+import { consumeGuestCartRestore } from "../store.js";
 import { showToast } from "../ui.js";
 
 const AUTH_SYNC_STATE = {
@@ -33,12 +34,21 @@ function beginDashboardNavigation() {
   authLoadingManager.beginNavigation(DASHBOARD_NAVIGATION_STATE);
 }
 
+function finishAuthNavigation() {
+  const explicitNext = new URLSearchParams(window.location.search).get("next");
+  const guestCart = consumeGuestCartRestore();
+  const fallback = !explicitNext && Number(guestCart?.itemCount || 0) > 0
+    ? "cart.html?restoredCart=1"
+    : "dashboard.html";
+
+  beginDashboardNavigation();
+  redirectAfterAuth(fallback);
+}
+
 async function completeAuthSuccess() {
   authLoadingManager.show(AUTH_SYNC_STATE);
   await syncSession();
-  showToast("Authentication successful.", "success");
-  beginDashboardNavigation();
-  redirectAfterAuth();
+  finishAuthNavigation();
 }
 
 function formatAuthError(error) {
@@ -109,9 +119,7 @@ async function handleGoogleRedirect() {
       return false;
     }
 
-    showToast("Authentication successful.", "success");
-    beginDashboardNavigation();
-    redirectAfterAuth();
+    finishAuthNavigation();
     return true;
   } catch (error) {
     authLoadingManager.hide();

@@ -574,7 +574,7 @@ export function refreshShell() {
     logoutBtns.forEach(el => el.classList.add("hidden"));
     dashLinks.forEach(el => el.classList.add("hidden"));
     installLinks.forEach(el => el.classList.add("hidden"));
-    cartLinks.forEach(el => el.classList.add("hidden"));
+    cartLinks.forEach(el => el.classList.remove("hidden"));
     adminLinks.forEach(el => el.classList.add("hidden"));
   }
 }
