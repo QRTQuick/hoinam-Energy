@@ -113,3 +113,114 @@ def send_message_via_smtp(settings, message: EmailMessage) -> None:
             smtp.starttls()
         smtp.login(settings.smtp_username, settings.smtp_password)
         smtp.send_message(message)
+
+
+def build_subscription_confirmation_message(
+    *,
+    settings,
+    subscriber_email: str,
+    subscriber_name: str | None,
+    unsubscribe_token: str,
+    frontend_url: str,
+) -> EmailMessage:
+    sender = settings.smtp_from_email or settings.smtp_username or settings.order_notification_email
+    greeting = f"Hi {subscriber_name}," if subscriber_name else "Hi there,"
+    unsubscribe_url = f"{frontend_url}/blog.html?unsubscribe={unsubscribe_token}"
+
+    body = "\n".join([
+        greeting,
+        "",
+        "You're now subscribed to the Hoinam Energy blog.",
+        "We'll send you a quick note whenever we publish a new post — solar tips, product news, and energy guides.",
+        "",
+        "If you didn't sign up or want to stop receiving emails, click the link below:",
+        unsubscribe_url,
+        "",
+        "— The Hoinam Energy team",
+    ])
+
+    message = EmailMessage()
+    message["Subject"] = "You're subscribed to the Hoinam Energy blog"
+    message["From"] = sender
+    message["To"] = subscriber_email
+    message.set_content(body)
+    return message
+
+
+def build_new_post_notification_message(
+    *,
+    settings,
+    subscriber_email: str,
+    subscriber_name: str | None,
+    post_title: str,
+    post_excerpt: str,
+    post_url: str,
+    unsubscribe_token: str,
+    frontend_url: str,
+) -> EmailMessage:
+    sender = settings.smtp_from_email or settings.smtp_username or settings.order_notification_email
+    greeting = f"Hi {subscriber_name}," if subscriber_name else "Hi there,"
+    unsubscribe_url = f"{frontend_url}/blog.html?unsubscribe={unsubscribe_token}"
+
+    body = "\n".join([
+        greeting,
+        "",
+        f"A new post is live on the Hoinam Energy blog:",
+        "",
+        f"  {post_title}",
+        f"  {post_excerpt}",
+        "",
+        f"Read it here: {post_url}",
+        "",
+        "—",
+        "To unsubscribe: " + unsubscribe_url,
+    ])
+
+    message = EmailMessage()
+    message["Subject"] = f"New post: {post_title}"
+    message["From"] = sender
+    message["To"] = subscriber_email
+    message.set_content(body)
+    return message
+
+
+def build_order_approved_message(
+    *,
+    settings,
+    user,
+    order,
+    shipping_address: dict | None = None,
+) -> EmailMessage:
+    shipping_address = shipping_address or order.shipping_address or {}
+    sender = settings.smtp_from_email or settings.smtp_username or settings.order_notification_email
+    customer_email = getattr(user, "email", None) or shipping_address.get("email") or ""
+    customer_name = getattr(user, "full_name", None) or shipping_address.get("full_name") or "Customer"
+    greeting = f"Hi {customer_name},"
+
+    body = "\n".join([
+        greeting,
+        "",
+        f"Great news — your Hoinam Energy order {order.order_number} has been approved!",
+        "",
+        "Your payment has been verified and your order is now being processed for dispatch.",
+        "",
+        f"Order number:  {order.order_number}",
+        f"Total amount:  {float(order.total_amount):,.2f} {order.currency}",
+        f"Payment ref:   {order.payment_reference}",
+        "",
+        "Delivery address:",
+        _format_shipping_address(shipping_address),
+        "",
+        "If you have any questions, reply to this email or contact us at sales@hoinamenergy.com.",
+        "",
+        "Thank you for choosing Hoinam Energy.",
+        "— The Hoinam Energy team",
+    ])
+
+    message = EmailMessage()
+    message["Subject"] = f"Order {order.order_number} approved — Hoinam Energy"
+    message["From"] = sender
+    message["To"] = customer_email
+    message["Reply-To"] = settings.order_notification_email
+    message.set_content(body)
+    return message

@@ -12,13 +12,16 @@ from .config import get_settings
 from .database import check_database_url, close_session, get_session, init_database
 from .emailer import (
     build_order_notification_message,
+    build_order_approved_message,
+    build_subscription_confirmation_message,
+    build_new_post_notification_message,
     send_message_via_smtp,
     smtp_is_configured,
 )
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, Order, Payment, Product, User, BlogPost
+from .models import Installation, Order, Payment, Product, User, BlogPost, BlogSubscriber
 from .seed import seed_products
 from .services import (
     apply_product_payload,
@@ -31,6 +34,7 @@ from .utils import (
     generate_order_number,
     generate_payment_reference,
     generate_verification_code,
+    generate_unsubscribe_token,
     resolve_product_image_url,
     slugify,
     to_decimal,
@@ -518,6 +522,10 @@ def create_app() -> Flask:
                 status="pending",
             )
             db_session().add(payment)
+            # Store verification code in payment_details so dashboard can access it
+            details = dict(order.payment_details or {})
+            details["verification_code"] = verification_code
+            order.payment_details = details
 
         db_session().commit()
 
@@ -618,11 +626,36 @@ def create_app() -> Flask:
 
         payment.receipt_url = f"/receipts/{receipt_filename}"
         payment.receipt_uploaded_at = dt.now(timezone.utc)
-        payment.status = "confirmed"
-        order.payment_status = "confirmed"
+        payment.status = "receipt_uploaded"
+        order.payment_status = "receipt_uploaded"
+        order.status = "payment_pending"
         db_session().commit()
 
-        return json_success(payment.to_dict(), message="Receipt uploaded successfully.")
+        # Notify admin that a receipt was uploaded and needs review
+        if smtp_is_configured(settings):
+            try:
+                from email.message import EmailMessage as _EM
+                admin_msg = _EM()
+                admin_msg["Subject"] = f"Receipt uploaded for order {order.order_number} — needs review"
+                admin_msg["From"] = settings.smtp_from_email or settings.smtp_username
+                admin_msg["To"] = settings.order_notification_email
+                admin_msg.set_content(
+                    f"A customer has uploaded a payment receipt for order {order.order_number}.\n\n"
+                    f"Order ID: {order.id}\n"
+                    f"Order number: {order.order_number}\n"
+                    f"Payment reference: {order.payment_reference}\n"
+                    f"Total: {float(order.total_amount):,.2f} {order.currency}\n"
+                    f"Verification code: {payment.verification_code}\n\n"
+                    f"Please review and approve the order in the admin panel."
+                )
+                send_message_via_smtp(settings, admin_msg)
+            except Exception:
+                app.logger.exception(
+                    "Receipt uploaded for %s but admin notification email failed.",
+                    order.order_number,
+                )
+
+        return json_success(payment.to_dict(), message="Receipt uploaded. Hoinam Energy will verify and approve your order within 40 minutes.")
 
     @app.post("/api/installations")
     def create_installation():
@@ -942,31 +975,52 @@ def create_app() -> Flask:
 
     @app.post("/api/admin/orders/<int:order_id>/confirm-delivery")
     def confirm_delivery(order_id: int):
-        """Mark goods as received and approve payment (admin only)."""
+        """Mark order as approved/delivered and email the customer (admin only)."""
         authenticate(admin=True)
-        payload = request.get_json(silent=True) or {}
 
-        order = db_session().query(Order).filter(Order.id == order_id).first()
+        order = (
+            db_session()
+            .query(Order)
+            .options(joinedload(Order.user))
+            .filter(Order.id == order_id)
+            .first()
+        )
         if not order:
             raise ApiError("Order not found.", 404)
 
-        # Mark order as goods received/delivered
         order.status = "delivered"
         order.payment_status = "confirmed"
         db_session().commit()
 
-        # Update payment if it exists
         payment = (
             db_session().query(Payment).filter(Payment.order_id == order_id).first()
         )
         if payment:
             payment.status = "confirmed"
-            payment.notes = f"Payment confirmed by admin on {datetime.now(timezone.utc).isoformat()}. Goods received."
+            payment.notes = (
+                f"Payment confirmed by admin on {datetime.now(timezone.utc).isoformat()}."
+            )
             db_session().commit()
+
+        # Email the customer their approval notification
+        if smtp_is_configured(settings) and order.user and order.user.email:
+            try:
+                approval_msg = build_order_approved_message(
+                    settings=settings,
+                    user=order.user,
+                    order=order,
+                    shipping_address=order.shipping_address,
+                )
+                send_message_via_smtp(settings, approval_msg)
+            except Exception:
+                app.logger.exception(
+                    "Order %s approved but approval email could not be sent.",
+                    order.order_number,
+                )
 
         return json_success(
             order.to_dict(),
-            message=f"Order {order.order_number} marked as delivered. Payment confirmed.",
+            message=f"Order {order.order_number} approved. Customer notified by email.",
         )
 
     @app.get("/")

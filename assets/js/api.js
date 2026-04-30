@@ -207,3 +207,17 @@ export function deleteBlogPost(postId) {
     authRequired: true
   });
 }
+
+export function uploadPaymentReceipt(verificationCode, file) {
+  const formData = new FormData();
+  formData.append("receipt", file);
+  return apiFetch(`/payments/${verificationCode}/receipt`, {
+    method: "POST",
+    authRequired: true,
+    formData
+  });
+}
+
+export function getOrderPayment(verificationCode) {
+  return apiFetch(`/payments/${verificationCode}`, { authRequired: true });
+}

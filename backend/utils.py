@@ -102,3 +102,8 @@ def generate_verification_code(prefix: str = "HN") -> str:
     # Generate a 10-character alphanumeric code
     code = uuid.uuid4().hex[:10].upper()
     return f"{safe_prefix}-{code}"
+
+
+def generate_unsubscribe_token() -> str:
+    """Generate a secure random token for blog unsubscribe links."""
+    return uuid.uuid4().hex

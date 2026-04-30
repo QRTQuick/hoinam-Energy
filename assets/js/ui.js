@@ -83,7 +83,7 @@ export function productMedia(product, className = "product-media") {
         loading="lazy"
         data-fallback-srcs="${fallbackSources}"
         data-fallback-index="0"
-        onerror="const sources=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); const nextIndex=Number(this.dataset.fallbackIndex||'0')+1; if (sources[nextIndex]) { this.dataset.fallbackIndex=String(nextIndex); this.src=sources[nextIndex]; return; } this.remove(); this.parentElement.classList.remove('has-image'); this.parentElement.classList.add('is-fallback');"
+        onerror="const sources=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); const nextIndex=Number(this.dataset.fallbackIndex||'0')+1; if (sources[nextIndex]) { this.dataset.fallbackIndex=String(nextIndex); this.src=sources[nextIndex]; return; } const p=this.parentElement; this.remove(); if(p){p.classList.remove('has-image'); p.classList.add('is-fallback');}"
       >
       ${fallback}
     </div>
@@ -376,6 +376,9 @@ export function injectShell(activePage) {
             <!-- About -->
             <a class="snav-link ${active("about")}" href="/about.html">About</a>
 
+            <!-- Blog -->
+            <a class="snav-link ${active("blog")}" href="/blog.html">Blog</a>
+
             <!-- Contact -->
             <a class="snav-link ${active("contact")}" href="/contact.html">Contact</a>
 
@@ -407,6 +410,7 @@ export function injectShell(activePage) {
             <a class="nav-link ${active("home")}" href="/index.html"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a>
             <a class="nav-link ${active("products")}" href="/products.html"><i class="fa-solid fa-store" aria-hidden="true"></i><span>Products</span></a>
             <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
+            <a class="nav-link ${active("blog")}" href="/blog.html"><i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>Blog</span></a>
             <a class="nav-link ${active("contact")}" href="/contact.html"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contact</span></a>
             <!-- logged-out -->
             <a class="nav-link snav-auth-out ${active("login")}" data-login-link href="/login.html"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Login</span></a>
@@ -443,6 +447,7 @@ export function injectShell(activePage) {
             <a href="/index.html">Home</a>
             <a href="/products.html">Products</a>
             <a href="/book-install.html">Book Installation</a>
+            <a href="/blog.html">Blog</a>
             <a href="/about.html">About</a>
             <a href="/contact.html">Contact</a>
           </div>

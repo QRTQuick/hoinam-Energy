@@ -1,4 +1,4 @@
-import { getUserInstallations, getUserOrders, updateProfile } from "../api.js";
+import { getUserInstallations, getUserOrders, updateProfile, uploadPaymentReceipt } from "../api.js";
 import authLoadingManager from "../auth-loading.js";
 import { bootstrapPage } from "../app-shell.js";
 import { formatDate, formatMoney, showToast, statusBadge } from "../ui.js";
@@ -33,7 +33,94 @@ function normalizePhoneNumber(rawValue) {
   throw new Error("Enter a valid phone number like +2348012345678 or 08012345678.");
 }
 
-function renderPhoneCompletion(profile) {
+function renderOrderCard(order) {
+  const isPendingTransfer = (
+    order.payment_method === "bank_transfer" &&
+    (order.payment_status === "awaiting_transfer" || order.payment_status === "receipt_uploaded")
+  );
+  const verificationCode = order.payment_details?.verification_code || "";
+  const receiptUploaded = order.payment_status === "receipt_uploaded";
+
+  return `
+    <article class="order-card" data-order-id="${order.id}">
+      <div class="chip-row">
+        <span class="badge">${order.order_number}</span>
+        ${statusBadge(order.status)}
+      </div>
+      <h3>${formatMoney(order.total_amount, order.currency)}</h3>
+      <p class="muted">${paymentLabel(order)} — ${order.payment_reference}</p>
+      <div class="mini-meta">
+        <span>${formatDate(order.created_at)}</span>
+        <span>${order.items.length} item(s)</span>
+      </div>
+      ${isPendingTransfer ? `
+        <div class="order-upload-section ${receiptUploaded ? "order-upload-done" : ""}" id="upload-section-${order.id}">
+          ${receiptUploaded
+            ? `<p class="order-upload-pending"><i class="fa-solid fa-clock" aria-hidden="true"></i> Proof of payment submitted — awaiting verification (up to 40 min).</p>`
+            : `
+              <p class="order-upload-prompt"><i class="fa-solid fa-image" aria-hidden="true"></i> Upload your transfer screenshot to speed up approval.</p>
+              <label class="proof-upload-label">
+                <input type="file" class="order-proof-input" data-order-id="${order.id}" data-code="${verificationCode}" accept="image/png,image/jpeg,image/jpg,image/gif,application/pdf" style="display:none">
+                <span class="proof-upload-placeholder">
+                  <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+                  <span>Choose file</span>
+                </span>
+              </label>
+              <button class="button button-sm order-proof-submit" data-order-id="${order.id}" data-code="${verificationCode}" disabled>
+                <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Submit proof
+              </button>
+              <p class="proof-upload-status hidden" id="upload-status-${order.id}"></p>
+            `
+          }
+        </div>
+      ` : ""}
+    </article>
+  `;
+}
+
+function bindOrderUploadHandlers() {
+  document.querySelectorAll(".order-proof-input").forEach((input) => {
+    input.addEventListener("change", () => {
+      const orderId = input.dataset.orderId;
+      const btn = document.querySelector(`.order-proof-submit[data-order-id="${orderId}"]`);
+      const placeholder = input.closest(".proof-upload-label")?.querySelector(".proof-upload-placeholder span:last-child");
+      if (input.files?.[0]) {
+        if (btn) btn.disabled = false;
+        if (placeholder) placeholder.textContent = input.files[0].name;
+      }
+    });
+  });
+
+  document.querySelectorAll(".order-proof-submit").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const orderId = btn.dataset.orderId;
+      const code = btn.dataset.code;
+      const input = document.querySelector(`.order-proof-input[data-order-id="${orderId}"]`);
+      const statusEl = document.getElementById(`upload-status-${orderId}`);
+      const file = input?.files?.[0];
+      if (!file || !code) return;
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Uploading…`;
+      if (statusEl) { statusEl.className = "proof-upload-status"; statusEl.textContent = "Uploading…"; statusEl.classList.remove("hidden"); }
+
+      try {
+        await uploadPaymentReceipt(code, file);
+        const section = document.getElementById(`upload-section-${orderId}`);
+        if (section) {
+          section.classList.add("order-upload-done");
+          section.innerHTML = `<p class="order-upload-pending"><i class="fa-solid fa-clock" aria-hidden="true"></i> Proof submitted — awaiting verification (up to 40 min).</p>`;
+        }
+        showToast("Proof of payment submitted.", "success");
+      } catch (error) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Submit proof`;
+        if (statusEl) { statusEl.className = "proof-upload-status proof-upload-error"; statusEl.textContent = error.message; }
+        showToast(error.message, "error");
+      }
+    });
+  });
+}
   const target = document.getElementById("profile-completion-slot");
   if (!target) {
     return;
@@ -133,24 +220,11 @@ async function init() {
 
     document.getElementById("orders-list").innerHTML = orders.length
       ? orders
-          .map(
-            (order) => `
-              <article class="order-card">
-                <div class="chip-row">
-                  <span class="badge">${order.order_number}</span>
-                  ${statusBadge(order.status)}
-                </div>
-                <h3>${formatMoney(order.total_amount, order.currency)}</h3>
-                <p class="muted">${paymentLabel(order)} - ${order.payment_reference}</p>
-                <div class="mini-meta">
-                  <span>${formatDate(order.created_at)}</span>
-                  <span>${order.items.length} item(s)</span>
-                </div>
-              </article>
-            `
-          )
+          .map((order) => renderOrderCard(order))
           .join("")
       : `<div class="empty-state">No orders yet. Your purchases will appear here after checkout.</div>`;
+
+    bindOrderUploadHandlers();
 
     document.getElementById("installations-list").innerHTML = installations.length
       ? installations

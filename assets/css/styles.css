@@ -4159,6 +4159,89 @@ body[data-page="products"] .catalog-active-pill {
   font-size: 0.92rem;
 }
 
+/* Proof of payment upload widget */
+.proof-upload-box {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 2px dashed rgba(0, 85, 184, 0.25);
+  border-radius: 16px;
+  background: #f6f9fc;
+}
+
+.proof-upload-box h4 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--heading);
+}
+
+.proof-upload-box .muted {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.proof-upload-label {
+  display: block;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+
+.proof-upload-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(0, 85, 184, 0.2);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  transition: border-color 180ms ease;
+}
+
+.proof-upload-label:hover .proof-upload-placeholder {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.proof-upload-preview {
+  margin-bottom: 0.75rem;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.proof-upload-preview img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.proof-upload-status {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.proof-upload-success {
+  background: #eafaf1;
+  color: #1a7a4a;
+  border: 1px solid #a3e4c1;
+}
+
+.proof-upload-error {
+  background: #fef0f0;
+  color: #c0392b;
+  border: 1px solid #f5c6c6;
+}
+
+.proof-upload-done {
+  border-color: #a3e4c1;
+  background: #f0faf5;
+}
+
 .checkout-complete-panel {
   margin-bottom: 1rem;
 }
@@ -6541,4 +6624,34 @@ p,
   * {
     -webkit-tap-highlight-color: rgba(0, 85, 184, 0.1);
   }
+}
+
+/* Dashboard order upload section */
+.order-upload-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.order-upload-prompt {
+  font-size: 0.88rem;
+  color: var(--primary);
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+
+.order-upload-pending {
+  font-size: 0.88rem;
+  color: #1a7a4a;
+  margin: 0;
+  font-weight: 600;
+}
+
+.order-upload-done {
+  border-top-color: #a3e4c1;
+}
+
+.button-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.88rem;
 }

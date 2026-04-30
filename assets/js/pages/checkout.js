@@ -1,4 +1,4 @@
-import { createOrder, getPaymentOptions } from "../api.js";
+import { createOrder, getPaymentOptions, uploadPaymentReceipt } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { clearCart, getCart, getCartSubtotal } from "../store.js";
 import { formatDate, formatMoney, showToast } from "../ui.js";
@@ -485,13 +485,18 @@ function printReceipt(order) {
     return;
   }
 
+  const html = buildReceiptDocument(order);
   printWindow.document.open();
-  printWindow.document.write(buildReceiptDocument(order));
+  printWindow.document.write(html);
   printWindow.document.close();
+  // Some browsers fire onload before the written content is ready — use a short
+  // timeout as a reliable fallback so the print dialog always opens.
   printWindow.focus();
-  printWindow.onload = () => {
-    printWindow.print();
+  const triggerPrint = () => {
+    try { printWindow.print(); } catch (_) { /* ignore */ }
   };
+  printWindow.onload = triggerPrint;
+  window.setTimeout(triggerPrint, 800);
 }
 
 function bindReceiptActions(order) {
@@ -507,6 +512,7 @@ function renderOrderComplete(order) {
   const status = document.getElementById("checkout-status");
   const paymentDetails = paymentDetailsForOrder(order);
   const isTransfer = paymentDetails.kind === "transfer";
+  const verificationCode = order.verification_code || "";
 
   status.innerHTML = `
     <div class="panel checkout-complete-panel">
@@ -514,7 +520,7 @@ function renderOrderComplete(order) {
       <h3>Order ${order.order_number} created</h3>
       <p class="muted">
         ${isTransfer
-          ? "Transfer to the selected bank account below and keep your receipt. You can print or download the order receipt right away."
+          ? "Transfer to the bank account below, then upload your payment screenshot or receipt. Hoinam Energy will verify and approve your order within 40 minutes."
           : "Hoinam Energy will contact you to confirm delivery and collect payment. You can still print or download your order receipt now."}
       </p>
       ${
@@ -524,9 +530,25 @@ function renderOrderComplete(order) {
               <div><span>Bank</span><strong>${paymentDetails.bank_name || "Pending setup"}</strong></div>
               <div><span>Account number</span><strong>${paymentDetails.account_number || "Pending setup"}</strong></div>
               <div><span>Account name</span><strong>${paymentDetails.account_name || "Hoinam Energy"}</strong></div>
-              <div><span>Reference</span><strong>${order.payment_reference}</strong></div>
-              ${order.verification_code ? `<div><span>Verification code</span><strong>${order.verification_code}</strong></div>` : ""}
+              <div><span>Reference / Narration</span><strong>${order.payment_reference}</strong></div>
+              ${verificationCode ? `<div><span>Verification code</span><strong>${verificationCode}</strong></div>` : ""}
               <div><span>Order date</span><strong>${formatDate(order.created_at)}</strong></div>
+            </div>
+            <div class="proof-upload-box" id="proof-upload-box">
+              <h4><i class="fa-solid fa-image" aria-hidden="true"></i> Upload proof of payment</h4>
+              <p class="muted">Take a screenshot of your transfer confirmation and upload it here. We'll verify and approve your order within 40 minutes.</p>
+              <label class="proof-upload-label" id="proof-upload-label">
+                <input type="file" id="proof-file-input" accept="image/png,image/jpeg,image/jpg,image/gif,application/pdf" style="display:none">
+                <span class="proof-upload-placeholder" id="proof-upload-placeholder">
+                  <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+                  <span>Click to choose a file (PNG, JPG, PDF)</span>
+                </span>
+              </label>
+              <div id="proof-upload-preview" class="proof-upload-preview hidden"></div>
+              <button class="button" type="button" id="proof-upload-btn" disabled>
+                <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Submit proof of payment
+              </button>
+              <p class="proof-upload-status hidden" id="proof-upload-status"></p>
             </div>
           `
           : `<p class="checkout-reference">Reference: <strong>${order.payment_reference}</strong></p>`
@@ -544,6 +566,59 @@ function renderOrderComplete(order) {
   `;
 
   bindReceiptActions(order);
+
+  // Wire up proof-of-payment upload if transfer order
+  if (isTransfer && verificationCode) {
+    const fileInput = document.getElementById("proof-file-input");
+    const uploadBtn = document.getElementById("proof-upload-btn");
+    const preview = document.getElementById("proof-upload-preview");
+    const statusEl = document.getElementById("proof-upload-status");
+    const placeholder = document.getElementById("proof-upload-placeholder");
+
+    fileInput?.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      uploadBtn.disabled = false;
+      placeholder.innerHTML = `<i class="fa-solid fa-file-circle-check" aria-hidden="true"></i> <span>${file.name}</span>`;
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Payment proof preview">`;
+          preview.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = `<p class="muted"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> ${file.name}</p>`;
+        preview.classList.remove("hidden");
+      }
+    });
+
+    uploadBtn?.addEventListener("click", async () => {
+      const file = fileInput?.files?.[0];
+      if (!file) return;
+
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Uploading…`;
+      statusEl.classList.remove("hidden");
+      statusEl.className = "proof-upload-status";
+      statusEl.textContent = "Uploading your proof of payment…";
+
+      try {
+        await uploadPaymentReceipt(verificationCode, file);
+        statusEl.className = "proof-upload-status proof-upload-success";
+        statusEl.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Uploaded! Hoinam Energy will verify and approve your order within 40 minutes. You'll receive a confirmation email once approved.`;
+        uploadBtn.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Submitted`;
+        document.getElementById("proof-upload-box").classList.add("proof-upload-done");
+      } catch (error) {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = `<i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Submit proof of payment`;
+        statusEl.className = "proof-upload-status proof-upload-error";
+        statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${error.message}`;
+        showToast(error.message, "error");
+      }
+    });
+  }
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
