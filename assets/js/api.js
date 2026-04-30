@@ -138,6 +138,18 @@ export function uploadInventory(file) {
   });
 }
 
+export function getPendingDeliveries() {
+  return apiFetch("/admin/pending-deliveries", { authRequired: true });
+}
+
+export function confirmDelivery(orderId, payload = {}) {
+  return apiFetch(`/admin/orders/${orderId}/confirm-delivery`, {
+    method: "POST",
+    authRequired: true,
+    body: payload
+  });
+}
+
 export function createProduct(payload) {
   return apiFetch("/products", {
     method: "POST",

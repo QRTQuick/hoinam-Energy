@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from flask import Flask, g, jsonify, request, send_from_directory
@@ -15,13 +15,26 @@ from .emailer import (
     send_message_via_smtp,
     smtp_is_configured,
 )
+from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
 from .models import Installation, Order, Payment, Product, User
 from .seed import seed_products
-from .services import apply_product_payload, calculate_order_items, flag_duplicate_full_name_users, sync_user_from_claims
+from .services import (
+    apply_product_payload,
+    calculate_order_items,
+    flag_duplicate_full_name_users,
+    sync_user_from_claims,
+)
 from .stores import get_all_stores, get_store_by_slug
-from .utils import generate_order_number, generate_payment_reference, generate_verification_code, resolve_product_image_url, slugify, to_decimal
+from .utils import (
+    generate_order_number,
+    generate_payment_reference,
+    generate_verification_code,
+    resolve_product_image_url,
+    slugify,
+    to_decimal,
+)
 
 
 class ApiError(Exception):
@@ -143,16 +156,23 @@ def create_app() -> Flask:
     def serialize_installation(installation: Installation) -> dict:
         payload = installation.to_dict()
         payload["user"] = installation.user.to_dict() if installation.user else None
-        payload["product"] = installation.product.to_dict() if installation.product else None
+        payload["product"] = (
+            installation.product.to_dict() if installation.product else None
+        )
         return payload
 
     def parse_inventory_file(file_storage) -> list[dict]:
         rows = parse_stock_inventory(file_storage.stream)
         if not rows:
-            raise ApiError("The uploaded workbook is empty or does not match the stock inventory layout.", 400)
+            raise ApiError(
+                "The uploaded workbook is empty or does not match the stock inventory layout.",
+                400,
+            )
         return rows
 
-    def find_existing_inventory_product(row: dict, product_sku: str, product_slug: str, legacy_slug: str | None):
+    def find_existing_inventory_product(
+        row: dict, product_sku: str, product_slug: str, legacy_slug: str | None
+    ):
         reference_text = (row.get("reference") or "").strip()
         session = db_session()
 
@@ -170,12 +190,20 @@ def create_app() -> Flask:
                 return product
 
         if legacy_slug:
-            product = session.query(Product).filter(Product.slug.endswith(f"-{legacy_slug}")).first()
+            product = (
+                session.query(Product)
+                .filter(Product.slug.endswith(f"-{legacy_slug}"))
+                .first()
+            )
             if product is not None:
                 return product
 
         if reference_text:
-            product = session.query(Product).filter(Product.name.endswith(f" {reference_text}")).first()
+            product = (
+                session.query(Product)
+                .filter(Product.name.endswith(f" {reference_text}"))
+                .first()
+            )
             if product is not None:
                 return product
 
@@ -184,6 +212,62 @@ def create_app() -> Flask:
     @app.get("/api/health")
     def health_check():
         return json_success({"status": "ok"})
+
+    @app.get("/api/debug/smtp-config")
+    def debug_smtp_config():
+        """Check SMTP configuration (admin only)."""
+        user = authenticate()
+        if user.role != "admin":
+            raise ApiError("Admin access required.", 403)
+
+        return json_success(
+            {
+                "smtp_configured": smtp_is_configured(settings),
+                "smtp_host": settings.smtp_host,
+                "smtp_port": settings.smtp_port,
+                "smtp_username": (
+                    settings.smtp_username[:10] + "***"
+                    if settings.smtp_username
+                    else None
+                ),
+                "smtp_password": "***" if settings.smtp_password else None,
+                "smtp_from_email": settings.smtp_from_email,
+                "smtp_use_tls": settings.smtp_use_tls,
+                "smtp_timeout_seconds": settings.smtp_timeout_seconds,
+                "order_notification_email": settings.order_notification_email,
+            }
+        )
+
+    @app.post("/api/debug/send-test-email")
+    def send_test_email():
+        """Send a test email (admin only)."""
+        user = authenticate()
+        if user.role != "admin":
+            raise ApiError("Admin access required.", 403)
+
+        if not smtp_is_configured(settings):
+            raise ApiError(
+                "SMTP is not configured. Check your environment variables.", 400
+            )
+
+        try:
+            test_message = EmailMessage()
+            test_message["Subject"] = "[TEST] Hoinam Energy SMTP Test"
+            test_message["From"] = settings.smtp_from_email or settings.smtp_username
+            test_message["To"] = settings.order_notification_email
+            test_message.set_content(
+                f"SMTP test email from Hoinam Energy.\n\n"
+                f"Sent at: {datetime.now(timezone.utc).isoformat()}\n"
+                f"From: {settings.smtp_from_email or settings.smtp_username}\n"
+                f"To: {settings.order_notification_email}"
+            )
+            send_message_via_smtp(settings, test_message)
+            return json_success(
+                {"message": f"Test email sent to {settings.order_notification_email}"}
+            )
+        except Exception as e:
+            app.logger.exception("Test email failed")
+            raise ApiError(f"Failed to send test email: {str(e)}", 500)
 
     @app.post("/api/auth/verify")
     def verify_auth():
@@ -226,12 +310,12 @@ def create_app() -> Flask:
     def list_products():
         # Support filtering by store
         store_slug = request.args.get("store", "").strip()
-        
+
         query = db_session().query(Product).filter(Product.active.is_(True))
-        
+
         if store_slug:
             query = query.filter(Product.store_slug == store_slug)
-        
+
         products = query.order_by(desc(Product.featured), Product.name.asc()).all()
         return json_success([product.to_dict() for product in products])
 
@@ -287,7 +371,8 @@ def create_app() -> Flask:
                     "description": "Place the order now, then pay by transfer to the Hoinam Energy OPay merchant account.",
                     "bank_name": settings.opay_bank_name,
                     "account_number": settings.opay_account_number,
-                    "account_name": settings.opay_account_name or settings.opay_merchant_name,
+                    "account_name": settings.opay_account_name
+                    or settings.opay_merchant_name,
                 },
                 {
                     "id": "bank_transfer",
@@ -319,13 +404,16 @@ def create_app() -> Flask:
         if option is None:
             return {
                 "id": payment_method,
-                "kind": "transfer" if payment_method != "pay_on_delivery" else "delivery",
+                "kind": (
+                    "transfer" if payment_method != "pay_on_delivery" else "delivery"
+                ),
                 "label": payment_method.replace("_", " ").title(),
             }
 
         payload = {
             "id": option["id"],
-            "kind": option.get("kind") or ("transfer" if option["id"] != "pay_on_delivery" else "delivery"),
+            "kind": option.get("kind")
+            or ("transfer" if option["id"] != "pay_on_delivery" else "delivery"),
             "label": option.get("label"),
             "description": option.get("description"),
         }
@@ -352,21 +440,35 @@ def create_app() -> Flask:
         payment_method = (payload.get("payment_method") or "opay_transfer").strip()
         allowed_payment_methods = {"opay_transfer", "bank_transfer", "pay_on_delivery"}
         if payment_method not in allowed_payment_methods:
-            raise ApiError("Choose OPay transfer, bank transfer, or pay on delivery.", 400)
+            raise ApiError(
+                "Choose OPay transfer, bank transfer, or pay on delivery.", 400
+            )
 
-        payment_reference = (payload.get("payment_reference") or "").strip() or generate_payment_reference(
-            "OPAY" if payment_method == "opay_transfer" else
-            "BANK" if payment_method == "bank_transfer" else "POD"
+        payment_reference = (
+            payload.get("payment_reference") or ""
+        ).strip() or generate_payment_reference(
+            "OPAY"
+            if payment_method == "opay_transfer"
+            else "BANK" if payment_method == "bank_transfer" else "POD"
         )
-        existing_order = db_session().query(Order).filter(Order.payment_reference == payment_reference).first()
+        existing_order = (
+            db_session()
+            .query(Order)
+            .filter(Order.payment_reference == payment_reference)
+            .first()
+        )
         if existing_order:
             return json_success(existing_order.to_dict())
 
         shipping_address = payload.get("shipping_address") or {}
         required_fields = ["full_name", "phone", "address", "city", "state"]
-        missing_fields = [field for field in required_fields if not shipping_address.get(field)]
+        missing_fields = [
+            field for field in required_fields if not shipping_address.get(field)
+        ]
         if missing_fields:
-            raise ApiError(f"Missing shipping fields: {', '.join(missing_fields)}.", 400)
+            raise ApiError(
+                f"Missing shipping fields: {', '.join(missing_fields)}.", 400
+            )
 
         normalized_items, total, locked_products = calculate_order_items(
             db_session(), payload.get("items") or [], lock_products=True
@@ -375,12 +477,22 @@ def create_app() -> Flask:
         for item in normalized_items:
             product = locked_products[item["product_id"]]
             if product.stock > 0 and product.stock < item["quantity"]:
-                raise ApiError(f"{product.name} is no longer available in that quantity.", 409)
+                raise ApiError(
+                    f"{product.name} is no longer available in that quantity.", 409
+                )
             if product.stock > 0:
                 product.stock -= item["quantity"]
 
-        payment_status = "awaiting_transfer" if payment_method in {"opay_transfer", "bank_transfer"} else "pay_on_delivery"
-        order_status = "payment_pending" if payment_method in {"opay_transfer", "bank_transfer"} else "confirmed"
+        payment_status = (
+            "awaiting_transfer"
+            if payment_method in {"opay_transfer", "bank_transfer"}
+            else "pay_on_delivery"
+        )
+        order_status = (
+            "payment_pending"
+            if payment_method in {"opay_transfer", "bank_transfer"}
+            else "confirmed"
+        )
         order = Order(
             order_number=generate_order_number(),
             user_id=user.id,
@@ -473,40 +585,48 @@ def create_app() -> Flask:
     @app.post("/api/payments/<verification_code>/receipt")
     def upload_payment_receipt(verification_code: str):
         user = authenticate()
-        
+
         # Find the payment by verification code
-        payment = db_session().query(Payment).filter(Payment.verification_code == verification_code).first()
+        payment = (
+            db_session()
+            .query(Payment)
+            .filter(Payment.verification_code == verification_code)
+            .first()
+        )
         if not payment:
             raise ApiError("Payment verification code not found.", 404)
-        
+
         # Verify the order belongs to the authenticated user
         order = payment.order
         if order.user_id != user.id:
-            raise ApiError("You don't have permission to upload receipt for this payment.", 403)
-        
+            raise ApiError(
+                "You don't have permission to upload receipt for this payment.", 403
+            )
+
         file_storage = request.files.get("receipt")
         if not file_storage:
             raise ApiError("Please attach a receipt file.", 400)
-        
+
         # Handle different receipt formats (image or PDF)
         allowed_extensions = {".pdf", ".png", ".jpg", ".jpeg", ".gif"}
         file_extension = Path(file_storage.filename).suffix.lower()
         if file_extension not in allowed_extensions:
             raise ApiError("Allowed formats: PDF, PNG, JPG, JPEG, GIF", 400)
-        
+
         # Store receipt URL or file path
         receipt_filename = f"receipt_{verification_code}_{file_storage.filename}"
         receipt_path = project_root / "receipts" / receipt_filename
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
         file_storage.save(receipt_path)
-        
+
         from datetime import datetime as dt
+
         payment.receipt_url = f"/receipts/{receipt_filename}"
         payment.receipt_uploaded_at = dt.now(timezone.utc)
         payment.status = "confirmed"
         order.payment_status = "confirmed"
         db_session().commit()
-        
+
         return json_success(payment.to_dict(), message="Receipt uploaded successfully.")
 
     @app.post("/api/installations")
@@ -521,7 +641,9 @@ def create_app() -> Flask:
         installation = Installation(
             user_id=user.id,
             product_id=payload.get("product_id"),
-            preferred_date=date.fromisoformat(preferred_date) if preferred_date else None,
+            preferred_date=(
+                date.fromisoformat(preferred_date) if preferred_date else None
+            ),
             service_type=payload.get("service_type") or "Solar Installation",
             address=address,
             city=payload.get("city"),
@@ -561,7 +683,12 @@ def create_app() -> Flask:
     @app.put("/api/installations/<int:installation_id>")
     def update_installation(installation_id: int):
         authenticate(admin=True)
-        installation = db_session().query(Installation).filter(Installation.id == installation_id).first()
+        installation = (
+            db_session()
+            .query(Installation)
+            .filter(Installation.id == installation_id)
+            .first()
+        )
         if not installation:
             raise ApiError("Installation request not found.", 404)
 
@@ -584,10 +711,15 @@ def create_app() -> Flask:
     @app.get("/api/admin/stats")
     def admin_stats():
         authenticate(admin=True)
-        revenue = db_session().query(func.coalesce(func.sum(Order.total_amount), 0)).scalar()
+        revenue = (
+            db_session().query(func.coalesce(func.sum(Order.total_amount), 0)).scalar()
+        )
         payload = {
             "users": db_session().query(func.count(User.id)).scalar(),
-            "products": db_session().query(func.count(Product.id)).filter(Product.active.is_(True)).scalar(),
+            "products": db_session()
+            .query(func.count(Product.id))
+            .filter(Product.active.is_(True))
+            .scalar(),
             "orders": db_session().query(func.count(Order.id)).scalar(),
             "installations": db_session().query(func.count(Installation.id)).scalar(),
             "revenue": float(revenue or 0),
@@ -604,7 +736,9 @@ def create_app() -> Flask:
 
         rows = parse_inventory_file(file_storage)
         if not rows:
-            raise ApiError("No inventory rows were found in the uploaded workbook.", 400)
+            raise ApiError(
+                "No inventory rows were found in the uploaded workbook.", 400
+            )
 
         created = 0
         updated = 0
@@ -612,7 +746,9 @@ def create_app() -> Flask:
             product_slug = row.get("slug") or slugify(row["name"])
             product_sku = row.get("sku") or product_slug.upper().replace("-", "_")
             legacy_slug = row.get("legacy_slug")
-            product = find_existing_inventory_product(row, product_sku, product_slug, legacy_slug)
+            product = find_existing_inventory_product(
+                row, product_sku, product_slug, legacy_slug
+            )
             if product is None:
                 product = Product(
                     name=row["name"],
@@ -626,7 +762,9 @@ def create_app() -> Flask:
                     price=to_decimal(row["price"]),
                     currency=settings.default_currency,
                     stock=row["stock"],
-                    image_url=resolve_product_image_url(row["name"], row["image_url"], product_slug),
+                    image_url=resolve_product_image_url(
+                        row["name"], row["image_url"], product_slug
+                    ),
                     active=True,
                 )
                 db_session().add(product)
@@ -651,7 +789,58 @@ def create_app() -> Flask:
                 updated += 1
 
         db_session().commit()
-        return json_success({"created": created, "updated": updated}, message="Inventory upload complete.")
+        return json_success(
+            {"created": created, "updated": updated},
+            message="Inventory upload complete.",
+        )
+
+    @app.get("/api/admin/pending-deliveries")
+    def get_pending_deliveries():
+        """Get orders awaiting delivery confirmation (admin only)."""
+        authenticate(admin=True)
+        pending_orders = (
+            db_session()
+            .query(Order)
+            .filter(Order.status.in_(["payment_pending", "confirmed"]))
+            .options(joinedload(Order.user))
+            .order_by(Order.created_at.asc())
+            .all()
+        )
+        payload = []
+        for order in pending_orders:
+            data = order.to_dict()
+            data["user"] = order.user.to_dict() if order.user else None
+            payload.append(data)
+        return json_success(payload)
+
+    @app.post("/api/admin/orders/<int:order_id>/confirm-delivery")
+    def confirm_delivery(order_id: int):
+        """Mark goods as received and approve payment (admin only)."""
+        authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+
+        order = db_session().query(Order).filter(Order.id == order_id).first()
+        if not order:
+            raise ApiError("Order not found.", 404)
+
+        # Mark order as goods received/delivered
+        order.status = "delivered"
+        order.payment_status = "confirmed"
+        db_session().commit()
+
+        # Update payment if it exists
+        payment = (
+            db_session().query(Payment).filter(Payment.order_id == order_id).first()
+        )
+        if payment:
+            payment.status = "confirmed"
+            payment.notes = f"Payment confirmed by admin on {datetime.now(timezone.utc).isoformat()}. Goods received."
+            db_session().commit()
+
+        return json_success(
+            order.to_dict(),
+            message=f"Order {order.order_number} marked as delivered. Payment confirmed.",
+        )
 
     @app.get("/")
     def serve_index():

@@ -8,7 +8,9 @@ import {
   listProducts,
   updateInstallationAdmin,
   updateProduct,
-  uploadInventory
+  uploadInventory,
+  getPendingDeliveries,
+  confirmDelivery
 } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { formatDate, formatMoney, productMedia, showToast, statusBadge } from "../ui.js";
@@ -215,6 +217,58 @@ function renderOrders(orders) {
   `;
 }
 
+function renderPendingDeliveries(orders) {
+  const pendingOrders = orders.filter(order => 
+    order.status === "payment_pending" || order.status === "confirmed"
+  );
+
+  if (pendingOrders.length === 0) {
+    document.getElementById("admin-pending-deliveries").innerHTML = `
+      <p class="muted">No pending deliveries. All orders are either delivered or completed.</p>
+    `;
+    return;
+  }
+
+  document.getElementById("admin-pending-deliveries").innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pendingOrders
+          .map(
+            (order) => `
+              <tr>
+                <td>
+                  <strong>${order.order_number}</strong><br>
+                  <span class="muted">${paymentLabel(order)} - ${order.payment_reference}</span>
+                </td>
+                <td>
+                  <strong>${order.user?.full_name || "Customer"}</strong><br>
+                  <span class="muted">${order.user?.phone || order.shipping_address?.phone || "-"}</span>
+                </td>
+                <td><strong>${formatMoney(order.total_amount, order.currency)}</strong></td>
+                <td>${statusBadge(order.status)}</td>
+                <td>
+                  <button class="button button-full" type="button" data-confirm-delivery="${order.id}">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i> Seen goods
+                  </button>
+                </td>
+              </tr>
+            `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+}
+
 function renderInstallations() {
   document.getElementById("admin-installations").innerHTML = `
     <table>
@@ -306,6 +360,7 @@ async function loadAdminData() {
 
   renderProducts();
   renderUsers(users);
+  renderPendingDeliveries(orders);
   renderOrders(orders);
   renderInstallations();
 }
@@ -419,6 +474,26 @@ async function init() {
           showToast("Product archived.", "success");
         } catch (error) {
           showToast(error.message, "error");
+        }
+      }
+      return;
+    }
+
+    const confirmDeliveryButton = event.target.closest("[data-confirm-delivery]");
+    if (confirmDeliveryButton) {
+      const orderId = Number(confirmDeliveryButton.dataset.confirmDelivery);
+      if (window.confirm("Confirm that goods have been received? This will approve the payment.")) {
+        try {
+          confirmDeliveryButton.disabled = true;
+          confirmDeliveryButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Confirming...`;
+          await confirmDelivery(orderId);
+          await loadAdminData();
+          showToast("Delivery confirmed and payment approved.", "success");
+        } catch (error) {
+          showToast(error.message, "error");
+        } finally {
+          confirmDeliveryButton.disabled = false;
+          confirmDeliveryButton.innerHTML = `<i class="fa-solid fa-check" aria-hidden="true"></i> Seen goods`;
         }
       }
       return;
