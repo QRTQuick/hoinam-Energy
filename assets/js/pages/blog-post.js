@@ -131,11 +131,14 @@ async function init() {
     document.getElementById("blog-post-loading").style.display = "none";
     const errorSection = document.getElementById("blog-post-error");
     errorSection.style.display = "block";
-    // Give a more helpful message — most likely the post is a draft
     const errorHeading = errorSection.querySelector("h1");
     const errorMsg = errorSection.querySelector("p");
     if (errorHeading) errorHeading.textContent = "Blog post not found";
-    if (errorMsg) errorMsg.textContent = "This post may still be a draft, or the link may be incorrect. Check the admin panel to make sure the post is published.";
+    if (errorMsg) {
+      errorMsg.textContent = (error.message || "").toLowerCase().includes("not published")
+        ? "This post is still a draft. Go to the admin panel, edit the post, check \"Published\", and save."
+        : "This post may have been removed or the link is incorrect.";
+    }
   }
 }
 

@@ -266,3 +266,14 @@ export function subscribeToBlog(email, name = "") {
 export function unsubscribeFromBlog(token) {
   return apiFetch(`/blog/unsubscribe/${token}`);
 }
+
+export function submitFeedback(payload) {
+  return apiFetch("/feedback", {
+    method: "POST",
+    body: payload
+  });
+}
+
+export function getAdminFeedback() {
+  return apiFetch("/admin/feedback", { authRequired: true });
+}

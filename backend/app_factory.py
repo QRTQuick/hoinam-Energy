@@ -15,13 +15,15 @@ from .emailer import (
     build_order_approved_message,
     build_subscription_confirmation_message,
     build_new_post_notification_message,
+    build_feedback_notification_message,
+    build_feedback_acknowledgement_message,
     send_message_via_smtp,
     smtp_is_configured,
 )
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, Order, Payment, Product, User, BlogPost, BlogSubscriber
+from .models import Installation, Order, Payment, Product, User, BlogPost, BlogSubscriber, Feedback
 from .seed import seed_products
 from .services import (
     apply_product_payload,
@@ -58,12 +60,29 @@ def create_app() -> Flask:
         supports_credentials=True,
     )
 
-    _db_initialized = False
+    # ── Database initialisation ───────────────────────────────────────────────
+    # Run once at app-creation time so the first real request isn't delayed by
+    # table creation, schema migrations, and product seeding.
+    try:
+        check_database_url()
+        init_database()
+        _seed_session = get_session()
+        try:
+            seed_products(_seed_session)
+            _seed_session.commit()
+        except Exception:
+            _seed_session.rollback()
+            raise
+        finally:
+            close_session()
+    except Exception as _init_err:
+        app.logger.warning("DB init at startup failed (%s) — will retry on first request.", _init_err)
+
+    _db_initialized = True  # mark done so before_request skips it
 
     def route_needs_database(path: str) -> bool:
         if not path.startswith("/api/"):
             return False
-
         database_optional_paths = {
             "/api/health",
             "/api/stores",
@@ -71,28 +90,13 @@ def create_app() -> Flask:
         }
         if path in database_optional_paths:
             return False
-
         if path.startswith("/api/stores/"):
             return False
-
         return True
 
     def ensure_db_initialized():
-        nonlocal _db_initialized
-        if _db_initialized:
-            return
-        check_database_url()
-        init_database()
-        seed_session = get_session()
-        try:
-            seed_products(seed_session)
-            seed_session.commit()
-        except Exception:
-            seed_session.rollback()
-            raise
-        finally:
-            close_session()
-        _db_initialized = True
+        # No-op — init already ran above. Kept for safety in case startup failed.
+        pass
 
     @app.before_request
     def attach_session():
@@ -801,15 +805,27 @@ def create_app() -> Flask:
 
     @app.get("/api/blog/<post_slug>")
     def get_blog_post(post_slug: str):
-        """Get a single published blog post by slug (public)."""
+        """Get a single blog post by slug.
+        Published posts are public. Draft posts are visible to admins only.
+        """
         post = (
             db_session()
             .query(BlogPost)
-            .filter(BlogPost.slug == post_slug, BlogPost.is_published.is_(True))
+            .filter(BlogPost.slug == post_slug)
             .first()
         )
         if not post:
             raise ApiError("Blog post not found.", 404)
+
+        if not post.is_published:
+            # Allow admins to preview drafts; everyone else gets a clear message
+            user = authenticate(required=False)
+            if not user or user.role != "admin":
+                raise ApiError(
+                    "This post is not published yet. If you're the admin, log in to preview it.",
+                    404,
+                )
+
         return json_success(post.to_dict())
 
     @app.get("/api/admin/blog")
@@ -1184,6 +1200,104 @@ def create_app() -> Flask:
             order.to_dict(),
             message=f"Order {order.order_number} approved. Customer notified by email.",
         )
+
+    # ── Feedback ──────────────────────────────────────────────────────────────
+
+    @app.post("/api/feedback")
+    def submit_feedback():
+        """Submit customer feedback (public — no auth required)."""
+        payload = request.get_json(silent=True) or {}
+
+        name = (payload.get("name") or "").strip()
+        if not name:
+            raise ApiError("Your name is required.", 400)
+
+        message_text = (payload.get("message") or "").strip()
+        if not message_text:
+            raise ApiError("A feedback message is required.", 400)
+
+        email = (payload.get("email") or "").strip() or None
+        phone = (payload.get("phone") or "").strip() or None
+        service_type = (payload.get("service_type") or "general").strip()
+        allowed_types = {"general", "pre_service", "post_service", "product", "installation"}
+        if service_type not in allowed_types:
+            service_type = "general"
+
+        raw_rating = payload.get("rating")
+        rating = None
+        if raw_rating is not None:
+            try:
+                rating = int(raw_rating)
+                if not 1 <= rating <= 5:
+                    rating = None
+            except (ValueError, TypeError):
+                rating = None
+
+        feedback = Feedback(
+            name=name,
+            email=email,
+            phone=phone,
+            service_type=service_type,
+            rating=rating,
+            message=message_text,
+            order_number=(payload.get("order_number") or "").strip() or None,
+            status="new",
+        )
+        db_session().add(feedback)
+        db_session().commit()
+
+        if smtp_is_configured(settings):
+            # Notify support team
+            try:
+                notif = build_feedback_notification_message(
+                    settings=settings,
+                    feedback=feedback,
+                )
+                send_message_via_smtp(settings, notif)
+            except Exception:
+                app.logger.exception("Feedback notification email failed for feedback %s.", feedback.id)
+
+            # Send acknowledgement to customer if they gave an email
+            if feedback.email:
+                try:
+                    ack = build_feedback_acknowledgement_message(
+                        settings=settings,
+                        feedback=feedback,
+                    )
+                    send_message_via_smtp(settings, ack)
+                except Exception:
+                    app.logger.exception("Feedback acknowledgement email failed for %s.", feedback.email)
+
+        return json_success(
+            feedback.to_dict(),
+            status_code=201,
+            message="Thank you! Your feedback has been received.",
+        )
+
+    @app.get("/api/admin/feedback")
+    def list_feedback():
+        """List all feedback submissions (admin only)."""
+        authenticate(admin=True)
+        items = (
+            db_session()
+            .query(Feedback)
+            .order_by(Feedback.created_at.desc())
+            .all()
+        )
+        return json_success([f.to_dict() for f in items])
+
+    @app.put("/api/admin/feedback/<int:feedback_id>")
+    def update_feedback_status(feedback_id: int):
+        """Update feedback status (admin only)."""
+        authenticate(admin=True)
+        item = db_session().query(Feedback).filter(Feedback.id == feedback_id).first()
+        if not item:
+            raise ApiError("Feedback not found.", 404)
+        payload = request.get_json(silent=True) or {}
+        if "status" in payload:
+            item.status = payload["status"]
+        db_session().commit()
+        return json_success(item.to_dict())
 
     @app.get("/")
     def serve_index():

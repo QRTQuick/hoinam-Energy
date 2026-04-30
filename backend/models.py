@@ -329,3 +329,35 @@ class BlogSubscriber(TimestampMixin, Base):
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
         }
+
+
+class Feedback(TimestampMixin, Base):
+    __tablename__ = "feedback"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    service_type: Mapped[str] = mapped_column(
+        String(64), default="general", nullable=False, index=True
+    )  # general | pre_service | post_service | product | installation
+    rating: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1–5
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    order_number: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(
+        String(32), default="new", nullable=False, index=True
+    )  # new | reviewed | resolved
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "phone": self.phone,
+            "service_type": self.service_type,
+            "rating": self.rating,
+            "message": self.message,
+            "order_number": self.order_number,
+            "status": self.status,
+            "created_at": self.created_at.isoformat(),
+        }

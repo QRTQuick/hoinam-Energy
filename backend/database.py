@@ -4,7 +4,7 @@ from urllib.parse import urlparse, urlunparse, urlencode, parse_qs
 
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import NullPool, QueuePool
 
 from .config import get_settings
 
@@ -16,27 +16,18 @@ _engine = None
 
 
 def _sanitize_database_url(url: str) -> str:
-    """
-    Vercel serverless functions cannot make outbound IPv6 connections.
-    Neon's *-pooler endpoints sometimes resolve to IPv6 in certain AWS regions.
-
-    To work around this:
-    1. Remove `channel_binding=require` — psycopg3 doesn't need it and it can
-       cause SSL handshake failures on some Neon endpoints.
-    2. Keep `sslmode=require` so the connection is still encrypted.
-
-    The caller should also ensure DATABASE_URL points to the *unpooled* Neon
-    endpoint (no `-pooler` in the hostname) when deploying to Vercel, because
-    the pooler endpoint is more likely to resolve to IPv6.
-    """
     parsed = urlparse(url)
     qs = parse_qs(parsed.query, keep_blank_values=True)
-    # Remove channel_binding — not needed and causes issues on Vercel + Neon
     qs.pop("channel_binding", None)
-    # Ensure SSL is required
     qs.setdefault("sslmode", ["require"])
     new_query = urlencode({k: v[0] for k, v in qs.items()})
     return urlunparse(parsed._replace(query=new_query))
+
+
+def _is_serverless() -> bool:
+    """Detect Vercel / serverless environment."""
+    import os
+    return bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
 
 def get_engine():
@@ -49,22 +40,36 @@ def get_engine():
 
         clean_url = _sanitize_database_url(settings.database_url)
 
-        # Vercel serverless functions are stateless — each invocation may run in a
-        # fresh process, so persistent connection pools (QueuePool) cause connection
-        # exhaustion and timeout errors.  NullPool opens a fresh connection per
-        # request and closes it immediately, which is the correct behaviour for
-        # serverless / edge deployments.
-        _engine = create_engine(
-            clean_url,
-            future=True,
-            poolclass=NullPool,
-            pool_pre_ping=True,
-            echo=False,
-            connect_args={
-                "connect_timeout": 10,
-                "options": "-c statement_timeout=30000",
-            },
-        )
+        if _is_serverless():
+            # Serverless: NullPool avoids connection exhaustion across invocations
+            _engine = create_engine(
+                clean_url,
+                future=True,
+                poolclass=NullPool,
+                echo=False,
+                connect_args={
+                    "connect_timeout": 10,
+                    "options": "-c statement_timeout=30000",
+                },
+            )
+        else:
+            # Persistent server (local dev, Railway, Render, etc.):
+            # Use a small connection pool so connections are reused across requests.
+            _engine = create_engine(
+                clean_url,
+                future=True,
+                poolclass=QueuePool,
+                pool_size=3,
+                max_overflow=5,
+                pool_timeout=20,
+                pool_recycle=300,       # recycle connections every 5 min
+                pool_pre_ping=True,     # test connection before use
+                echo=False,
+                connect_args={
+                    "connect_timeout": 10,
+                    "options": "-c statement_timeout=30000",
+                },
+            )
         SessionLocal.configure(bind=_engine)
 
     return _engine
@@ -81,14 +86,18 @@ def close_session() -> None:
 
 def init_database() -> None:
     engine = get_engine()
+    # create_all is idempotent — only creates tables that don't exist yet
     Base.metadata.create_all(bind=engine)
-    ensure_schema_updates(engine)
+    _ensure_schema_updates(engine)
 
 
-def ensure_schema_updates(engine) -> None:
+def _ensure_schema_updates(engine) -> None:
+    """Add missing columns to existing tables without dropping data."""
     inspector = inspect(engine)
     tables = set(inspector.get_table_names())
-    column_specs = {
+
+    # Map of table → {column_name: DDL type string}
+    column_specs: dict[str, dict[str, str]] = {
         "users": {
             "needs_monitoring": "BOOLEAN NOT NULL DEFAULT false",
             "monitoring_reason": "TEXT",
@@ -98,7 +107,7 @@ def ensure_schema_updates(engine) -> None:
             "store_slug": "VARCHAR(80)",
         },
         "orders": {
-            "payment_method": "VARCHAR(32) NOT NULL DEFAULT 'opay_transfer'",
+            "payment_method": "VARCHAR(32) NOT NULL DEFAULT 'bank_transfer'",
             "payment_details": "JSON",
         },
     }
@@ -107,18 +116,16 @@ def ensure_schema_updates(engine) -> None:
         for table_name, columns in column_specs.items():
             if table_name not in tables:
                 continue
-
             existing_columns = {
-                column["name"] for column in inspector.get_columns(table_name)
+                col["name"] for col in inspector.get_columns(table_name)
             }
             for column_name, column_type in columns.items():
-                if column_name in existing_columns:
-                    continue
-                connection.execute(
-                    text(
-                        f'ALTER TABLE "{table_name}" ADD COLUMN {column_name} {column_type}'
+                if column_name not in existing_columns:
+                    connection.execute(
+                        text(
+                            f'ALTER TABLE "{table_name}" ADD COLUMN {column_name} {column_type}'
+                        )
                     )
-                )
 
 
 def check_database_url() -> None:

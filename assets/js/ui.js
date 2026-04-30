@@ -382,6 +382,9 @@ export function injectShell(activePage) {
             <!-- Contact -->
             <a class="snav-link ${active("contact")}" href="/contact.html">Contact</a>
 
+            <!-- Feedback -->
+            <a class="snav-link ${active("feedback")}" href="/feedback.html">Feedback</a>
+
             <!-- Logged-out links -->
             <a class="snav-link snav-auth-out ${active("login")}" data-login-link href="/login.html">Login</a>
 
@@ -412,6 +415,7 @@ export function injectShell(activePage) {
             <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
             <a class="nav-link ${active("blog")}" href="/blog.html"><i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>Blog</span></a>
             <a class="nav-link ${active("contact")}" href="/contact.html"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contact</span></a>
+            <a class="nav-link ${active("feedback")}" href="/feedback.html"><i class="fa-solid fa-star" aria-hidden="true"></i><span>Feedback</span></a>
             <!-- logged-out -->
             <a class="nav-link snav-auth-out ${active("login")}" data-login-link href="/login.html"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Login</span></a>
             <!-- logged-in -->
@@ -450,6 +454,7 @@ export function injectShell(activePage) {
             <a href="/blog.html">Blog</a>
             <a href="/about.html">About</a>
             <a href="/contact.html">Contact</a>
+            <a href="/feedback.html">Feedback</a>
           </div>
 
           <div class="footer-bw-col">

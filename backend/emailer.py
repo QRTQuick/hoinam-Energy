@@ -224,3 +224,79 @@ def build_order_approved_message(
     message["Reply-To"] = settings.order_notification_email
     message.set_content(body)
     return message
+
+
+def build_feedback_notification_message(
+    *,
+    settings,
+    feedback,
+) -> EmailMessage:
+    sender = settings.smtp_from_email or settings.smtp_username or settings.order_notification_email
+    # Feedback goes to support email
+    support_email = "hoinamenergy@gmail.com"
+    subject = f"New feedback from {feedback.name} — Hoinam Energy"
+
+    stars = ("★" * (feedback.rating or 0)) + ("☆" * (5 - (feedback.rating or 0)))
+    rating_line = f"Rating: {stars} ({feedback.rating}/5)" if feedback.rating else "Rating: Not provided"
+
+    service_labels = {
+        "general": "General",
+        "pre_service": "Before service / Pre-purchase",
+        "post_service": "After service / Post-purchase",
+        "product": "Product feedback",
+        "installation": "Installation feedback",
+    }
+    service_label = service_labels.get(feedback.service_type, feedback.service_type)
+
+    body = "\n".join([
+        "A new customer feedback has been submitted on Hoinam Energy.",
+        "",
+        f"Name:          {feedback.name}",
+        f"Email:         {feedback.email or 'Not provided'}",
+        f"Phone:         {feedback.phone or 'Not provided'}",
+        f"Feedback type: {service_label}",
+        f"Order number:  {feedback.order_number or 'Not provided'}",
+        rating_line,
+        "",
+        "Message:",
+        feedback.message,
+    ])
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = sender
+    message["To"] = support_email
+    if feedback.email:
+        message["Reply-To"] = feedback.email
+    message.set_content(body)
+    return message
+
+
+def build_feedback_acknowledgement_message(
+    *,
+    settings,
+    feedback,
+) -> EmailMessage:
+    sender = settings.smtp_from_email or settings.smtp_username or settings.order_notification_email
+    greeting = f"Hi {feedback.name},"
+
+    body = "\n".join([
+        greeting,
+        "",
+        "Thank you for sharing your feedback with Hoinam Energy.",
+        "We've received your message and our team will review it shortly.",
+        "",
+        "If you need immediate assistance, you can reach us at:",
+        "  Support:  hoinamenergy@gmail.com",
+        "  Sales:    sales@hoinamenergy.com",
+        "",
+        "— The Hoinam Energy team",
+    ])
+
+    message = EmailMessage()
+    message["Subject"] = "We received your feedback — Hoinam Energy"
+    message["From"] = sender
+    message["To"] = feedback.email
+    message["Reply-To"] = "hoinamenergy@gmail.com"
+    message.set_content(body)
+    return message
