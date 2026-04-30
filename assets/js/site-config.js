@@ -1,9 +1,8 @@
 (function () {
   const origin = window.location.origin;
-  const hostname = window.location.hostname;
-  const useCustomAuthDomain =
-    hostname.endsWith(".vercel.app") || hostname === "hoinam-energy.vercel.app" || hostname === "hoinamenergy.com" || hostname === "www.hoinamenergy.com";
-  const authDomain = useCustomAuthDomain ? hostname : "hoinam-energy-workspace.firebaseapp.com";
+  // Use the Firebase-managed auth domain for redirect sign-in so Google OAuth
+  // does not require every storefront hostname to be registered as a redirect URI.
+  const authDomain = "hoinam-energy-workspace.firebaseapp.com";
 
   window.HOINAM_CONFIG = {
     apiBaseUrl: `${origin}/api`,
