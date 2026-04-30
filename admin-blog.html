@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Management | Hoinam Energy Admin</title>
@@ -9,83 +10,92 @@
     <link rel="canonical" href="https://hoinam-energy.vercel.app/admin-blog.html">
     <meta name="theme-color" content="#0055B8">
     <link rel="stylesheet" href="/assets/css/styles.css">
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="site-header"></div>
     <main>
-      <section class="page-hero">
-        <div class="container">
-          <span class="eyebrow"><i class="fa-solid fa-newspaper" aria-hidden="true"></i> Blog Manager</span>
-          <h1>Create and manage blog posts</h1>
-          <p>Publish news, tips, and insights to keep customers informed about solar energy and renewable power.</p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container split-layout">
-          <form class="panel form-grid" id="blog-form">
-            <h3 class="field-full"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> New blog post</h3>
-            <input name="post_id" type="hidden">
-            <label class="field field-full">
-              <span>Title</span>
-              <input name="title" type="text" placeholder="Blog post title" required>
-            </label>
-            <label class="field field-full">
-              <span>Slug (URL-friendly)</span>
-              <input name="slug" type="text" placeholder="blog-post-url-slug" required>
-            </label>
-            <label class="field field-full">
-              <span>Category</span>
-              <select name="category" required>
-                <option value="News">News</option>
-                <option value="Tips">Tips & Guides</option>
-                <option value="Tutorial">Tutorial</option>
-                <option value="Product">Product</option>
-              </select>
-            </label>
-            <label class="field field-full">
-              <span>Excerpt (summary)</span>
-              <textarea name="excerpt" rows="2" placeholder="Short summary of the blog post" required></textarea>
-            </label>
-            <label class="field field-full">
-              <span>Content</span>
-              <textarea name="content" rows="8" placeholder="Full blog post content. Use **bold** for emphasis and [link text](url) for links." required></textarea>
-            </label>
-            <label class="field field-full">
-              <span>Featured Image URL</span>
-              <input name="image_url" type="url" placeholder="https://example.com/image.jpg">
-            </label>
-            <label class="field field-full">
-              <span>Tags (comma-separated)</span>
-              <input name="tags" type="text" placeholder="solar, energy, tips, news">
-            </label>
-            <label class="field field-full">
-              <span><input name="is_published" type="checkbox"> Publish now</span>
-            </label>
-            <div class="field field-full inline-actions">
-              <button class="button" type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save post</button>
-              <button class="button button-ghost" id="clear-blog-form" type="button"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Clear form</button>
+        <section class="page-hero">
+            <div class="container">
+                <span class="eyebrow"><i class="fa-solid fa-newspaper" aria-hidden="true"></i> Blog Manager</span>
+                <h1>Create and manage blog posts</h1>
+                <p>Publish news, tips, and insights to keep customers informed about solar energy and renewable power.
+                </p>
             </div>
-          </form>
-        </div>
-      </section>
+        </section>
 
-      <section class="section">
-        <div class="container">
-          <div class="panel">
-            <div class="section-heading">
-              <div>
-                <span class="eyebrow"><i class="fa-solid fa-list" aria-hidden="true"></i> Blog Posts</span>
-                <h2>Manage existing posts</h2>
-              </div>
+        <section class="section">
+            <div class="container split-layout">
+                <form class="panel form-grid" id="blog-form">
+                    <h3 class="field-full"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> New blog post
+                    </h3>
+                    <input name="post_id" type="hidden">
+                    <label class="field field-full">
+                        <span>Title</span>
+                        <input name="title" type="text" placeholder="Blog post title" required>
+                    </label>
+                    <label class="field field-full">
+                        <span>Slug (URL-friendly)</span>
+                        <input name="slug" type="text" placeholder="blog-post-url-slug" required>
+                    </label>
+                    <label class="field field-full">
+                        <span>Category</span>
+                        <select name="category" required>
+                            <option value="News">News</option>
+                            <option value="Tips">Tips & Guides</option>
+                            <option value="Tutorial">Tutorial</option>
+                            <option value="Product">Product</option>
+                        </select>
+                    </label>
+                    <label class="field field-full">
+                        <span>Excerpt (summary)</span>
+                        <textarea name="excerpt" rows="2" placeholder="Short summary of the blog post"
+                            required></textarea>
+                    </label>
+                    <label class="field field-full">
+                        <span>Content</span>
+                        <textarea name="content" rows="8"
+                            placeholder="Full blog post content. Use **bold** for emphasis and [link text](url) for links."
+                            required></textarea>
+                    </label>
+                    <label class="field field-full">
+                        <span>Featured Image URL</span>
+                        <input name="image_url" type="url" placeholder="https://example.com/image.jpg">
+                    </label>
+                    <label class="field field-full">
+                        <span>Tags (comma-separated)</span>
+                        <input name="tags" type="text" placeholder="solar, energy, tips, news">
+                    </label>
+                    <label class="field field-full">
+                        <span><input name="is_published" type="checkbox"> Publish now</span>
+                    </label>
+                    <div class="field field-full inline-actions">
+                        <button class="button" type="submit"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                            Save post</button>
+                        <button class="button button-ghost" id="clear-blog-form" type="button"><i
+                                class="fa-solid fa-rotate-left" aria-hidden="true"></i> Clear form</button>
+                    </div>
+                </form>
             </div>
-            <div class="table-wrap" id="blog-posts-table"></div>
-          </div>
-        </div>
-      </section>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="panel">
+                    <div class="section-heading">
+                        <div>
+                            <span class="eyebrow"><i class="fa-solid fa-list" aria-hidden="true"></i> Blog Posts</span>
+                            <h2>Manage existing posts</h2>
+                        </div>
+                    </div>
+                    <div class="table-wrap" id="blog-posts-table"></div>
+                </div>
+            </div>
+        </section>
     </main>
     <div id="site-footer"></div>
     <script src="/assets/js/site-config.js"></script>
     <script type="module" src="/assets/js/pages/admin-blog.js"></script>
-  </body>
+</body>
+
 </html>

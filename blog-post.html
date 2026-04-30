@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Post | Hoinam Energy</title>
-    <meta name="description" content="Read the latest insights from Hoinam Energy about solar energy and renewable power solutions.">
+    <meta name="description"
+        content="Read the latest insights from Hoinam Energy about solar energy and renewable power solutions.">
     <link rel="canonical" href="https://hoinam-energy.vercel.app/blog.html">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://hoinam-energy.vercel.app/blog-post.html">
@@ -13,62 +15,64 @@
     <meta name="twitter:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
     <meta name="theme-color" content="#0055B8">
     <link rel="stylesheet" href="/assets/css/styles.css">
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="site-header"></div>
     <main>
-      <article id="blog-post-container" style="display: none;">
-        <section class="page-hero">
-          <div class="container">
-            <span class="eyebrow" id="post-category"></span>
-            <h1 id="post-title"></h1>
-            <p id="post-excerpt" class="muted"></p>
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
-              <span id="post-date" class="muted"></span>
-              <span id="post-reading-time" class="muted"></span>
-              <span id="post-author" class="muted"></span>
+        <article id="blog-post-container" style="display: none;">
+            <section class="page-hero">
+                <div class="container">
+                    <span class="eyebrow" id="post-category"></span>
+                    <h1 id="post-title"></h1>
+                    <p id="post-excerpt" class="muted"></p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                        <span id="post-date" class="muted"></span>
+                        <span id="post-reading-time" class="muted"></span>
+                        <span id="post-author" class="muted"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="container" style="max-width: 800px;">
+                    <div id="post-image-container" style="margin-bottom: 2rem;"></div>
+                    <div id="post-content" class="panel" style="line-height: 1.8; font-size: 1.05rem;"></div>
+
+                    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--line);">
+                        <div id="post-tags-container"></div>
+                        <div style="margin-top: 2rem;">
+                            <a href="/blog.html" class="button button-ghost">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to blog
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </article>
+
+        <section id="blog-post-loading" class="section">
+            <div class="container" style="text-align: center; padding: 3rem;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <p class="muted">Loading blog post...</p>
             </div>
-          </div>
         </section>
 
-        <section class="section">
-          <div class="container" style="max-width: 800px;">
-            <div id="post-image-container" style="margin-bottom: 2rem;"></div>
-            <div id="post-content" class="panel" style="line-height: 1.8; font-size: 1.05rem;"></div>
-            
-            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--line);">
-              <div id="post-tags-container"></div>
-              <div style="margin-top: 2rem;">
-                <a href="/blog.html" class="button button-ghost">
-                  <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to blog
-                </a>
-              </div>
+        <section id="blog-post-error" style="display: none;">
+            <div class="page-hero">
+                <div class="container">
+                    <h1>Blog post not found</h1>
+                    <p class="muted">The blog post you're looking for doesn't exist or has been removed.</p>
+                    <a href="/blog.html" class="button" style="margin-top: 1rem;">
+                        Back to blog
+                    </a>
+                </div>
             </div>
-          </div>
         </section>
-      </article>
-
-      <section id="blog-post-loading" class="section">
-        <div class="container" style="text-align: center; padding: 3rem;">
-          <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-          <p class="muted">Loading blog post...</p>
-        </div>
-      </section>
-
-      <section id="blog-post-error" style="display: none;">
-        <div class="page-hero">
-          <div class="container">
-            <h1>Blog post not found</h1>
-            <p class="muted">The blog post you're looking for doesn't exist or has been removed.</p>
-            <a href="/blog.html" class="button" style="margin-top: 1rem;">
-              Back to blog
-            </a>
-          </div>
-        </div>
-      </section>
     </main>
     <div id="site-footer"></div>
     <script src="/assets/js/site-config.js"></script>
     <script type="module" src="/assets/js/pages/blog-post.js"></script>
-  </body>
+</body>
+
 </html>
