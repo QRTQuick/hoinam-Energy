@@ -43,6 +43,40 @@ export async function apiFetch(path, options = {}) {
   return payload.data;
 }
 
+// Like apiFetch but returns { data, message } so callers can read the server message.
+export async function apiFetchFull(path, options = {}) {
+  const {
+    method = "GET",
+    body,
+    authRequired = false,
+    formData,
+    headers = {}
+  } = options;
+
+  const requestHeaders = { ...headers };
+  const token = await getCurrentToken();
+  if (token) {
+    requestHeaders.Authorization = `Bearer ${token}`;
+  }
+
+  if (authRequired && !requestHeaders.Authorization) {
+    throw new Error("You need to sign in to continue.");
+  }
+
+  const response = await fetch(buildUrl(path), {
+    method,
+    headers: formData ? requestHeaders : { "Content-Type": "application/json", ...requestHeaders },
+    body: formData ? formData : body ? JSON.stringify(body) : undefined
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.success === false) {
+    throw new Error(payload.message || "The request could not be completed.");
+  }
+
+  return { data: payload.data, message: payload.message };
+}
+
 export async function syncSession() {
   const token = await getCurrentToken();
   if (!token) {
@@ -223,7 +257,7 @@ export function getOrderPayment(verificationCode) {
 }
 
 export function subscribeToBlog(email, name = "") {
-  return apiFetch("/blog/subscribe", {
+  return apiFetchFull("/blog/subscribe", {
     method: "POST",
     body: { email, name }
   });

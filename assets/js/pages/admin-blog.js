@@ -83,7 +83,10 @@ function renderBlogPosts() {
                 <td>${post.published_at ? formatDate(post.published_at) : "-"}</td>
                 <td>
                   <div class="inline-actions">
-                    <a href="/blog-post.html?slug=${post.slug}" target="_blank" class="button button-ghost" style="font-size: 0.9rem;">View</a>
+                    ${post.is_published
+                      ? `<a href="/blog-post.html?slug=${post.slug}" target="_blank" class="button button-ghost" style="font-size: 0.9rem;">View</a>`
+                      : `<span style="font-size:0.82rem;color:var(--text-soft);padding:0.3rem 0.6rem;border:1px dashed var(--line);border-radius:8px;">Draft — not live</span>`
+                    }
                     <button class="button button-ghost" type="button" data-edit-post="${post.id}" style="font-size: 0.9rem;">Edit</button>
                     <button class="button button-danger" type="button" data-delete-post="${post.id}" style="font-size: 0.9rem;">Delete</button>
                   </div>

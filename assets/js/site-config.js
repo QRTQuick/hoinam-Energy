@@ -27,6 +27,7 @@
       about:
         "Hoinam Energy supplies solar panels, backup power systems, portable stations, and installation services for homes, offices, shops, and businesses across Nigeria. We work with multiple brands and help customers from product selection through to installation and after-service support.",
       email: "hoinamenergy@gmail.com",
+      salesEmail: "sales@hoinamenergy.com",
       offices: [
         {
           title: "Aba Office",

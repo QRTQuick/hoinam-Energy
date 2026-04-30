@@ -244,7 +244,7 @@ def create_app() -> Flask:
 
     @app.post("/api/debug/send-test-email")
     def send_test_email():
-        """Send a test email (admin only)."""
+        """Send a test email (admin only). Pass {"to": "email@example.com"} to override recipient."""
         user = authenticate()
         if user.role != "admin":
             raise ApiError("Admin access required.", 403)
@@ -254,20 +254,24 @@ def create_app() -> Flask:
                 "SMTP is not configured. Check your environment variables.", 400
             )
 
+        payload = request.get_json(silent=True) or {}
+        recipient = (payload.get("to") or "").strip() or settings.order_notification_email
+
         try:
             test_message = EmailMessage()
             test_message["Subject"] = "[TEST] Hoinam Energy SMTP Test"
             test_message["From"] = settings.smtp_from_email or settings.smtp_username
-            test_message["To"] = settings.order_notification_email
+            test_message["To"] = recipient
             test_message.set_content(
                 f"SMTP test email from Hoinam Energy.\n\n"
                 f"Sent at: {datetime.now(timezone.utc).isoformat()}\n"
                 f"From: {settings.smtp_from_email or settings.smtp_username}\n"
-                f"To: {settings.order_notification_email}"
+                f"To: {recipient}\n\n"
+                f"If you received this, SMTP is working correctly."
             )
             send_message_via_smtp(settings, test_message)
             return json_success(
-                {"message": f"Test email sent to {settings.order_notification_email}"}
+                {"message": f"Test email sent to {recipient}"}
             )
         except Exception as e:
             app.logger.exception("Test email failed")
@@ -979,10 +983,18 @@ def create_app() -> Flask:
                     frontend_url=settings.frontend_url,
                 )
                 send_message_via_smtp(settings, msg)
-            except Exception:
+            except Exception as email_err:
                 app.logger.exception(
                     "Subscription confirmation email failed for %s.", email
                 )
+                # Return success for the subscription itself but flag the email issue
+                return json_success(
+                    subscriber.to_dict(),
+                    status_code=201,
+                    message=f"Subscribed! However, the confirmation email could not be sent ({email_err}). Your subscription is saved.",
+                )
+        else:
+            app.logger.warning("SMTP not configured — no confirmation email sent for subscriber %s.", email)
 
         return json_success(
             subscriber.to_dict(),

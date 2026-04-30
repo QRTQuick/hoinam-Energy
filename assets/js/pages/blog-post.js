@@ -108,11 +108,11 @@ async function init() {
         btn.disabled = true;
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Subscribing…`;
         try {
-          await subscribeToBlog(email, name);
+          const result = await subscribeToBlog(email, name);
           form.reset();
           btn.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Subscribed!`;
           status.className = "blog-subscribe-status blog-subscribe-success";
-          status.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> You're subscribed! Check your inbox for a confirmation.`;
+          status.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> ${result.message || "You're subscribed!"}`;
           status.classList.remove("hidden");
         } catch (error) {
           btn.disabled = false;
@@ -129,7 +129,13 @@ async function init() {
     console.error("Error loading blog post:", error);
     document.getElementById("blog-post-container").style.display = "none";
     document.getElementById("blog-post-loading").style.display = "none";
-    document.getElementById("blog-post-error").style.display = "block";
+    const errorSection = document.getElementById("blog-post-error");
+    errorSection.style.display = "block";
+    // Give a more helpful message — most likely the post is a draft
+    const errorHeading = errorSection.querySelector("h1");
+    const errorMsg = errorSection.querySelector("p");
+    if (errorHeading) errorHeading.textContent = "Blog post not found";
+    if (errorMsg) errorMsg.textContent = "This post may still be a draft, or the link may be incorrect. Check the admin panel to make sure the post is published.";
   }
 }
 

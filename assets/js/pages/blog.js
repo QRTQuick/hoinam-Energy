@@ -50,11 +50,11 @@ function bindSubscribeForm() {
     btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Subscribing…`;
 
     try {
-      await subscribeToBlog(email, name);
+      const result = await subscribeToBlog(email, name);
       form.reset();
       btn.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Subscribed!`;
       status.className = "blog-subscribe-status blog-subscribe-success";
-      status.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> You're subscribed! Check your inbox for a confirmation email.`;
+      status.innerHTML = `<i class="fa-solid fa-circle-check" aria-hidden="true"></i> ${result.message || "You're subscribed!"}`;
       status.classList.remove("hidden");
     } catch (error) {
       btn.disabled = false;

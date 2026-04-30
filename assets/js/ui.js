@@ -455,7 +455,8 @@ export function injectShell(activePage) {
           <div class="footer-bw-col">
             <h4>Contact</h4>
             ${office ? `<p><i class="fa-solid fa-location-dot"></i> ${office.address}</p>` : ""}
-            <p><i class="fa-solid fa-envelope"></i> <a href="mailto:${email}">${email}</a></p>
+            <p><i class="fa-solid fa-tag"></i> Sales: <a href="mailto:${company.salesEmail || "sales@hoinamenergy.com"}">${company.salesEmail || "sales@hoinamenergy.com"}</a></p>
+            <p><i class="fa-solid fa-headset"></i> Support: <a href="mailto:${email}">${email}</a></p>
           </div>
 
           <div class="footer-bw-col">
