@@ -143,6 +143,7 @@ class Order(TimestampMixin, Base):
     payment_reference: Mapped[str] = mapped_column(
         String(128), unique=True, nullable=False, index=True
     )
+    payment_details: Mapped[dict | None] = mapped_column(JSON, default=dict, nullable=True)
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
     shipping_address: Mapped[dict] = mapped_column(JSON, nullable=False)
@@ -160,6 +161,7 @@ class Order(TimestampMixin, Base):
             "payment_status": self.payment_status,
             "payment_method": self.payment_method,
             "payment_reference": self.payment_reference,
+            "payment_details": self.payment_details or {},
             "total_amount": float(self.total_amount),
             "currency": self.currency,
             "shipping_address": self.shipping_address,

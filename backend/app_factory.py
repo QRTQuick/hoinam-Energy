@@ -10,6 +10,11 @@ from sqlalchemy.orm import joinedload
 
 from .config import get_settings
 from .database import check_database_url, close_session, get_session, init_database
+from .emailer import (
+    build_order_notification_message,
+    send_message_via_smtp,
+    smtp_is_configured,
+)
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
 from .models import Installation, Order, Payment, Product, User
@@ -277,6 +282,7 @@ def create_app() -> Flask:
             "methods": [
                 {
                     "id": "opay_transfer",
+                    "kind": "transfer",
                     "label": "OPay merchant transfer",
                     "description": "Place the order now, then pay by transfer to the Hoinam Energy OPay merchant account.",
                     "bank_name": settings.opay_bank_name,
@@ -285,6 +291,7 @@ def create_app() -> Flask:
                 },
                 {
                     "id": "bank_transfer",
+                    "kind": "transfer",
                     "label": "Bank transfer",
                     "description": "Place the order now, then pay by direct bank transfer to the Hoinam Energy company account. You'll receive a verification code to include in the transfer narration.",
                     "bank_name": settings.bank_transfer_bank_name,
@@ -293,11 +300,46 @@ def create_app() -> Flask:
                 },
                 {
                     "id": "pay_on_delivery",
+                    "kind": "delivery",
                     "label": "Pay on delivery",
                     "description": "Reserve the order and pay when Hoinam Energy confirms delivery.",
                 },
             ]
         }
+
+    def payment_option_by_id(payment_method: str) -> dict | None:
+        methods = payment_options_payload().get("methods") or []
+        for option in methods:
+            if option.get("id") == payment_method:
+                return option
+        return None
+
+    def payment_details_payload(payment_method: str) -> dict:
+        option = payment_option_by_id(payment_method)
+        if option is None:
+            return {
+                "id": payment_method,
+                "kind": "transfer" if payment_method != "pay_on_delivery" else "delivery",
+                "label": payment_method.replace("_", " ").title(),
+            }
+
+        payload = {
+            "id": option["id"],
+            "kind": option.get("kind") or ("transfer" if option["id"] != "pay_on_delivery" else "delivery"),
+            "label": option.get("label"),
+            "description": option.get("description"),
+        }
+
+        if payload["kind"] == "transfer":
+            payload.update(
+                {
+                    "bank_name": option.get("bank_name"),
+                    "account_number": option.get("account_number"),
+                    "account_name": option.get("account_name"),
+                }
+            )
+
+        return payload
 
     @app.get("/api/payment-options")
     def payment_options_route():
@@ -346,6 +388,7 @@ def create_app() -> Flask:
             payment_status=payment_status,
             payment_method=payment_method,
             payment_reference=payment_reference,
+            payment_details=payment_details_payload(payment_method),
             total_amount=to_decimal(total),
             currency=settings.default_currency,
             shipping_address=shipping_address,
@@ -370,6 +413,28 @@ def create_app() -> Flask:
             db_session().add(payment)
 
         db_session().commit()
+
+        if smtp_is_configured(settings):
+            try:
+                message = build_order_notification_message(
+                    settings=settings,
+                    user=user,
+                    order=order,
+                    shipping_address=shipping_address,
+                    verification_code=verification_code,
+                )
+                send_message_via_smtp(settings, message)
+            except Exception:
+                app.logger.exception(
+                    "Order %s was created but the notification email could not be sent.",
+                    order.order_number,
+                )
+        else:
+            app.logger.warning(
+                "SMTP is not configured, so no order notification email was sent for %s.",
+                order.order_number,
+            )
+
         order_payload = order.to_dict()
         order_payload["payment_options"] = payment_options_payload()
         if verification_code:

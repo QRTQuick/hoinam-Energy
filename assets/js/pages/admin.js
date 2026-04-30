@@ -17,6 +17,19 @@ let products = [];
 let installations = [];
 const MAX_PRODUCT_IMAGE_BYTES = 1.5 * 1024 * 1024;
 
+function paymentLabel(order) {
+  if (order.payment_details?.label) {
+    return order.payment_details.label;
+  }
+  if (order.payment_method === "pay_on_delivery") {
+    return "Pay on delivery";
+  }
+  if (order.payment_method === "bank_transfer") {
+    return "Bank transfer";
+  }
+  return "OPay merchant transfer";
+}
+
 function field(form, name) {
   return form.elements.namedItem(name);
 }
@@ -187,7 +200,7 @@ function renderOrders(orders) {
               <tr>
                 <td>
                   <strong>${order.order_number}</strong><br>
-                  <span class="muted">${order.payment_method === "pay_on_delivery" ? "Pay on delivery" : "OPay transfer"} - ${order.payment_reference}</span>
+                  <span class="muted">${paymentLabel(order)} - ${order.payment_reference}</span>
                 </td>
                 <td>${order.user?.full_name || order.user?.email || "Customer"}</td>
                 <td>${formatMoney(order.total_amount, order.currency)}</td>

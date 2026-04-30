@@ -3,6 +3,19 @@ import authLoadingManager from "../auth-loading.js";
 import { bootstrapPage } from "../app-shell.js";
 import { formatDate, formatMoney, showToast, statusBadge } from "../ui.js";
 
+function paymentLabel(order) {
+  if (order.payment_details?.label) {
+    return order.payment_details.label;
+  }
+  if (order.payment_method === "pay_on_delivery") {
+    return "Pay on delivery";
+  }
+  if (order.payment_method === "bank_transfer") {
+    return "Bank transfer";
+  }
+  return "OPay merchant transfer";
+}
+
 function normalizePhoneNumber(rawValue) {
   const value = rawValue.trim().replace(/[^\d+]/g, "");
   if (!value) {
@@ -128,7 +141,7 @@ async function init() {
                   ${statusBadge(order.status)}
                 </div>
                 <h3>${formatMoney(order.total_amount, order.currency)}</h3>
-                <p class="muted">${order.payment_method === "pay_on_delivery" ? "Pay on delivery" : "OPay transfer"} - ${order.payment_reference}</p>
+                <p class="muted">${paymentLabel(order)} - ${order.payment_reference}</p>
                 <div class="mini-meta">
                   <span>${formatDate(order.created_at)}</span>
                   <span>${order.items.length} item(s)</span>

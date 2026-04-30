@@ -99,6 +99,7 @@ def ensure_schema_updates(engine) -> None:
         },
         "orders": {
             "payment_method": "VARCHAR(32) NOT NULL DEFAULT 'opay_transfer'",
+            "payment_details": "JSON",
         },
     }
 

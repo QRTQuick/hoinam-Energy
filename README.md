@@ -32,6 +32,8 @@ Copy `.env.example` to `.env` and set:
 Optional:
 
 - `ALLOW_DEMO_PAYMENTS=true` for local demo checkout without a live Paystack secret
+- `ORDER_NOTIFICATION_EMAIL=hoinamenergy@gmail.com`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`
 
 ## Required Frontend Config
 
@@ -91,3 +93,4 @@ This migration:
 - The initial EcoFlow inventory is seeded from the prompt and can be replaced with the admin Excel upload.
 - Seed prices are starter catalog placeholders so checkout works end to end; replace them with your live commercial pricing before production launch.
 - Admin access can come from a Firebase custom claim named `admin` or from matching an email in `ADMIN_EMAILS`.
+- New order emails are sent only when SMTP is configured. For Brevo SMTP, use `smtp-relay.brevo.com`, port `587`, your Brevo SMTP login as `SMTP_USERNAME`, and a Brevo SMTP key as `SMTP_PASSWORD`.

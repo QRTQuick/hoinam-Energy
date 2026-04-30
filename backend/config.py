@@ -26,6 +26,16 @@ def _env_flag(name: str, default: bool = False) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_int(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        return int(value.strip())
+    except ValueError:
+        return default
+
+
 def _env_list(name: str) -> list[str]:
     raw = os.getenv(name, "")
     return [item.strip() for item in raw.split(",") if item.strip()]
@@ -69,6 +79,30 @@ class Settings:
     )
     bank_transfer_bank_name: str = field(
         default_factory=lambda: os.getenv("BANK_TRANSFER_BANK_NAME", "").strip()
+    )
+    smtp_host: str = field(
+        default_factory=lambda: os.getenv("SMTP_HOST", "smtp-relay.brevo.com").strip()
+    )
+    smtp_port: int = field(default_factory=lambda: _env_int("SMTP_PORT", 587))
+    smtp_username: str = field(
+        default_factory=lambda: os.getenv("SMTP_USERNAME", "").strip()
+    )
+    smtp_password: str = field(
+        default_factory=lambda: os.getenv("SMTP_PASSWORD", "").strip()
+    )
+    smtp_from_email: str = field(
+        default_factory=lambda: os.getenv("SMTP_FROM_EMAIL", "").strip()
+    )
+    smtp_use_tls: bool = field(
+        default_factory=lambda: _env_flag("SMTP_USE_TLS", True)
+    )
+    smtp_timeout_seconds: int = field(
+        default_factory=lambda: _env_int("SMTP_TIMEOUT_SECONDS", 15)
+    )
+    order_notification_email: str = field(
+        default_factory=lambda: os.getenv(
+            "ORDER_NOTIFICATION_EMAIL", "hoinamenergy@gmail.com"
+        ).strip()
     )
     admin_emails: set[str] = field(default_factory=_admin_email_set)
     firebase_credentials_json: str = field(
