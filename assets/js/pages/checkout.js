@@ -315,285 +315,182 @@ function formatReceiptDate(value) {
   }).format(new Date(value));
 }
 
-function buildReceiptDocument(order) {
+// ── Receipt as PNG ────────────────────────────────────────────────────────────
+// Replaces the old popup-based print approach with a canvas render → PNG download.
+// html2canvas is loaded on demand from CDN so it doesn't affect page load time.
+
+function loadHtml2Canvas() {
+  return new Promise((resolve, reject) => {
+    if (window.html2canvas) { resolve(window.html2canvas); return; }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    script.onload = () => resolve(window.html2canvas);
+    script.onerror = () => reject(new Error("Could not load image renderer. Check your internet connection."));
+    document.head.append(script);
+  });
+}
+
+function buildReceiptNode(order) {
   const paymentDetails = paymentDetailsForOrder(order);
   const shipping = order.shipping_address || {};
   const items = Array.isArray(order.items) ? order.items : [];
   const notes = order.notes?.trim() || "None";
   const total = formatMoney(order.total_amount, order.currency);
-  const itemRows = items
-    .map(
-      (item) => `
-        <tr>
-          <td>${escapeHtml(item.name || "Product")}</td>
-          <td>${escapeHtml(item.quantity || 0)}</td>
-          <td>${escapeHtml(formatMoney(item.unit_price || 0, item.currency || order.currency))}</td>
-          <td>${escapeHtml(formatMoney(item.line_total || 0, item.currency || order.currency))}</td>
-        </tr>
-      `
-    )
-    .join("");
 
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Receipt ${escapeHtml(order.order_number)}</title>
-        <style>
-          :root {
-            color-scheme: light;
-            --ink: #11233a;
-            --soft: #5e6f85;
-            --line: #d7e0ea;
-            --brand: #0055b8;
-            --panel: #f6f9fc;
-          }
-          * {
-            box-sizing: border-box;
-          }
-          body {
-            margin: 0;
-            padding: 32px;
-            font-family: "Segoe UI", Arial, sans-serif;
-            color: var(--ink);
-            background: #ffffff;
-          }
-          .receipt-shell {
-            max-width: 860px;
-            margin: 0 auto;
-            border: 1px solid var(--line);
-            border-radius: 20px;
-            overflow: hidden;
-          }
-          .receipt-head {
-            padding: 28px 32px;
-            background: linear-gradient(135deg, #0055b8, #0b79de);
-            color: #ffffff;
-          }
-          .receipt-head h1,
-          .receipt-head p,
-          .receipt-body h2,
-          .receipt-body p {
-            margin: 0;
-          }
-          .receipt-head h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.35rem;
-          }
-          .receipt-body {
-            padding: 28px 32px 32px;
-            display: grid;
-            gap: 24px;
-          }
-          .receipt-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-          }
-          .receipt-card {
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 18px;
-            background: var(--panel);
-          }
-          .receipt-card h2 {
-            font-size: 1rem;
-            margin-bottom: 0.7rem;
-          }
-          .receipt-meta {
-            display: grid;
-            gap: 0.6rem;
-          }
-          .receipt-meta strong,
-          .receipt-card strong {
-            display: block;
-            font-size: 0.76rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--soft);
-            margin-bottom: 0.14rem;
-          }
-          .receipt-meta span,
-          .receipt-card p {
-            display: block;
-            line-height: 1.5;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          th,
-          td {
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--line);
-            text-align: left;
-            font-size: 0.95rem;
-          }
-          th {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--soft);
-          }
-          .receipt-total {
-            display: flex;
-            justify-content: flex-end;
-            font-size: 1.05rem;
-            font-weight: 700;
-          }
-          .receipt-footer {
-            color: var(--soft);
-            font-size: 0.92rem;
-          }
-          @media print {
-            body {
-              padding: 0;
-            }
-            .receipt-shell {
-              border: 0;
-              border-radius: 0;
-            }
-          }
-          @media (max-width: 720px) {
-            body {
-              padding: 14px;
-            }
-            .receipt-grid {
-              grid-template-columns: 1fr;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <article class="receipt-shell">
-          <header class="receipt-head">
-            <h1>Hoinam Energy Receipt</h1>
-            <p>Order ${escapeHtml(order.order_number)} created on ${escapeHtml(formatReceiptDate(order.created_at))}</p>
-          </header>
-          <section class="receipt-body">
-            <div class="receipt-grid">
-              <section class="receipt-card">
-                <h2>Customer</h2>
-                <div class="receipt-meta">
-                  <div>
-                    <strong>Name</strong>
-                    <span>${escapeHtml(shipping.full_name || "Not provided")}</span>
-                  </div>
-                  <div>
-                    <strong>Phone</strong>
-                    <span>${escapeHtml(shipping.phone || "Not provided")}</span>
-                  </div>
-                  <div>
-                    <strong>Address</strong>
-                    <span>${escapeHtml([shipping.address, shipping.city, shipping.state].filter(Boolean).join(", ") || "Not provided")}</span>
-                  </div>
-                </div>
-              </section>
-              <section class="receipt-card">
-                <h2>Payment</h2>
-                <div class="receipt-meta">
-                  <div>
-                    <strong>Method</strong>
-                    <span>${escapeHtml(paymentDetails.label)}</span>
-                  </div>
-                  <div>
-                    <strong>Reference</strong>
-                    <span>${escapeHtml(order.payment_reference)}</span>
-                  </div>
-                  ${
-                    paymentDetails.kind === "transfer"
-                      ? `
-                        <div>
-                          <strong>Bank</strong>
-                          <span>${escapeHtml(paymentDetails.bank_name || "Pending setup")}</span>
-                        </div>
-                        <div>
-                          <strong>Account number</strong>
-                          <span>${escapeHtml(paymentDetails.account_number || "Pending setup")}</span>
-                        </div>
-                        <div>
-                          <strong>Account name</strong>
-                          <span>${escapeHtml(paymentDetails.account_name || "Hoinam Energy")}</span>
-                        </div>
-                      `
-                      : ""
-                  }
-                  ${order.verification_code ? `<div><strong>Verification code</strong><span>${escapeHtml(order.verification_code)}</span></div>` : ""}
-                </div>
-              </section>
+  const node = document.createElement("div");
+  node.style.cssText = [
+    "position:fixed", "left:-9999px", "top:0",
+    "width:860px", "background:#fff",
+    "font-family:Segoe UI,Arial,sans-serif",
+    "color:#11233a", "font-size:15px", "line-height:1.5",
+    "box-sizing:border-box"
+  ].join(";");
+
+  const transferRows = paymentDetails.kind === "transfer" ? `
+    <div style="margin-top:8px">
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Bank</span>
+      <span>${escapeHtml(paymentDetails.bank_name || "Pending setup")}</span>
+    </div>
+    <div style="margin-top:8px">
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Account number</span>
+      <span>${escapeHtml(paymentDetails.account_number || "Pending setup")}</span>
+    </div>
+    <div style="margin-top:8px">
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Account name</span>
+      <span>${escapeHtml(paymentDetails.account_name || "Hoinam Energy")}</span>
+    </div>
+  ` : "";
+
+  const verificationRow = order.verification_code ? `
+    <div style="margin-top:8px">
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Verification code</span>
+      <span>${escapeHtml(order.verification_code)}</span>
+    </div>
+  ` : "";
+
+  const itemRows = items.map((item) => `
+    <tr>
+      <td style="padding:10px 8px;border-bottom:1px solid #d7e0ea">${escapeHtml(item.name || "Product")}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #d7e0ea">${escapeHtml(String(item.quantity || 0))}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #d7e0ea">${escapeHtml(formatMoney(item.unit_price || 0, item.currency || order.currency))}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #d7e0ea">${escapeHtml(formatMoney(item.line_total || 0, item.currency || order.currency))}</td>
+    </tr>
+  `).join("");
+
+  node.innerHTML = `
+    <div style="border:1px solid #d7e0ea;border-radius:20px;overflow:hidden;max-width:860px;margin:0 auto">
+      <!-- Header -->
+      <div style="padding:28px 32px;background:linear-gradient(135deg,#0055b8,#0b79de);color:#fff">
+        <div style="font-size:28px;font-weight:800;margin-bottom:6px">Hoinam Energy Receipt</div>
+        <div style="font-size:14px;opacity:.9">Order ${escapeHtml(order.order_number)} · ${escapeHtml(formatReceiptDate(order.created_at))}</div>
+      </div>
+      <!-- Body -->
+      <div style="padding:28px 32px;background:#fff">
+        <!-- Customer + Payment grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <!-- Customer -->
+          <div style="border:1px solid #d7e0ea;border-radius:14px;padding:18px;background:#f6f9fc">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px">Customer</div>
+            <div>
+              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Name</span>
+              <span>${escapeHtml(shipping.full_name || "Not provided")}</span>
             </div>
-            <section class="receipt-card">
-              <h2>Order items</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Unit price</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemRows}
-                </tbody>
-              </table>
-              <div class="receipt-total">Total: ${escapeHtml(total)}</div>
-            </section>
-            <section class="receipt-card">
-              <h2>Notes</h2>
-              <p>${escapeHtml(notes)}</p>
-            </section>
-            <p class="receipt-footer">This receipt was generated from the Hoinam Energy checkout page. You can print it or save it as PDF from your browser.</p>
-          </section>
-        </article>
-      </body>
-    </html>
+            <div style="margin-top:8px">
+              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Phone</span>
+              <span>${escapeHtml(shipping.phone || "Not provided")}</span>
+            </div>
+            <div style="margin-top:8px">
+              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Address</span>
+              <span>${escapeHtml([shipping.address, shipping.city, shipping.state].filter(Boolean).join(", ") || "Not provided")}</span>
+            </div>
+          </div>
+          <!-- Payment -->
+          <div style="border:1px solid #d7e0ea;border-radius:14px;padding:18px;background:#f6f9fc">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px">Payment</div>
+            <div>
+              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Method</span>
+              <span>${escapeHtml(paymentDetails.label)}</span>
+            </div>
+            <div style="margin-top:8px">
+              <span style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85;display:block">Reference</span>
+              <span>${escapeHtml(order.payment_reference)}</span>
+            </div>
+            ${transferRows}
+            ${verificationRow}
+          </div>
+        </div>
+        <!-- Items table -->
+        <div style="border:1px solid #d7e0ea;border-radius:14px;padding:18px;background:#f6f9fc;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px">Order items</div>
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr>
+                <th style="padding:10px 8px;border-bottom:2px solid #d7e0ea;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85">Item</th>
+                <th style="padding:10px 8px;border-bottom:2px solid #d7e0ea;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85">Qty</th>
+                <th style="padding:10px 8px;border-bottom:2px solid #d7e0ea;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85">Unit price</th>
+                <th style="padding:10px 8px;border-bottom:2px solid #d7e0ea;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5e6f85">Total</th>
+              </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+          <div style="text-align:right;font-size:16px;font-weight:700;padding-top:12px">Total: ${escapeHtml(total)}</div>
+        </div>
+        <!-- Notes -->
+        <div style="border:1px solid #d7e0ea;border-radius:14px;padding:18px;background:#f6f9fc;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">Notes</div>
+          <div>${escapeHtml(notes)}</div>
+        </div>
+        <div style="font-size:12px;color:#5e6f85">This receipt was generated by Hoinam Energy. Save this image for your records.</div>
+      </div>
+    </div>
   `;
+
+  document.body.append(node);
+  return node;
 }
 
-function downloadReceipt(order) {
-  const documentHtml = buildReceiptDocument(order);
-  const blob = new Blob([documentHtml], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `receipt-${order.order_number}.html`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
-}
+async function downloadReceiptPng(order, btn) {
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Generating…`;
 
-function printReceipt(order) {
-  const printWindow = window.open("", "_blank", "noopener,noreferrer");
-  if (!printWindow) {
-    showToast("Allow pop-ups in your browser so the receipt can open for printing.", "error");
-    return;
+  let node = null;
+  try {
+    const html2canvas = await loadHtml2Canvas();
+    node = buildReceiptNode(order);
+
+    const canvas = await html2canvas(node, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      width: 860,
+    });
+
+    const link = document.createElement("a");
+    link.download = `receipt-${order.order_number}.png`;
+    link.href = canvas.toDataURL("image/png");
+    document.body.append(link);
+    link.click();
+    link.remove();
+
+    showToast("Receipt saved as PNG.", "success");
+  } catch (error) {
+    showToast(error.message || "Could not generate receipt image.", "error");
+  } finally {
+    node?.remove();
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
   }
-
-  const html = buildReceiptDocument(order);
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-  // Some browsers fire onload before the written content is ready — use a short
-  // timeout as a reliable fallback so the print dialog always opens.
-  printWindow.focus();
-  const triggerPrint = () => {
-    try { printWindow.print(); } catch (_) { /* ignore */ }
-  };
-  printWindow.onload = triggerPrint;
-  window.setTimeout(triggerPrint, 800);
 }
 
 function bindReceiptActions(order) {
-  document.querySelector("[data-print-receipt]")?.addEventListener("click", () => {
-    printReceipt(order);
-  });
-  document.querySelector("[data-download-receipt]")?.addEventListener("click", () => {
-    downloadReceipt(order);
-  });
+  const printBtn = document.querySelector("[data-print-receipt]");
+  const downloadBtn = document.querySelector("[data-download-receipt]");
+
+  // Both buttons now save as PNG — no popup needed
+  printBtn?.addEventListener("click", () => downloadReceiptPng(order, printBtn));
+  downloadBtn?.addEventListener("click", () => downloadReceiptPng(order, downloadBtn));
 }
 
 function renderOrderComplete(order) {
@@ -642,10 +539,10 @@ function renderOrderComplete(order) {
           : `<p class="checkout-reference">Reference: <strong>${order.payment_reference}</strong></p>`
       }
       <div class="receipt-actions">
-        <button class="button" type="button" data-print-receipt><i class="fa-solid fa-print" aria-hidden="true"></i> Print receipt</button>
-        <button class="button button-ghost" type="button" data-download-receipt><i class="fa-solid fa-download" aria-hidden="true"></i> Download receipt</button>
+        <button class="button" type="button" data-print-receipt><i class="fa-solid fa-image" aria-hidden="true"></i> Save receipt as PNG</button>
+        <button class="button button-ghost" type="button" data-download-receipt><i class="fa-solid fa-download" aria-hidden="true"></i> Download PNG</button>
       </div>
-      <p class="receipt-note">Use Print to save as PDF, or Download to keep an HTML copy on the device.</p>
+      <p class="receipt-note">Both buttons save the receipt as a PNG image you can keep on your device or share.</p>
       <div class="inline-actions">
         <a class="button" href="/dashboard.html">View dashboard</a>
         <a class="button button-ghost" href="/products.html">Continue shopping</a>

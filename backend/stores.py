@@ -12,6 +12,15 @@ STORES = {
         "website": "https://www.ecoflow.com/",
         "featured": True,
     },
+    "bluetti": {
+        "id": "bluetti",
+        "name": "Bluetti Store",
+        "slug": "bluetti",
+        "description": "Portable power stations and solar panels for mobile power",
+        "image_url": "https://www.bluettipower.com/logo.png",
+        "website": "https://www.bluettipower.com/",
+        "featured": True,
+    },
     "deye": {
         "id": "deye",
         "name": "Deye Store",

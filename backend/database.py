@@ -93,12 +93,12 @@ def init_database() -> None:
 
 
 def _remove_bluetti_products(engine) -> None:
-    """Archive all Bluetti products from the database."""
+    """Archive Buttu products from the database (Bluetti is a valid brand)."""
     with engine.begin() as connection:
         connection.execute(
             text(
                 "UPDATE products SET active = false "
-                "WHERE LOWER(brand) = 'bluetti' OR LOWER(store_slug) = 'bluetti'"
+                "WHERE LOWER(brand) = 'buttu' OR LOWER(store_slug) = 'buttu'"
             )
         )
 
