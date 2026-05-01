@@ -121,6 +121,8 @@ function bindOrderUploadHandlers() {
     });
   });
 }
+
+function renderPhoneCompletion(profile) {
   const target = document.getElementById("profile-completion-slot");
   if (!target) {
     return;
