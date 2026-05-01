@@ -8,23 +8,51 @@ function getSlugFromURL() {
 }
 
 function formatContent(content) {
-  // Convert markdown-like content to HTML
   return content
     .split("\n\n")
     .map(paragraph => {
       paragraph = paragraph.trim();
       if (!paragraph) return "";
-      
-      // Convert **bold** to <strong>
-      paragraph = paragraph.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-      // Convert *italic* to <em>
-      paragraph = paragraph.replace(/\*(.*?)\*/g, "<em>$1</em>");
-      // Convert links [text](url)
-      paragraph = paragraph.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-      
-      return `<p>${paragraph}</p>`;
+
+      // Headings
+      if (/^### /.test(paragraph)) return `<h3>${paragraph.slice(4)}</h3>`;
+      if (/^## /.test(paragraph))  return `<h2>${paragraph.slice(3)}</h2>`;
+      if (/^# /.test(paragraph))   return `<h1>${paragraph.slice(2)}</h1>`;
+
+      // Horizontal rule
+      if (/^---+$/.test(paragraph)) return `<hr>`;
+
+      // Unordered list — lines starting with - or *
+      if (/^[-*] /m.test(paragraph)) {
+        const items = paragraph
+          .split("\n")
+          .filter(l => /^[-*] /.test(l.trim()))
+          .map(l => `<li>${inlineFormat(l.replace(/^[-*] /, "").trim())}</li>`)
+          .join("");
+        return `<ul>${items}</ul>`;
+      }
+
+      // Ordered list
+      if (/^\d+\. /m.test(paragraph)) {
+        const items = paragraph
+          .split("\n")
+          .filter(l => /^\d+\. /.test(l.trim()))
+          .map(l => `<li>${inlineFormat(l.replace(/^\d+\. /, "").trim())}</li>`)
+          .join("");
+        return `<ol>${items}</ol>`;
+      }
+
+      return `<p>${inlineFormat(paragraph)}</p>`;
     })
-    .join("");
+    .join("\n");
+}
+
+function inlineFormat(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 }
 
 async function init() {
@@ -36,19 +64,26 @@ async function init() {
     document.getElementById("blog-post-container").style.display = "none";
     document.getElementById("blog-post-loading").style.display = "none";
     document.getElementById("blog-post-error").style.display = "block";
+    const errorHeading = document.querySelector("#blog-post-error h1");
+    const errorMsg = document.querySelector("#blog-post-error p");
+    if (errorHeading) errorHeading.textContent = "No post specified";
+    if (errorMsg) errorMsg.textContent = "The link is missing a post identifier. Go back to the blog and click a post.";
     return;
   }
 
   try {
     const post = await getBlogPost(slug);
 
-    // Update page title and meta tags dynamically
+    // Update page title and meta tags dynamically — guard against missing tags
     document.title = `${post.title} | Hoinam Energy Blog`;
-    document.querySelector('meta[property="og:title"]').setAttribute("content", post.title);
-    document.querySelector('meta[property="og:description"]').setAttribute("content", post.excerpt);
-    document.querySelector('meta[name="description"]').setAttribute("content", post.excerpt);
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", post.title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content", post.excerpt);
+    document.querySelector('meta[name="description"]')?.setAttribute("content", post.excerpt);
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", post.title);
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", post.excerpt);
     if (post.image_url) {
-      document.querySelector('meta[property="og:image"]').setAttribute("content", post.image_url);
+      document.querySelector('meta[property="og:image"]')?.setAttribute("content", post.image_url);
+      document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", post.image_url);
     }
 
     // Populate post content
