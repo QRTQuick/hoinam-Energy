@@ -923,7 +923,7 @@ def create_app() -> Flask:
         if not title:
             raise ApiError("Blog post title is required.", 400)
 
-        slug = (payload.get("slug") or "").strip() or slugify(title)
+        slug = (payload.get("slug") or "").strip().strip("/") or slugify(title)
         excerpt = (payload.get("excerpt") or "").strip()
         content = (payload.get("content") or "").strip()
         if not content:
@@ -970,7 +970,7 @@ def create_app() -> Flask:
         if "title" in payload:
             post.title = (payload.get("title") or "").strip() or post.title
         if "slug" in payload:
-            slug = (payload.get("slug") or "").strip()
+            slug = (payload.get("slug") or "").strip().strip("/")
             if slug and slug != post.slug:
                 existing = (
                     db_session()

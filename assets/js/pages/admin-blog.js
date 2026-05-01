@@ -21,9 +21,10 @@ function parseTags(input) {
 }
 
 function blogFormPayload(form) {
+  const rawSlug = field(form, "slug").value.trim().replace(/^\/+|\/+$/g, "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
   return {
     title: field(form, "title").value.trim(),
-    slug: field(form, "slug").value.trim(),
+    slug: rawSlug,
     excerpt: field(form, "excerpt").value.trim(),
     content: field(form, "content").value.trim(),
     image_url: field(form, "image_url").value.trim(),
@@ -116,6 +117,26 @@ async function init() {
   }
 
   const form = document.getElementById("blog-form");
+
+  // Auto-generate slug from title when slug field is empty
+  const titleInput = field(form, "title");
+  const slugInput  = field(form, "slug");
+  titleInput.addEventListener("input", () => {
+    if (!slugInput.value.trim() || slugInput.dataset.autoSlug === "true") {
+      const generated = titleInput.value.trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+      slugInput.value = generated;
+      slugInput.dataset.autoSlug = "true";
+    }
+  });
+  slugInput.addEventListener("input", () => {
+    // Once the user manually edits the slug, stop auto-generating
+    slugInput.dataset.autoSlug = "false";
+  });
 
   try {
     await loadPosts();
