@@ -536,17 +536,21 @@ export function injectShell(activePage) {
     });
   }
 
-  document.querySelector("[data-logout-button]")?.addEventListener("click", async () => {
-    await logoutUser();
-    clearCachedProfile();
-    refreshShell();
-    showToast("You have been signed out.", "success");
-    window.location.href = "/login.html";
+  document.querySelectorAll("[data-logout-button]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      await logoutUser();
+      clearCachedProfile();
+      refreshShell();
+      showToast("You have been signed out.", "success");
+      window.location.href = "/login.html";
+    });
   });
 
-  document.querySelector("[data-cookie-open]")?.addEventListener("click", () => {
-    window.localStorage.removeItem("hoinam_cookie_consent");
-    renderCookieBanner(true);
+  document.querySelectorAll("[data-cookie-open]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      window.localStorage.removeItem("hoinam_cookie_consent");
+      renderCookieBanner(true);
+    });
   });
 
   refreshShell();
