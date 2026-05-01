@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome | Hoinam Energy</title>
+  <meta name="description" content="Hoinam Energy — Solar installation, backup power systems, and energy solutions for homes and businesses across Nigeria.">
+  <meta property="og:title" content="Welcome to Hoinam Energy">
+  <meta property="og:description" content="Solar installation, backup power, and energy solutions for homes and businesses across Nigeria.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://hoinamenergy.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0a0f1e">
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #0a0f1e; font-family: "Segoe UI", system-ui, sans-serif; }
+
+    /* ── Slide stack ──────────────────────────────────────────────────── */
+    .lp-slides {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .lp-slide {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .lp-slide.is-active { opacity: 1; }
+
+    /* Ken Burns — each slide gets a different direction */
+    .lp-slide-img {
+      position: absolute;
+      inset: -8%;
+      background-size: cover;
+      background-position: center;
+      will-change: transform;
+      animation: none;
+    }
+    .lp-slide.is-active .lp-slide-img { animation: kb-zoom 8s ease-out forwards; }
+
+    @keyframes kb-zoom {
+      from { transform: scale(1.12) translate(0, 0); }
+      to   { transform: scale(1.0)  translate(0, 0); }
+    }
+    .lp-slide:nth-child(2).is-active .lp-slide-img {
+      animation: kb-right 8s ease-out forwards;
+    }
+    @keyframes kb-right {
+      from { transform: scale(1.12) translate(-2%, 1%); }
+      to   { transform: scale(1.0)  translate(0, 0); }
+    }
+    .lp-slide:nth-child(3).is-active .lp-slide-img {
+      animation: kb-left 8s ease-out forwards;
+    }
+    @keyframes kb-left {
+      from { transform: scale(1.12) translate(2%, -1%); }
+      to   { transform: scale(1.0)  translate(0, 0); }
+    }
+    .lp-slide:nth-child(4).is-active .lp-slide-img,
+    .lp-slide:nth-child(5).is-active .lp-slide-img,
+    .lp-slide:nth-child(6).is-active .lp-slide-img {
+      animation: kb-up 8s ease-out forwards;
+    }
+    @keyframes kb-up {
+      from { transform: scale(1.12) translate(0, 2%); }
+      to   { transform: scale(1.0)  translate(0, 0); }
+    }
+
+    /* Gradient overlay — dark at top & bottom, lighter in middle */
+    .lp-slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom,
+          rgba(8, 12, 28, 0.82) 0%,
+          rgba(8, 12, 28, 0.30) 40%,
+          rgba(8, 12, 28, 0.30) 60%,
+          rgba(8, 12, 28, 0.88) 100%
+        );
+      z-index: 1;
+    }
+
+    /* ── Noise texture overlay ────────────────────────────────────────── */
+    .lp-noise {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* ── Content layer ────────────────────────────────────────────────── */
+    .lp-content {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      pointer-events: none;
+    }
+
+    /* Logo with glow pulse */
+    .lp-logo-wrap {
+      margin-bottom: 2rem;
+      animation: lp-drop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .lp-logo {
+      width: clamp(80px, 14vw, 140px);
+      height: auto;
+      filter: drop-shadow(0 0 24px rgba(255,193,7,0.4));
+      animation: lp-glow-pulse 3s ease-in-out 1s infinite;
+    }
+    @keyframes lp-glow-pulse {
+      0%, 100% { filter: drop-shadow(0 0 18px rgba(255,193,7,0.35)); }
+      50%       { filter: drop-shadow(0 0 36px rgba(255,193,7,0.65)); }
+    }
+
+    /* "Welcome to" eyebrow */
+    .lp-eyebrow {
+      font-size: clamp(0.7rem, 2vw, 0.9rem);
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #ffc107;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      animation: lp-rise 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+    }
+
+    /* Brand name — split into two words for stagger */
+    .lp-brand {
+      font-size: clamp(3rem, 10vw, 7.5rem);
+      font-weight: 900;
+      line-height: 0.95;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      text-shadow: 0 2px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .lp-brand-word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(60px);
+    }
+    .lp-brand-word:nth-child(1) { animation: lp-word-in 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s forwards; }
+    .lp-brand-word:nth-child(2) {
+      color: #ffc107;
+      animation: lp-word-in 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards;
+    }
+    @keyframes lp-word-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tagline */
+    .lp-tagline {
+      margin-top: 1.25rem;
+      font-size: clamp(0.9rem, 2.4vw, 1.15rem);
+      color: rgba(255,255,255,0.7);
+      font-weight: 400;
+      max-width: 520px;
+      line-height: 1.6;
+      opacity: 0;
+      animation: lp-rise 0.7s ease 0.85s forwards;
+    }
+
+    /* ── CTA button — magnetic bounce ─────────────────────────────────── */
+    .lp-cta-wrap {
+      pointer-events: all;
+      margin-top: 2.5rem;
+      opacity: 0;
+      animation: lp-bounce-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 1.05s forwards;
+    }
+    .lp-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 1rem 2.4rem;
+      background: #ffc107;
+      color: #0a0f1e;
+      font-size: 1rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      box-shadow:
+        0 0 0 0 rgba(255,193,7,0),
+        0 8px 32px rgba(255,193,7,0.4);
+      transition:
+        transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 200ms ease,
+        background 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Shimmer sweep */
+    .lp-cta::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+      animation: lp-shimmer 2.5s ease 2s infinite;
+    }
+    @keyframes lp-shimmer {
+      0%   { left: -100%; }
+      40%, 100% { left: 160%; }
+    }
+    .lp-cta:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow:
+        0 0 0 6px rgba(255,193,7,0.18),
+        0 16px 40px rgba(255,193,7,0.5);
+      background: #ffca28;
+    }
+    .lp-cta:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+    .lp-cta-arrow {
+      width: 18px;
+      height: 18px;
+      transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .lp-cta:hover .lp-cta-arrow {
+      transform: translateX(5px);
+    }
+
+    /* ── Slide counter ────────────────────────────────────────────────── */
+    .lp-counter {
+      position: fixed;
+      bottom: 2.5rem;
+      left: 2.5rem;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      opacity: 0;
+      animation: lp-rise 0.6s ease 1.3s forwards;
+    }
+    .lp-counter-current {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      min-width: 2ch;
+    }
+    .lp-counter-sep {
+      width: 40px;
+      height: 1px;
+      background: rgba(255,255,255,0.3);
+    }
+    .lp-counter-total {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+    }
+
+    /* ── Slide caption ────────────────────────────────────────────────── */
+    .lp-caption {
+      position: fixed;
+      bottom: 2.5rem;
+      right: 2.5rem;
+      z-index: 20;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: right;
+      max-width: 200px;
+      line-height: 1.5;
+      opacity: 0;
+      animation: lp-rise 0.6s ease 1.3s forwards;
+      transition: opacity 400ms ease;
+    }
+
+    /* ── Dots ─────────────────────────────────────────────────────────── */
+    .lp-dots {
+      position: fixed;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 0.45rem;
+      opacity: 0;
+      animation: lp-rise 0.6s ease 1.3s forwards;
+    }
+    .lp-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 300ms ease, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1), width 300ms ease;
+    }
+    .lp-dot.is-active {
+      background: #ffc107;
+      transform: scale(1.5);
+      width: 20px;
+      border-radius: 3px;
+    }
+
+    /* ── Progress line ────────────────────────────────────────────────── */
+    .lp-progress-track {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      z-index: 20;
+    }
+    .lp-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffc107, #ff9800);
+      width: 0%;
+      transition: width linear;
+    }
+
+    /* ── Vertical line accent ─────────────────────────────────────────── */
+    .lp-vline {
+      position: fixed;
+      left: 2.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 0;
+      background: linear-gradient(to bottom, transparent, rgba(255,193,7,0.5), transparent);
+      z-index: 20;
+      animation: lp-vline-grow 1s ease 1.2s forwards;
+    }
+    @keyframes lp-vline-grow {
+      to { height: 120px; }
+    }
+
+    /* ── Shared keyframes ─────────────────────────────────────────────── */
+    @keyframes lp-drop {
+      from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes lp-rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes lp-bounce-in {
+      0%   { opacity: 0; transform: scale(0.7) translateY(20px); }
+      60%  { opacity: 1; transform: scale(1.06) translateY(-4px); }
+      80%  { transform: scale(0.97) translateY(2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .lp-counter, .lp-caption, .lp-vline { display: none; }
+      .lp-dots { bottom: 1.5rem; }
+      .lp-brand { font-size: clamp(2.8rem, 14vw, 4.5rem); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Noise texture -->
+  <div class="lp-noise" aria-hidden="true"></div>
+
+  <!-- Slides -->
+  <div class="lp-slides" aria-hidden="true">
+    <div class="lp-slide is-active">
+      <div class="lp-slide-img" style="background-image:url('/assets/images/home/pinterest-people-working-unsplash.jpg')"></div>
+    </div>
+    <div class="lp-slide">
+      <div class="lp-slide-img" style="background-image:url('/assets/images/home/pinterest-open-office-unsplash.jpg')"></div>
+    </div>
+    <div class="lp-slide">
+      <div class="lp-slide-img" style="background-image:url('/assets/images/home/pinterest-teamwork-hands-unsplash.jpg')"></div>
+    </div>
+    <div class="lp-slide">
+      <div class="lp-slide-img" style="background-image:url('/assets/images/home/ecoflow-delta-2-max.png');background-color:#0a0f1e;background-size:contain;background-repeat:no-repeat;"></div>
+    </div>
+    <div class="lp-slide">
+      <div class="lp-slide-img" style="background-image:url('/assets/images/home/ecoflow-river-2-pro.png');background-color:#0a0f1e;background-size:contain;background-repeat:no-repeat;"></div>
+    </div>
+    <div class="lp-slide">
+      <div class="lp-slide-img" style="background-image:url('/assets/images/home/ecoflow-110w-solar-panel.png');background-color:#0a0f1e;background-size:contain;background-repeat:no-repeat;"></div>
+    </div>
+  </div>
+
+  <!-- Vertical accent line -->
+  <div class="lp-vline" aria-hidden="true"></div>
+
+  <!-- Main content -->
+  <div class="lp-content">
+    <div class="lp-logo-wrap">
+      <img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy logo" class="lp-logo">
+    </div>
+    <p class="lp-eyebrow">Welcome to</p>
+    <h1 class="lp-brand">
+      <span class="lp-brand-word">Hoinam&nbsp;</span><span class="lp-brand-word">Energy</span>
+    </h1>
+    <p class="lp-tagline">Solar installation, backup power systems, and energy solutions for homes and businesses across Nigeria.</p>
+    <div class="lp-cta-wrap">
+      <a href="/index.html" class="lp-cta" id="lp-enter">
+        Enter site
+        <svg class="lp-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Slide counter -->
+  <div class="lp-counter" aria-live="polite" aria-label="Slide counter">
+    <span class="lp-counter-current" id="lp-cur">01</span>
+    <span class="lp-counter-sep"></span>
+    <span class="lp-counter-total" id="lp-tot">06</span>
+  </div>
+
+  <!-- Caption -->
+  <p class="lp-caption" id="lp-caption" aria-live="polite"></p>
+
+  <!-- Dots -->
+  <div class="lp-dots" role="tablist" aria-label="Slide navigation" id="lp-dots"></div>
+
+  <!-- Progress -->
+  <div class="lp-progress-track" aria-hidden="true">
+    <div class="lp-progress-fill" id="lp-progress"></div>
+  </div>
+
+  <script>
+    (function () {
+      const INTERVAL = 5500;
+      const slides   = Array.from(document.querySelectorAll(".lp-slide"));
+      const dotsWrap = document.getElementById("lp-dots");
+      const caption  = document.getElementById("lp-caption");
+      const progress = document.getElementById("lp-progress");
+      const curEl    = document.getElementById("lp-cur");
+      const totEl    = document.getElementById("lp-tot");
+
+      const CAPTIONS = [
+        "Our team at work",
+        "Collaboration & planning",
+        "Teamwork drives results",
+        "EcoFlow Delta 2 Max",
+        "EcoFlow River 2 Pro",
+        "110W Foldable Solar Panel",
+      ];
+
+      const pad = n => String(n + 1).padStart(2, "0");
+      totEl.textContent = pad(slides.length - 1);
+
+      let current = 0;
+      let timer   = null;
+
+      // Build dots
+      slides.forEach((_, i) => {
+        const dot = document.createElement("button");
+        dot.className = "lp-dot" + (i === 0 ? " is-active" : "");
+        dot.setAttribute("role", "tab");
+        dot.setAttribute("aria-label", "Slide " + (i + 1));
+        dot.addEventListener("click", () => { goTo(i); resetTimer(); });
+        dotsWrap.appendChild(dot);
+      });
+
+      function getDots() { return Array.from(dotsWrap.querySelectorAll(".lp-dot")); }
+
+      function goTo(index) {
+        // Fade out current
+        slides[current].classList.remove("is-active");
+        getDots()[current].classList.remove("is-active");
+
+        current = ((index % slides.length) + slides.length) % slides.length;
+
+        // Fade in next
+        slides[current].classList.add("is-active");
+        const dots = getDots();
+        dots[current].classList.add("is-active");
+
+        // Update counter & caption
+        curEl.textContent = pad(current);
+        caption.style.opacity = "0";
+        setTimeout(() => {
+          caption.textContent = CAPTIONS[current] || "";
+          caption.style.opacity = "1";
+        }, 300);
+
+        // Reset progress bar
+        progress.style.transition = "none";
+        progress.style.width = "0%";
+        void progress.offsetWidth; // reflow
+        progress.style.transition = "width " + INTERVAL + "ms linear";
+        progress.style.width = "100%";
+      }
+
+      function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => goTo(current + 1), INTERVAL);
+      }
+
+      // Pause on hover
+      const slidesEl = document.querySelector(".lp-slides");
+      slidesEl.addEventListener("mouseenter", () => clearInterval(timer));
+      slidesEl.addEventListener("mouseleave", resetTimer);
+      slidesEl.addEventListener("touchstart", () => clearInterval(timer), { passive: true });
+      slidesEl.addEventListener("touchend", resetTimer, { passive: true });
+
+      // Keyboard
+      document.addEventListener("keydown", e => {
+        if (e.key === "ArrowRight") { goTo(current + 1); resetTimer(); }
+        if (e.key === "ArrowLeft")  { goTo(current - 1); resetTimer(); }
+      });
+
+      // Swipe support
+      let touchX = 0;
+      document.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; }, { passive: true });
+      document.addEventListener("touchend", e => {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 50) { goTo(current + (dx < 0 ? 1 : -1)); resetTimer(); }
+      }, { passive: true });
+
+      // Init
+      caption.textContent = CAPTIONS[0];
+      progress.style.transition = "width " + INTERVAL + "ms linear";
+      progress.style.width = "100%";
+      resetTimer();
+
+      // Auto-redirect after 30 s if idle
+      let redirectTimer = setTimeout(() => { window.location.href = "/index.html"; }, 30000);
+      document.getElementById("lp-enter").addEventListener("click", () => clearTimeout(redirectTimer));
+      document.addEventListener("click", () => { clearTimeout(redirectTimer); redirectTimer = setTimeout(() => { window.location.href = "/index.html"; }, 30000); });
+    })();
+  </script>
+</body>
+</html>
