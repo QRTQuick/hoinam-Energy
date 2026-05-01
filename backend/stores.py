@@ -21,24 +21,6 @@ STORES = {
         "website": "https://www.deye.com/",
         "featured": True,
     },
-    "bluetti": {
-        "id": "bluetti",
-        "name": "Bluetti Store",
-        "slug": "bluetti",
-        "description": "Portable power stations and solar panels for mobile power",
-        "image_url": "https://www.bluettipower.com/logo.png",
-        "website": "https://www.bluettipower.com/",
-        "featured": True,
-    },
-    "buttu": {
-        "id": "buttu",
-        "name": "Buttu Store",
-        "slug": "buttu",
-        "description": "Premium solar components and installation solutions",
-        "image_url": "https://buttu.com/logo.png",
-        "website": "https://buttu.com/",
-        "featured": True,
-    },
 }
 
 

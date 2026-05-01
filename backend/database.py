@@ -89,6 +89,18 @@ def init_database() -> None:
     # create_all is idempotent — only creates tables that don't exist yet
     Base.metadata.create_all(bind=engine)
     _ensure_schema_updates(engine)
+    _remove_bluetti_products(engine)
+
+
+def _remove_bluetti_products(engine) -> None:
+    """Archive all Bluetti products from the database."""
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "UPDATE products SET active = false "
+                "WHERE LOWER(brand) = 'bluetti' OR LOWER(store_slug) = 'bluetti'"
+            )
+        )
 
 
 def _ensure_schema_updates(engine) -> None:
