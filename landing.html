@@ -395,9 +395,6 @@
     <div class="lp-slide">
       <div class="lp-slide-img" style="background-image:url('/assets/images/home/ecoflow-river-2-pro.png');background-color:#0a0f1e;background-size:contain;background-repeat:no-repeat;"></div>
     </div>
-    <div class="lp-slide">
-      <div class="lp-slide-img" style="background-image:url('/assets/images/home/ecoflow-110w-solar-panel.png');background-color:#0a0f1e;background-size:contain;background-repeat:no-repeat;"></div>
-    </div>
   </div>
 
   <!-- Vertical accent line -->
@@ -412,9 +409,9 @@
     <h1 class="lp-brand">
       <span class="lp-brand-word">Hoinam&nbsp;</span><span class="lp-brand-word">Energy</span>
     </h1>
-    <p class="lp-tagline">Solar installation, backup power systems, and energy solutions for homes and businesses across Nigeria.</p>
+    <p class="lp-tagline">Premium solar installation, renewable energy systems, and power solutions engineered for optimal efficiency. Trusted by businesses across Nigeria for unparalleled service and technical excellence.</p>
     <div class="lp-cta-wrap">
-      <a href="/index.html" class="lp-cta" id="lp-enter">
+      <a href="/login.html" class="lp-cta" id="lp-enter">
         Enter site
         <svg class="lp-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -427,7 +424,7 @@
   <div class="lp-counter" aria-live="polite" aria-label="Slide counter">
     <span class="lp-counter-current" id="lp-cur">01</span>
     <span class="lp-counter-sep"></span>
-    <span class="lp-counter-total" id="lp-tot">06</span>
+    <span class="lp-counter-total" id="lp-tot">05</span>
   </div>
 
   <!-- Caption -->
@@ -457,7 +454,6 @@
         "Teamwork drives results",
         "EcoFlow Delta 2 Max",
         "EcoFlow River 2 Pro",
-        "110W Foldable Solar Panel",
       ];
 
       const pad = n => String(n + 1).padStart(2, "0");
@@ -539,9 +535,9 @@
       resetTimer();
 
       // Auto-redirect after 30 s if idle
-      let redirectTimer = setTimeout(() => { window.location.href = "/index.html"; }, 30000);
+      let redirectTimer = setTimeout(() => { window.location.href = "/login.html"; }, 30000);
       document.getElementById("lp-enter").addEventListener("click", () => clearTimeout(redirectTimer));
-      document.addEventListener("click", () => { clearTimeout(redirectTimer); redirectTimer = setTimeout(() => { window.location.href = "/index.html"; }, 30000); });
+      document.addEventListener("click", () => { clearTimeout(redirectTimer); redirectTimer = setTimeout(() => { window.location.href = "/login.html"; }, 30000); });
     })();
   </script>
 </body>
