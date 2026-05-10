@@ -93,21 +93,49 @@ export function productMedia(product, className = "product-media") {
 export function renderProductCard(product) {
   const stock = Number(product.stock || 0);
   const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
-  const stockClass = stock > 0 ? "stock-pill" : "stock-pill stock-pill-out";
+  const isFeatured = product.featured || false;
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  
   return `
-    <article class="product-card">
-      ${productMedia(product)}
-      <div class="product-card-body">
-        <div class="chip-row">
-          <span class="chip">${product.brand || product.category || "Solar"}</span>
-          <span class="${stockClass}">${stockLabel}</span>
+    <article class="product-card" tabindex="0">
+      ${isFeatured ? '<span class="product-card-featured">Featured</span>' : ''}
+      ${hasDiscount ? '<span class="product-card-sale">Sale</span>' : ''}
+      
+      <img src="${product.image || '/assets/images/products/placeholder.svg'}" alt="${product.name}" class="product-card-bg" loading="lazy">
+      <div class="product-card-overlay"></div>
+      
+      <div class="product-card-actions">
+        <button class="product-card-action-btn" aria-label="Add to wishlist" onclick="event.stopPropagation(); showToast('Added to wishlist!', 'success');">
+          <i class="fa-regular fa-heart"></i>
+        </button>
+        <button class="product-card-action-btn" aria-label="Quick view" onclick="event.stopPropagation(); window.location.href='/product-detail.html?id=${product.id}';">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+        <button class="product-card-action-btn" aria-label="Add to cart" onclick="event.stopPropagation(); addToCart('${product.id}');">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </button>
+      </div>
+      
+      <div class="product-card-content">
+        <span class="product-card-brand">${product.brand || product.category || "Solar"}</span>
+        <h3 class="product-card-title">${product.name}</h3>
+        <p class="product-card-category">${product.category || "Power Solution"}</p>
+        
+        <div class="product-card-price">
+          <span class="product-card-price-current">${formatProductPrice(product.price, product.currency)}</span>
+          ${hasDiscount ? `<span class="product-card-price-original">${formatProductPrice(product.originalPrice, product.currency)}</span>` : ''}
         </div>
-        <h3>${product.name}</h3>
-        <p class="product-summary">${product.summary || "Reliable solar and backup power from Hoinam Energy."}</p>
-        <div class="product-meta">
-          <strong class="price">${formatProductPrice(product.price, product.currency)}</strong>
-          <a class="button button-ghost product-card-link" href="/product-detail.html?id=${product.id}">
-            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> View
+        
+        <div class="product-card-expanded">
+          ${stock > 0 ? `<div class="product-card-stock"><i class="fa-solid fa-check-circle"></i> ${stockLabel}</div>` : `<div class="product-card-stock out-of-stock"><i class="fa-solid fa-times-circle"></i> ${stockLabel}</div>`}
+          
+          <ul class="product-card-features">
+            ${product.features?.slice(0, 3).map(feature => `<li><i class="fa-solid fa-check"></i> ${feature}</li>`).join('') || ''}
+            ${!product.features?.length ? '<li><i class="fa-solid fa-bolt"></i> High efficiency</li><li><i class="fa-solid fa-shield-halved"></i> 2-year warranty</li><li><i class="fa-solid fa-truck-fast"></i> Fast delivery</li>' : ''}
+          </ul>
+          
+          <a href="/product-detail.html?id=${product.id}" class="product-card-cta" onclick="event.stopPropagation();">
+            View Details <i class="fa-solid fa-arrow-right"></i>
           </a>
         </div>
       </div>
