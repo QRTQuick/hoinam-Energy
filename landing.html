@@ -411,7 +411,7 @@
     </h1>
     <p class="lp-tagline">Premium solar installation, renewable energy systems, and power solutions engineered for optimal efficiency. Trusted by businesses across Nigeria for unparalleled service and technical excellence.</p>
     <div class="lp-cta-wrap">
-      <a href="/login.html" class="lp-cta" id="lp-enter">
+      <a href="/products.html" class="lp-cta" id="lp-enter">
         Enter site
         <svg class="lp-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -535,9 +535,9 @@
       resetTimer();
 
       // Auto-redirect after 30 s if idle
-      let redirectTimer = setTimeout(() => { window.location.href = "/login.html"; }, 30000);
+      let redirectTimer = setTimeout(() => { window.location.href = "/products.html"; }, 30000);
       document.getElementById("lp-enter").addEventListener("click", () => clearTimeout(redirectTimer));
-      document.addEventListener("click", () => { clearTimeout(redirectTimer); redirectTimer = setTimeout(() => { window.location.href = "/login.html"; }, 30000); });
+      document.addEventListener("click", () => { clearTimeout(redirectTimer); redirectTimer = setTimeout(() => { window.location.href = "/products.html"; }, 30000); });
     })();
   </script>
 </body>
