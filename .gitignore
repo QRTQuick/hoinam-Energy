@@ -3,8 +3,6 @@
 __pycache__/
 *.o
 *.obj
-dist/
-build/
 *.class
 *.exe
 *.dll
@@ -13,24 +11,18 @@ build/
 *.out
 
 # Dependencies
-.venv/
-venv/
 node_modules/
-.mypy_cache/
-.pytest_cache/
-target/
-.gradle/
+venv/
+.venv/
+.env
+.env.local
+.env.*
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 *.swo
-
-# Environment
-.env
-.env.local
-*.env.*
 
 # Editors
 .vscode/
@@ -68,3 +60,53 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Python specific
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.PyInstaller/
+.pytest_cache/
+.mypy_cache/
+
+# Build directories
+dist/
+build/
+target/
+.gradle/
+
+# Compressed archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.jar
+*.war
+*.ear
+*.deb
+*.rpm
+*.pkg
+*.msi
+*.dmg
+*.iso
+*.img
+*.tar.Z
+*.tar.lz
+*.tar.lz4
+*.tar.lzh
+*.tar.cab
+*.tar.arj
+*.Z
+*.lz
+*.lz4
+*.lzh
+*.cab
+*.arj
