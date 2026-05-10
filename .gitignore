@@ -1,17 +1,1 @@
-__pycache__/
-*.py[cod]
-.env
-.env.example
-hoinam-energy-workspace-firebase-adminsdk-fbsvc-6bdb65b85e.json
-.venv/
-venv/
-dist/
-build/
-.pytest_cache/
-node_modules/
-.DS_Store
-outdated/
-*.log
-*.err
-*.out
-.season.json
+Nothing should be ignored based on the provided file changes, as they only include source/config files (landing.html, vercel.json) without any build artifacts, dependencies, or temporary files.
