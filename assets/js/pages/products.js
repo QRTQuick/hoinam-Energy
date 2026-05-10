@@ -1,7 +1,17 @@
 import { listProducts } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { refreshInteractions } from "../interactions.js";
-import { formatMoney, formatProductPrice, productMedia, renderProductCardMobile, showToast } from "../ui.js";
+import { addToCart } from "../store.js";
+import { formatMoney, formatProductPrice, productMedia, renderProductCard, renderProductCardMobile, showToast } from "../ui.js";
+
+// Expose addToCart to global scope for inline handlers
+window.addToCart = (productId) => {
+  const product = allProducts.find(p => p.id === productId);
+  if (product) {
+    addToCart(product, 1);
+    showToast('Added to cart!', 'success');
+  }
+};
 
 const isMobile = () => window.innerWidth <= 640;
 
@@ -513,18 +523,11 @@ function renderProducts() {
   }
 
   controls.productsGrid.innerHTML = sorted
-    .map(({ product }) => isMobile()
-      ? renderProductCardMobile(product)
-      : renderProductResult(product, state.search))
+    .map(({ product }) => renderProductCard(product))
     .join("");
 
-  if (isMobile()) {
-    controls.productsGrid.classList.add("mob-product-list");
-    controls.productsGrid.classList.remove("catalog-results-list");
-  } else {
-    controls.productsGrid.classList.remove("mob-product-list");
-    controls.productsGrid.classList.add("catalog-results-list");
-  }
+  controls.productsGrid.classList.add("products-grid");
+  controls.productsGrid.classList.remove("catalog-results-list", "mob-product-list");
 
   refreshInteractions(controls.productsGrid);
   syncUrl();
