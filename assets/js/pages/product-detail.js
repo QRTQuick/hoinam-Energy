@@ -1,7 +1,7 @@
 import { getProduct } from "../api.js";
 import { bootstrapPage } from "../app-shell.js";
 import { addToCart } from "../store.js";
-import { formatProductPrice, productMedia, refreshShell, showToast } from "../ui.js";
+import { formatProductPrice, productMedia, refreshShell, resolveProductImageUrls, showToast } from "../ui.js";
 
 function escapeHtml(value = "") {
   return String(value)
@@ -22,6 +22,10 @@ function setText(id, value) {
 function updateMetadata(product) {
   const title = `${product.name || "Product detail"} | Hoinam Energy`;
   const description = product.summary || product.description || "Explore specs, pricing, and availability for EcoFlow backup power systems.";
+  const [imageUrl] = resolveProductImageUrls(product);
+  const absoluteImageUrl = imageUrl?.startsWith("/")
+    ? `${window.location.origin}${imageUrl}`
+    : imageUrl;
 
   document.title = title;
   document.querySelector('meta[name="description"]')?.setAttribute("content", description);
@@ -29,6 +33,11 @@ function updateMetadata(product) {
   document.querySelector('meta[property="og:description"]')?.setAttribute("content", description);
   document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", title);
   document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", description);
+
+  if (absoluteImageUrl) {
+    document.querySelector('meta[property="og:image"]')?.setAttribute("content", absoluteImageUrl);
+    document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", absoluteImageUrl);
+  }
 }
 
 function updateHero(product) {

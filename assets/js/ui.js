@@ -20,7 +20,7 @@ function slugifyName(value = "") {
 
 const PRODUCT_IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
 
-function resolveProductImageUrls(product = {}) {
+export function resolveProductImageUrls(product = {}) {
   const explicitImage = String(product.image_url || "").trim();
   const urls = [];
   if (explicitImage) {
