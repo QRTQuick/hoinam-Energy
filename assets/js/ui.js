@@ -95,13 +95,15 @@ export function renderProductCard(product) {
   const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
   const isFeatured = product.featured || false;
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const imageUrls = resolveProductImageUrls(product);
+  const imageUrl = imageUrls[0] || '/assets/images/products/placeholder.svg';
   
   return `
     <article class="product-card" tabindex="0">
       ${isFeatured ? '<span class="product-card-featured">Featured</span>' : ''}
       ${hasDiscount ? '<span class="product-card-sale">Sale</span>' : ''}
       
-      <img src="${product.image || '/assets/images/products/placeholder.svg'}" alt="${product.name}" class="product-card-bg" loading="lazy">
+      <img src="${imageUrl}" alt="${product.name}" class="product-card-bg" loading="lazy" onerror="const sources=${JSON.stringify(imageUrls)}; const nextIndex=Number(this.dataset.index||'0')+1; if (sources[nextIndex]) { this.dataset.index=String(nextIndex); this.src=sources[nextIndex]; return; } this.src='/assets/images/products/placeholder.svg';" data-index="0">
       <div class="product-card-overlay"></div>
       
       <div class="product-card-actions">
