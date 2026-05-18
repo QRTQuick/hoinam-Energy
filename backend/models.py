@@ -4,7 +4,6 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import (
-    JSON,
     Boolean,
     Date,
     DateTime,
@@ -91,7 +90,6 @@ class Product(TimestampMixin, Base):
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
     stock: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    highlights: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
     featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
@@ -120,7 +118,6 @@ class Product(TimestampMixin, Base):
             "currency": self.currency,
             "stock": max(0, self.stock),  # Ensure non-negative
             "image_url": image_url,
-            "highlights": self.highlights or [],
             "featured": self.featured,
             "active": self.active,
             "created_at": self.created_at.isoformat(),
