@@ -84,6 +84,7 @@ class Product(TimestampMixin, Base):
     category: Mapped[str] = mapped_column(
         String(128), default="Portable Power", nullable=False
     )
+    summary: Mapped[str | None] = mapped_column(String(500), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=Decimal("0.00"), nullable=False
@@ -91,6 +92,9 @@ class Product(TimestampMixin, Base):
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
     stock: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    highlights: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
     specs: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     installations = relationship("Installation", back_populates="product")
@@ -103,7 +107,8 @@ class Product(TimestampMixin, Base):
         
         # Ensure image_url is always a valid string (never None)
         # Frontend expects a string, even if it's a placeholder
-        image_url = resolved_image or f"/assets/images/products/{self.slug or 'placeholder'}.svg"
+        image_url = resolved_image or "/assets/images/products/placeholder.svg"
+        highlights = self.highlights or []
         
         return {
             "id": self.id,
@@ -113,11 +118,16 @@ class Product(TimestampMixin, Base):
             "brand": self.brand or "Energy",  # Provide fallback
             "store_slug": self.store_slug,
             "category": self.category or "Portable Power",  # Provide fallback
+            "summary": self.summary,
             "description": self.description,
             "price": float(self.price),
             "currency": self.currency,
             "stock": max(0, self.stock),  # Ensure non-negative
             "image_url": image_url,
+            "highlights": highlights,
+            "features": highlights,
+            "featured": self.featured,
+            "active": self.active,
             "specs": self.specs or {},
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),

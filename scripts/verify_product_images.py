@@ -162,8 +162,10 @@ def check_data_integrity(products: list[dict]):
             issues.append(f"Product missing name: {product}")
         if not product.get("slug"):
             issues.append(f"Product {product.get('name')} missing slug")
-        if not product.get("price"):
+        if "price" not in product or product.get("price") is None:
             issues.append(f"Product {product.get('name')} missing price")
+        elif product.get("price") < 0:
+            issues.append(f"Product {product.get('name')} has a negative price")
         if not product.get("brand"):
             issues.append(f"Product {product.get('name')} missing brand")
 

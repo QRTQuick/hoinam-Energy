@@ -27,6 +27,10 @@ from backend.inventory import parse_stock_inventory
 from backend.models import Product
 from backend.seed import upsert_inventory_products
 
+OK = "[OK]"
+FAIL = "[X]"
+WARN = "[!]"
+
 
 def main():
     """Main sync function."""
@@ -38,31 +42,31 @@ def main():
     print("\n1. Initializing database connection...")
     try:
         init_database()
-        print("   ✓ Database initialized")
+        print(f"   {OK} Database initialized")
     except Exception as e:
-        print(f"   ✗ Failed to initialize database: {e}")
+        print(f"   {FAIL} Failed to initialize database: {e}")
         return 1
 
     # Parse inventory
     print("\n2. Parsing STOCK INVENTORY.xlsx...")
     try:
         inventory_products = parse_stock_inventory()
-        print(f"   ✓ Found {len(inventory_products)} products in inventory")
+        print(f"   {OK} Found {len(inventory_products)} products in inventory")
     except Exception as e:
-        print(f"   ✗ Failed to parse inventory: {e}")
+        print(f"   {FAIL} Failed to parse inventory: {e}")
         return 1
 
     if not inventory_products:
-        print("   ✗ No products found in inventory file")
+        print(f"   {FAIL} No products found in inventory file")
         return 1
 
     # Check image linking
     print("\n3. Checking image links...")
     with_images = sum(1 for p in inventory_products if p.get("image_url"))
     without_images = len(inventory_products) - with_images
-    print(f"   ✓ Products with images: {with_images}/{len(inventory_products)}")
+    print(f"   {OK} Products with images: {with_images}/{len(inventory_products)}")
     if without_images > 0:
-        print(f"   ⚠ Products without images: {without_images}")
+        print(f"   {WARN} Products without images: {without_images}")
 
     # Sync to database
     print("\n4. Syncing products to database...")
@@ -70,9 +74,9 @@ def main():
     try:
         session = get_session()
         upsert_inventory_products(session, inventory_products)
-        print("   ✓ Successfully synced to database")
+        print(f"   {OK} Successfully synced to database")
     except Exception as e:
-        print(f"   ✗ Failed to sync products: {e}")
+        print(f"   {FAIL} Failed to sync products: {e}")
         if session:
             session.rollback()
         return 1
@@ -87,26 +91,26 @@ def main():
         session = get_session()
         db_products = session.query(Product).filter(Product.active.is_(True)).all()
         db_with_images = sum(1 for p in db_products if p.image_url)
-        print(f"   ✓ Database now has {len(db_products)} active products")
-        print(f"   ✓ Products with images in DB: {db_with_images}/{len(db_products)}")
+        print(f"   {OK} Database now has {len(db_products)} active products")
+        print(f"   {OK} Products with images in DB: {db_with_images}/{len(db_products)}")
 
         # Show first 10 products
         if db_products:
             print("\n   First 10 products in database:")
             for i, product in enumerate(db_products[:10], 1):
-                img_status = "✓" if product.image_url else "✗"
+                img_status = "IMG" if product.image_url else "NOIMG"
                 print(
                     f"     {i:2}. {img_status} {product.name:50} - {product.price} NGN"
                 )
     except Exception as e:
-        print(f"   ✗ Failed to verify: {e}")
+        print(f"   {FAIL} Failed to verify: {e}")
         return 1
     finally:
         if session:
             close_session()
 
     print("\n" + "=" * 70)
-    print("✓ SYNC COMPLETED SUCCESSFULLY")
+    print("SYNC COMPLETED SUCCESSFULLY")
     print("=" * 70)
     print("\nNext steps:")
     print("  1. Run the Flask app: python app.py")

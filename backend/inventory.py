@@ -22,6 +22,23 @@ STORE_SLUGS = {
     "DEYE": "deye",
 }
 
+FEATURED_REFERENCES = {
+    "river 2",
+    "river 2 max",
+    "river 2 pro",
+    "delta 2 max",
+    "delta pro",
+    "delta pro 3",
+    "bluetti ac180",
+    "bluetti ac200pl",
+    "bluetti ac300",
+    "bluetti ac500",
+    "bluetti ep500p",
+    "sun-6k-sg04lp1-eu-sm2",
+    "sun-12k-sg04lp3-eu-am3",
+    "se-g5.1 5kwh 51.2v",
+}
+
 def clean_text(value) -> str:
     return " ".join(str(value or "").replace("_", " ").split())
 
@@ -55,6 +72,53 @@ def product_display_name(brand: str, reference: str) -> str:
     if reference.lower().startswith(brand.lower()):
         return reference
     return f"{brand} {reference}"
+
+
+def trim_summary(value: str, max_length: int = 180) -> str:
+    text = clean_text(value)
+    if len(text) <= max_length:
+        return text
+    truncated = text[: max_length - 1].rsplit(" ", 1)[0]
+    return f"{truncated}..."
+
+
+def product_summary(name: str, description: str, category: str) -> str:
+    if description:
+        return trim_summary(description)
+    return f"{name} in the Hoinam Energy {category.lower()} catalog."
+
+
+def product_highlights(category: str, brand: str, description: str) -> list[str]:
+    category_key = clean_text(category).lower()
+    haystack = f"{category_key} {description}".lower()
+    highlights: list[str] = []
+
+    if category_key == "portable power":
+        highlights.append("Portable backup power")
+    elif category_key == "solar panels":
+        highlights.append("Solar charging ready")
+    elif category_key == "inverters":
+        highlights.append("Hybrid inverter solution")
+    elif category_key == "batteries":
+        highlights.append("Energy storage expansion")
+    elif category_key == "accessories":
+        highlights.append("System accessory")
+    else:
+        highlights.append("Energy backup solution")
+
+    if "solar" in haystack:
+        highlights.append("Solar compatible")
+    if any(term in haystack for term in ["battery", "kwh", "storage"]):
+        highlights.append("Battery storage support")
+    if any(term in haystack for term in ["portable", "river", "delta", "ac"]):
+        highlights.append("Designed for flexible backup")
+
+    highlights.append(f"{brand} product support")
+    return list(dict.fromkeys(highlights))[:4]
+
+
+def is_featured_product(reference: str, stock: int) -> bool:
+    return stock > 0 and clean_text(reference).lower() in FEATURED_REFERENCES
 
 
 def infer_category(row_name: str | None, reference: str, description: str, brand: str) -> str:
@@ -117,6 +181,7 @@ def parse_stock_inventory(path: str | Path | None = None) -> list[dict]:
             resolve_product_image_url(name, None, slug)
             or resolve_product_image_url(reference_text, None, legacy_slug)
         )
+        summary = product_summary(name, description_text, category)
 
         products.append(
             {
@@ -126,11 +191,19 @@ def parse_stock_inventory(path: str | Path | None = None) -> list[dict]:
                 "brand": brand,
                 "store_slug": brand_slug,
                 "category": category,
+                "summary": summary,
                 "description": description_text or f"{name} imported from the Hoinam Energy stock inventory.",
                 "price": price,
                 "currency": "NGN",
                 "stock": stock,
                 "image_url": image_url,
+                "highlights": product_highlights(category, brand, description_text),
+                "featured": is_featured_product(reference_text, stock),
+                "active": True,
+                "specs": {
+                    "reference": reference_text,
+                    "inventory_name": row_name_text,
+                },
                 "legacy_slug": legacy_slug,
                 "reference": reference_text,
             }
