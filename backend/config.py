@@ -14,6 +14,9 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 def _normalize_database_url(value: str) -> str:
     value = (value or "").strip()
+    if value.upper().startswith("DATABASE_URL="):
+        value = value.split("=", 1)[1].strip()
+    value = value.strip("\"'")
     if value.startswith("postgresql://"):
         return value.replace("postgresql://", "postgresql+psycopg://", 1)
     return value

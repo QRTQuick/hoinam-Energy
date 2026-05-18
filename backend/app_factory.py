@@ -88,6 +88,7 @@ def create_app() -> Flask:
             return False
         database_optional_paths = {
             "/api/health",
+            "/api/season",
             "/api/stores",
             "/api/payment-options",
         }
@@ -121,7 +122,13 @@ def create_app() -> Flask:
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
         if request.path.startswith("/api/"):
-            return jsonify({"success": False, "message": str(error)}), 500
+            app.logger.exception("Unhandled API error")
+            return jsonify(
+                {
+                    "success": False,
+                    "message": "The request could not be completed.",
+                }
+            ), 500
         raise error
 
     def db_session():
