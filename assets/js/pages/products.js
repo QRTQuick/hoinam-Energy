@@ -253,39 +253,84 @@ function updateHeroStats(products = allProducts) {
 }
 
 function renderStoreStrip() {
-  const controls = getControls();
-  const brandStats = [...new Set(allProducts.map((product) => product.brand).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b))
-    .map((brand) => {
-      const products = allProducts.filter((product) => product.brand === brand);
-      const categories = new Set(products.map((product) => product.category).filter(Boolean));
-      const imageProduct = products.find((product) => product.image_url) || products[0];
-      return {
-        brand,
-        count: products.length,
-        categories: categories.size,
-        imageProduct
-      };
-    });
+  try {
+    const controls = getControls();
+    
+    // Validate controls exist
+    if (!controls.storeStrip) {
+      console.warn("[v0] Store strip control not found");
+      return;
+    }
+    
+    // Build brand statistics with defensive checks
+    const brandStats = [...new Set(allProducts.map((product) => {
+      const brand = String(product?.brand || "").trim();
+      return brand || null;
+    }).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b))
+      .map((brand) => {
+        try {
+          const products = allProducts.filter((product) => product?.brand === brand);
+          if (!products.length) {
+            return null;
+          }
+          
+          const categories = new Set(products.map((product) => {
+            const cat = String(product?.category || "").trim();
+            return cat || null;
+          }).filter(Boolean));
+          
+          // Find first product with valid data (not necessarily image)
+          const imageProduct = products.find((p) => p && typeof p === "object") || null;
+          
+          return {
+            brand: String(brand).trim(),
+            count: products.length,
+            categories: categories.size,
+            imageProduct
+          };
+        } catch (error) {
+          console.warn("[v0] Error processing brand:", brand, error);
+          return null;
+        }
+      })
+      .filter(Boolean);
 
-  controls.storeStrip.innerHTML = [
-    `
-      <button class="store-card is-active" type="button" data-store-filter="">
-        <span class="store-card-icon"><i class="fa-solid fa-store" aria-hidden="true"></i></span>
-        <strong>All Stores</strong>
-        <small>${allProducts.length} products</small>
-      </button>
-    `,
-    ...brandStats.map(
-      (item) => `
-        <button class="store-card" type="button" data-store-filter="${escapeHtml(item.brand)}">
-          <span class="store-card-media">${productMedia(item.imageProduct, "store-card-product-media")}</span>
-          <strong>${escapeHtml(item.brand)} Store</strong>
-          <small>${item.count} products - ${item.categories} categories</small>
-        </button>
+    // Render store cards with error boundaries
+    const storeCards = [
       `
-    )
-  ].join("");
+        <button class="store-card is-active" type="button" data-store-filter="">
+          <span class="store-card-icon"><i class="fa-solid fa-store" aria-hidden="true"></i></span>
+          <strong>All Stores</strong>
+          <small>${allProducts.length} products</small>
+        </button>
+      `,
+      ...brandStats.map((item) => {
+        try {
+          if (!item || !item.brand) {
+            return '';
+          }
+          
+          const mediaHtml = item.imageProduct ? productMedia(item.imageProduct, "store-card-product-media") : '<div class="store-card-product-media is-fallback"><div class="fallback-mark">?</div></div>';
+          
+          return `
+            <button class="store-card" type="button" data-store-filter="${escapeHtml(item.brand)}">
+              <span class="store-card-media">${mediaHtml}</span>
+              <strong>${escapeHtml(item.brand)} Store</strong>
+              <small>${item.count} products - ${item.categories} categories</small>
+            </button>
+          `;
+        } catch (error) {
+          console.error("[v0] Error rendering store card for brand:", item?.brand, error);
+          return '';
+        }
+      }).filter(Boolean)
+    ];
+    
+    controls.storeStrip.innerHTML = storeCards.join("");
+  } catch (error) {
+    console.error("[v0] Error rendering store strip:", error);
+  }
 
   controls.storeStrip.querySelectorAll("[data-store-filter]").forEach((card) => {
     card.addEventListener("click", () => {

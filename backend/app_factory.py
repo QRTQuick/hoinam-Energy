@@ -224,6 +224,65 @@ def create_app() -> Flask:
     def health_check():
         return json_success({"status": "ok"})
 
+    @app.get("/api/health/database")
+    def health_database():
+        """Check database health and data integrity."""
+        try:
+            session = db_session()
+            
+            # Count products and check for data issues
+            total_products = session.query(func.count(Product.id)).scalar() or 0
+            
+            # Count products with missing critical fields
+            products_missing_name = session.query(func.count(Product.id)).filter(
+                Product.name == None
+            ).scalar() or 0
+            products_missing_slug = session.query(func.count(Product.id)).filter(
+                Product.slug == None
+            ).scalar() or 0
+            products_missing_image = session.query(func.count(Product.id)).filter(
+                Product.image_url == None
+            ).scalar() or 0
+            products_with_negative_stock = session.query(func.count(Product.id)).filter(
+                Product.stock < 0
+            ).scalar() or 0
+            
+            # Calculate integrity score
+            issues = (
+                products_missing_name + 
+                products_missing_slug + 
+                products_with_negative_stock
+            )
+            integrity_score = 100 if issues == 0 else max(0, 100 - (issues * 10))
+            
+            return json_success(
+                {
+                    "status": "ok",
+                    "database": {
+                        "total_products": total_products,
+                        "integrity_score": integrity_score,
+                        "issues": {
+                            "missing_name": products_missing_name,
+                            "missing_slug": products_missing_slug,
+                            "missing_image": products_missing_image,
+                            "negative_stock": products_with_negative_stock,
+                        },
+                    },
+                }
+            )
+        except Exception as e:
+            return json_success(
+                {
+                    "status": "error",
+                    "error": str(e),
+                    "database": {
+                        "total_products": 0,
+                        "integrity_score": 0,
+                    },
+                },
+                status_code=500,
+            )
+
     @app.get("/api/debug/smtp-config")
     def debug_smtp_config():
         """Check SMTP configuration (admin only)."""

@@ -66,102 +66,152 @@ export function statusBadge(status) {
 }
 
 export function productMedia(product, className = "product-media") {
-  const fallback = `<div class="fallback-mark">${initialsFromName(product.name)}</div>`;
-  const imageUrls = resolveProductImageUrls(product);
-  const [imageUrl] = imageUrls;
+  // Validate product object
+  if (!product || typeof product !== "object") {
+    return `<div class="${className} is-fallback"><div class="fallback-mark">?</div></div>`;
+  }
+  
+  const productName = String(product.name || "Product").trim();
+  const fallback = `<div class="fallback-mark">${initialsFromName(productName)}</div>`;
+  
+  try {
+    const imageUrls = resolveProductImageUrls(product);
+    const validUrls = imageUrls.filter(url => url && typeof url === "string" && url.trim());
+    
+    if (!validUrls.length) {
+      return `<div class="${className} is-fallback">${fallback}</div>`;
+    }
 
-  if (!imageUrl) {
+    const [imageUrl] = validUrls;
+    const fallbackSources = validUrls.join("|");
+    
+    return `
+      <div class="${className} has-image">
+        <img
+          src="${imageUrl}"
+          alt="${productName}"
+          loading="lazy"
+          data-fallback-srcs="${fallbackSources}"
+          data-fallback-index="0"
+          onerror="const sources=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); const nextIndex=Number(this.dataset.fallbackIndex||'0')+1; if (sources[nextIndex]) { this.dataset.fallbackIndex=String(nextIndex); this.src=sources[nextIndex]; return; } const p=this.parentElement; this.remove(); if(p){p.classList.remove('has-image'); p.classList.add('is-fallback');}"
+        >
+        ${fallback}
+      </div>
+    `;
+  } catch (error) {
+    console.warn("[v0] Error rendering product media:", error);
     return `<div class="${className} is-fallback">${fallback}</div>`;
   }
-
-  const fallbackSources = imageUrls.join("|");
-  return `
-    <div class="${className} has-image">
-      <img
-        src="${imageUrl}"
-        alt="${product.name}"
-        loading="lazy"
-        data-fallback-srcs="${fallbackSources}"
-        data-fallback-index="0"
-        onerror="const sources=(this.dataset.fallbackSrcs||'').split('|').filter(Boolean); const nextIndex=Number(this.dataset.fallbackIndex||'0')+1; if (sources[nextIndex]) { this.dataset.fallbackIndex=String(nextIndex); this.src=sources[nextIndex]; return; } const p=this.parentElement; this.remove(); if(p){p.classList.remove('has-image'); p.classList.add('is-fallback');}"
-      >
-      ${fallback}
-    </div>
-  `;
 }
 
 export function renderProductCard(product) {
-  const stock = Number(product.stock || 0);
-  const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
-  const isFeatured = product.featured || false;
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const imageUrls = resolveProductImageUrls(product);
-  const imageUrl = imageUrls[0] || '/assets/images/products/placeholder.svg';
-  
-  return `
-    <article class="product-card" tabindex="0">
-      ${isFeatured ? '<span class="product-card-featured">Featured</span>' : ''}
-      ${hasDiscount ? '<span class="product-card-sale">Sale</span>' : ''}
-      
-      <img src="${imageUrl}" alt="${product.name}" class="product-card-bg" loading="lazy" onerror="const sources=${JSON.stringify(imageUrls)}; const nextIndex=Number(this.dataset.index||'0')+1; if (sources[nextIndex]) { this.dataset.index=String(nextIndex); this.src=sources[nextIndex]; return; } this.src='/assets/images/products/placeholder.svg';" data-index="0">
-      <div class="product-card-overlay"></div>
-      
-      <div class="product-card-actions">
-        <button class="product-card-action-btn" aria-label="Add to wishlist" onclick="event.stopPropagation(); showToast('Added to wishlist!', 'success');">
-          <i class="fa-regular fa-heart"></i>
-        </button>
-        <button class="product-card-action-btn" aria-label="Quick view" onclick="event.stopPropagation(); window.location.href='/product-detail.html?id=${product.id}';">
-          <i class="fa-regular fa-eye"></i>
-        </button>
-        <button class="product-card-action-btn" aria-label="Add to cart" onclick="event.stopPropagation(); addToCart('${product.id}');">
-          <i class="fa-solid fa-cart-shopping"></i>
-        </button>
-      </div>
-      
-      <div class="product-card-content">
-        <span class="product-card-brand">${product.brand || product.category || "Solar"}</span>
-        <h3 class="product-card-title">${product.name}</h3>
-        <p class="product-card-category">${product.category || "Power Solution"}</p>
+  try {
+    // Validate product object
+    if (!product || typeof product !== "object" || !product.id) {
+      console.warn("[v0] Invalid product data for card render:", product);
+      return '';
+    }
+
+    // Extract and validate data with fallbacks
+    const productId = Number(product.id || 0);
+    const productName = String(product.name || "Product").trim();
+    const brand = String(product.brand || product.category || "Solar").trim();
+    const category = String(product.category || "Power Solution").trim();
+    const stock = Math.max(0, Number(product.stock || 0));
+    const price = Number(product.price || 0);
+    const currency = String(product.currency || "NGN").trim();
+    const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
+    const isFeatured = Boolean(product.featured);
+    const hasDiscount = Boolean(product.originalPrice && product.originalPrice > price);
+    
+    const imageUrls = resolveProductImageUrls(product);
+    const validImageUrls = imageUrls.filter(url => url && typeof url === "string");
+    const imageUrl = validImageUrls[0] || '/assets/images/products/placeholder.svg';
+    
+    return `
+      <article class="product-card" tabindex="0">
+        ${isFeatured ? '<span class="product-card-featured">Featured</span>' : ''}
+        ${hasDiscount ? '<span class="product-card-sale">Sale</span>' : ''}
         
-        <div class="product-card-price">
-          <span class="product-card-price-current">${formatProductPrice(product.price, product.currency)}</span>
-          ${hasDiscount ? `<span class="product-card-price-original">${formatProductPrice(product.originalPrice, product.currency)}</span>` : ''}
+        <img src="${imageUrl}" alt="${productName}" class="product-card-bg" loading="lazy" onerror="const sources=${JSON.stringify(validImageUrls)}; const nextIndex=Number(this.dataset.index||'0')+1; if (sources[nextIndex]) { this.dataset.index=String(nextIndex); this.src=sources[nextIndex]; return; } this.src='/assets/images/products/placeholder.svg';" data-index="0">
+        <div class="product-card-overlay"></div>
+        
+        <div class="product-card-actions">
+          <button class="product-card-action-btn" aria-label="Add to wishlist" onclick="event.stopPropagation(); showToast('Added to wishlist!', 'success');">
+            <i class="fa-regular fa-heart"></i>
+          </button>
+          <button class="product-card-action-btn" aria-label="Quick view" onclick="event.stopPropagation(); window.location.href='/product-detail.html?id=${productId}';">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+          <button class="product-card-action-btn" aria-label="Add to cart" onclick="event.stopPropagation(); addToCart('${productId}');">
+            <i class="fa-solid fa-cart-shopping"></i>
+          </button>
         </div>
         
-        <div class="product-card-expanded">
-          ${stock > 0 ? `<div class="product-card-stock"><i class="fa-solid fa-check-circle"></i> ${stockLabel}</div>` : `<div class="product-card-stock out-of-stock"><i class="fa-solid fa-times-circle"></i> ${stockLabel}</div>`}
+        <div class="product-card-content">
+          <span class="product-card-brand">${brand}</span>
+          <h3 class="product-card-title">${productName}</h3>
+          <p class="product-card-category">${category}</p>
           
-          <ul class="product-card-features">
-            ${product.features?.slice(0, 3).map(feature => `<li><i class="fa-solid fa-check"></i> ${feature}</li>`).join('') || ''}
-            ${!product.features?.length ? '<li><i class="fa-solid fa-bolt"></i> High efficiency</li><li><i class="fa-solid fa-shield-halved"></i> 2-year warranty</li><li><i class="fa-solid fa-truck-fast"></i> Fast delivery</li>' : ''}
-          </ul>
+          <div class="product-card-price">
+            <span class="product-card-price-current">${formatProductPrice(price, currency)}</span>
+            ${hasDiscount ? `<span class="product-card-price-original">${formatProductPrice(product.originalPrice, currency)}</span>` : ''}
+          </div>
           
-          <a href="/product-detail.html?id=${product.id}" class="product-card-cta" onclick="event.stopPropagation();">
-            View Details <i class="fa-solid fa-arrow-right"></i>
-          </a>
+          <div class="product-card-expanded">
+            ${stock > 0 ? `<div class="product-card-stock"><i class="fa-solid fa-check-circle"></i> ${stockLabel}</div>` : `<div class="product-card-stock out-of-stock"><i class="fa-solid fa-times-circle"></i> ${stockLabel}</div>`}
+            
+            <ul class="product-card-features">
+              ${Array.isArray(product.features) && product.features.length ? product.features.slice(0, 3).map(feature => `<li><i class="fa-solid fa-check"></i> ${String(feature || '').trim()}</li>`).join('') : '<li><i class="fa-solid fa-bolt"></i> High efficiency</li><li><i class="fa-solid fa-shield-halved"></i> 2-year warranty</li><li><i class="fa-solid fa-truck-fast"></i> Fast delivery</li>'}
+            </ul>
+            
+            <a href="/product-detail.html?id=${productId}" class="product-card-cta" onclick="event.stopPropagation();">
+              View Details <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
         </div>
-      </div>
-    </article>
-  `;
+      </article>
+    `;
+  } catch (error) {
+    console.error("[v0] Error rendering product card:", error, product);
+    return '';
+  }
 }
 
 export function renderProductCardMobile(product) {
-  const stock = Number(product.stock || 0);
-  const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
-  return `
-    <a class="mob-product-card" href="/product-detail.html?id=${product.id}">
-      <div class="mob-product-img">
-        ${productMedia(product, "mob-product-media")}
-      </div>
-      <div class="mob-product-info">
-        <span class="mob-product-cat">${product.brand || product.category || "Solar"}</span>
-        <h3 class="mob-product-name">${product.name}</h3>
-        <p class="mob-product-price">${formatProductPrice(product.price, product.currency)}</p>
-        <span class="mob-product-stock ${stock > 0 ? "in" : "out"}">${stockLabel}</span>
-      </div>
-      <i class="fa-solid fa-chevron-right mob-product-arrow" aria-hidden="true"></i>
-    </a>
-  `;
+  try {
+    // Validate product object
+    if (!product || typeof product !== "object" || !product.id) {
+      console.warn("[v0] Invalid product data for mobile card:", product);
+      return '';
+    }
+
+    const productId = Number(product.id || 0);
+    const productName = String(product.name || "Product").trim();
+    const brand = String(product.brand || product.category || "Solar").trim();
+    const stock = Math.max(0, Number(product.stock || 0));
+    const price = Number(product.price || 0);
+    const currency = String(product.currency || "NGN").trim();
+    const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
+    
+    return `
+      <a class="mob-product-card" href="/product-detail.html?id=${productId}">
+        <div class="mob-product-img">
+          ${productMedia(product, "mob-product-media")}
+        </div>
+        <div class="mob-product-info">
+          <span class="mob-product-cat">${brand}</span>
+          <h3 class="mob-product-name">${productName}</h3>
+          <p class="mob-product-price">${formatProductPrice(price, currency)}</p>
+          <span class="mob-product-stock ${stock > 0 ? "in" : "out"}">${stockLabel}</span>
+        </div>
+        <i class="fa-solid fa-chevron-right mob-product-arrow" aria-hidden="true"></i>
+      </a>
+    `;
+  } catch (error) {
+    console.error("[v0] Error rendering mobile product card:", error, product);
+    return '';
+  }
 }
 
 export function showToast(message, type = "info") {
