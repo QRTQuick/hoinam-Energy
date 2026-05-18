@@ -84,7 +84,6 @@ class Product(TimestampMixin, Base):
     category: Mapped[str] = mapped_column(
         String(128), default="Portable Power", nullable=False
     )
-    summary: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=Decimal("0.00"), nullable=False
@@ -116,7 +115,6 @@ class Product(TimestampMixin, Base):
             "brand": self.brand or "Energy",  # Provide fallback
             "store_slug": self.store_slug,
             "category": self.category or "Portable Power",  # Provide fallback
-            "summary": self.summary,
             "description": self.description,
             "price": float(self.price),
             "currency": self.currency,

@@ -38,16 +38,7 @@ def build_seed_lookup() -> dict[str, dict]:
     return {normalize_key(item["name"]): item for item in SEED_PRODUCTS}
 
 
-def summary_for_product(name: str, description: str | None, seed_meta: dict | None) -> str:
-    if seed_meta and seed_meta.get("summary"):
-        return seed_meta["summary"]
 
-    description = (description or "").strip()
-    if not description:
-        return f"{name} ready for storefront publication."
-    if len(description) <= 255:
-        return description
-    return f"{description[:252].rstrip()}..."
 
 
 def backup_and_drop_conflicting_tables(engine) -> list[tuple[str, str, int]]:
@@ -101,7 +92,6 @@ def import_legacy_products(engine) -> int:
                 slug=slugify(canonical_name),
                 sku=slugify(canonical_name).upper().replace("-", "_"),
                 category=seed_meta.get("category") if seed_meta else humanize_category(row["category"]),
-                summary=summary_for_product(canonical_name, row["description"], seed_meta),
                 description=(row["description"] or (seed_meta or {}).get("description")),
                 price=to_decimal(row["price"]),
                 currency=settings.default_currency,
