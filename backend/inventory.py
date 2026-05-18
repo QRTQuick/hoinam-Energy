@@ -22,19 +22,6 @@ STORE_SLUGS = {
     "DEYE": "deye",
 }
 
-FEATURED_REFERENCES = {
-    "river 3 plus",
-    "river 2 max",
-    "delta 2 max",
-    "delta pro 3",
-    "ac180",
-    "ac200pl",
-    "ep500p",
-    "sun-6k-sg04lp1-eu-sm2",
-    "se-g10.2 (10.24kwh 51.2v)",
-}
-
-
 def clean_text(value) -> str:
     return " ".join(str(value or "").replace("_", " ").split())
 
@@ -144,8 +131,6 @@ def parse_stock_inventory(path: str | Path | None = None) -> list[dict]:
                 "currency": "NGN",
                 "stock": stock,
                 "image_url": image_url,
-                "featured": reference_text.strip().lower() in FEATURED_REFERENCES,
-                "active": True,
                 "legacy_slug": legacy_slug,
                 "reference": reference_text,
             }

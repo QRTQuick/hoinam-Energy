@@ -91,8 +91,7 @@ class Product(TimestampMixin, Base):
     currency: Mapped[str] = mapped_column(String(16), default="NGN", nullable=False)
     stock: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    specs: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     installations = relationship("Installation", back_populates="product")
 
@@ -119,8 +118,7 @@ class Product(TimestampMixin, Base):
             "currency": self.currency,
             "stock": max(0, self.stock),  # Ensure non-negative
             "image_url": image_url,
-            "featured": self.featured,
-            "active": self.active,
+            "specs": self.specs or {},
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
