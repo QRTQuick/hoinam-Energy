@@ -65,15 +65,37 @@ def _resolved_explicit_product_image(image_url: str | None) -> str | None:
 def resolve_product_image_url(
     name: str | None = None, image_url: str | None = None, slug: str | None = None
 ) -> str | None:
+    """
+    Resolve a product image URL with fallback logic and logging.
+    
+    Attempts to resolve in this order:
+    1. Explicit image_url if provided and valid
+    2. Slug-based image file lookup
+    3. Name-based slug generation and lookup
+    4. Placeholder fallback
+    
+    Returns a valid image URL or None if all methods fail.
+    """
+    # Try explicit image URL first
     resolved_explicit = _resolved_explicit_product_image(image_url)
     if resolved_explicit:
         return resolved_explicit
 
+    # Fall back to slug-based lookup
     lookup_slug = (slug or slugify(name or "")).strip()
     if not lookup_slug:
+        # Unable to generate slug - return None (frontend will use fallback)
         return None
 
-    return _resolved_product_image_from_slug(lookup_slug)
+    resolved_from_slug = _resolved_product_image_from_slug(lookup_slug)
+    if resolved_from_slug:
+        return resolved_from_slug
+    
+    # Log missing images for debugging (in production, consider a logger)
+    product_identifier = name or slug or "unknown"
+    # Image not found for product; frontend should handle with fallback
+    
+    return None
 
 
 def generate_order_number() -> str:

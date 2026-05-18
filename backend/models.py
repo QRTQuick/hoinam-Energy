@@ -99,22 +99,29 @@ class Product(TimestampMixin, Base):
     installations = relationship("Installation", back_populates="product")
 
     def to_dict(self) -> dict:
+        # Resolve image URL with validation
+        resolved_image = resolve_product_image_url(
+            self.name, self.image_url, self.slug
+        )
+        
+        # Ensure image_url is always a valid string (never None)
+        # Frontend expects a string, even if it's a placeholder
+        image_url = resolved_image or f"/assets/images/products/{self.slug or 'placeholder'}.svg"
+        
         return {
             "id": self.id,
             "name": self.name,
             "slug": self.slug,
             "sku": self.sku,
-            "brand": self.brand,
+            "brand": self.brand or "Energy",  # Provide fallback
             "store_slug": self.store_slug,
-            "category": self.category,
+            "category": self.category or "Portable Power",  # Provide fallback
             "summary": self.summary,
             "description": self.description,
             "price": float(self.price),
             "currency": self.currency,
-            "stock": self.stock,
-            "image_url": resolve_product_image_url(
-                self.name, self.image_url, self.slug
-            ),
+            "stock": max(0, self.stock),  # Ensure non-negative
+            "image_url": image_url,
             "highlights": self.highlights or [],
             "featured": self.featured,
             "active": self.active,
