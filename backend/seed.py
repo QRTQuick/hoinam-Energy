@@ -14,7 +14,6 @@ SEED_PRODUCTS = [
         "stock": 8,
         "price": "680000",
         "description": "A compact EcoFlow power station suited for light backup loads, outdoor teams, and everyday emergency charging.",
-        "featured": True,
     },
     {
         "name": "110W Solar Panel Foldable",
@@ -22,7 +21,6 @@ SEED_PRODUCTS = [
         "price": "250000",
         "image_url": "/assets/images/products/110w-solar-panel-foldable.png",
         "description": "Foldable solar panel solution for mobile charging, camping, field teams, and rapid deployment energy needs.",
-        "featured": True,
         "category": "Solar Panels",
     },
     {
@@ -51,14 +49,12 @@ SEED_PRODUCTS = [
         "price": "980000",
         "image_url": "/assets/images/products/river-2-pro.png",
         "description": "Designed for customers who need more headroom for longer outages, essential office equipment, and hybrid solar charging.",
-        "featured": True,
     },
     {
         "name": "Delta 3 2000 Air",
         "stock": 14,
         "price": "2200000",
         "description": "A premium EcoFlow system for deeper home backup, installers, and businesses that need stronger performance and longer uptime.",
-        "featured": True,
         "category": "Home Backup",
     },
     {
@@ -67,7 +63,6 @@ SEED_PRODUCTS = [
         "price": "1800000",
         "image_url": "/assets/images/products/delta-2-max.png",
         "description": "A versatile backup platform for homeowners and growing businesses that need dependable energy storage and solar expansion.",
-        "featured": True,
         "category": "Home Backup",
     },
 ]
@@ -96,7 +91,6 @@ def seed_products(session) -> None:
             currency=settings.default_currency,
             stock=product_data["stock"],
             image_url=product_data.get("image_url"),
-            featured=product_data.get("featured", False),
         )
         session.add(product)
 
