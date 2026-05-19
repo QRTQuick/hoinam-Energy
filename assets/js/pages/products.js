@@ -253,15 +253,14 @@ function updateHeroStats(products = allProducts) {
 }
 
 function renderStoreStrip() {
+  const controls = getControls();
+
+  if (!controls.storeStrip) {
+    console.warn("[v0] Store strip control not found");
+    return;
+  }
+
   try {
-    const controls = getControls();
-    
-    // Validate controls exist
-    if (!controls.storeStrip) {
-      console.warn("[v0] Store strip control not found");
-      return;
-    }
-    
     // Build brand statistics with defensive checks
     const brandStats = [...new Set(allProducts.map((product) => {
       const brand = String(product?.brand || "").trim();
@@ -330,6 +329,7 @@ function renderStoreStrip() {
     controls.storeStrip.innerHTML = storeCards.join("");
   } catch (error) {
     console.error("[v0] Error rendering store strip:", error);
+    return;
   }
 
   controls.storeStrip.querySelectorAll("[data-store-filter]").forEach((card) => {
