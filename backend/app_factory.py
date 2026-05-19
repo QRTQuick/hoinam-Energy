@@ -24,8 +24,8 @@ from .emailer import (
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, Order, Payment, Product, User, BlogPost, BlogSubscriber, Feedback, Coupon
-from .seed import seed_products, seed_coupons
+from .models import Installation, JobListing, Order, Payment, Product, User, BlogPost, BlogSubscriber, Feedback, Coupon
+from .seed import seed_products, seed_coupons, seed_jobs
 from .services import (
     apply_product_payload,
     calculate_order_items,
@@ -72,6 +72,7 @@ def create_app() -> Flask:
         try:
             seed_products(_seed_session)
             seed_coupons(_seed_session)
+            seed_jobs(_seed_session)
             _seed_session.commit()
         except Exception:
             _seed_session.rollback()
@@ -226,6 +227,75 @@ def create_app() -> Flask:
                 return product
 
         return None
+
+    def _payload_bool(payload: dict, key: str, default: bool = False) -> bool:
+        value = payload.get(key, default)
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
+
+    def _payload_list(payload: dict, key: str) -> list[str]:
+        value = payload.get(key) or []
+        if isinstance(value, str):
+            return [
+                item.strip()
+                for item in value.replace("\r", "\n").replace(",", "\n").split("\n")
+                if item.strip()
+            ]
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        return []
+
+    def normalize_job_payload(payload: dict, *, existing: JobListing | None = None) -> dict:
+        title = (payload.get("title") or existing.title if existing else payload.get("title") or "").strip()
+        company = (payload.get("company") or existing.company if existing else payload.get("company") or "").strip()
+        location = (payload.get("location") or existing.location if existing else payload.get("location") or "").strip()
+        job_type = (payload.get("job_type") or existing.job_type if existing else payload.get("job_type") or "").strip()
+
+        if not title:
+            raise ApiError("Job title is required.", 400)
+        if not company:
+            raise ApiError("Company name is required.", 400)
+        if not location:
+            raise ApiError("Job location is required.", 400)
+        if not job_type:
+            raise ApiError("Job type is required.", 400)
+
+        slug = (payload.get("slug") or (existing.slug if existing else "")).strip()
+        if not slug:
+            slug = slugify(f"{title} {company} {location}")
+
+        deadline_value = payload.get("deadline")
+        if deadline_value in (None, ""):
+            deadline = existing.deadline if existing else None
+        else:
+            try:
+                deadline = date.fromisoformat(str(deadline_value)[:10])
+            except ValueError:
+                raise ApiError("Invalid deadline. Use YYYY-MM-DD.", 400)
+
+        return {
+            "title": title,
+            "slug": slug,
+            "company": company,
+            "logo_url": (payload.get("logo_url") or (existing.logo_url if existing else "") or "").strip() or None,
+            "location": location,
+            "salary": (payload.get("salary") or (existing.salary if existing else "") or "").strip() or None,
+            "job_type": job_type,
+            "deadline": deadline,
+            "categories": _payload_list(payload, "categories") or (existing.categories if existing else []),
+            "summary": (payload.get("summary") or (existing.summary if existing else "") or "").strip() or None,
+            "about_company": (payload.get("about_company") or (existing.about_company if existing else "") or "").strip() or None,
+            "responsibilities": _payload_list(payload, "responsibilities") or (existing.responsibilities if existing else []),
+            "requirements": _payload_list(payload, "requirements") or (existing.requirements if existing else []),
+            "benefits": _payload_list(payload, "benefits") or (existing.benefits if existing else []),
+            "application_email": (payload.get("application_email") or (existing.application_email if existing else "") or "").strip() or None,
+            "email_subject": (payload.get("email_subject") or (existing.email_subject if existing else "") or "").strip() or None,
+            "how_to_apply": (payload.get("how_to_apply") or (existing.how_to_apply if existing else "") or "").strip() or None,
+            "featured": _payload_bool(payload, "featured", existing.featured if existing else False),
+            "active": _payload_bool(payload, "active", existing.active if existing else True),
+            "immediate_start": _payload_bool(payload, "immediate_start", existing.immediate_start if existing else False),
+        }
 
     @app.get("/api/health")
     def health_check():
@@ -441,6 +511,89 @@ def create_app() -> Flask:
         product.active = False
         db_session().commit()
         return json_success({"id": product_id}, message="Product archived.")
+
+    @app.get("/api/jobs")
+    def list_jobs():
+        jobs = (
+            db_session()
+            .query(JobListing)
+            .filter(JobListing.active.is_(True))
+            .order_by(desc(JobListing.featured), JobListing.created_at.desc())
+            .all()
+        )
+        return json_success([job.to_dict() for job in jobs])
+
+    @app.get("/api/jobs/<int:job_id>")
+    def get_job(job_id: int):
+        job = db_session().query(JobListing).filter(JobListing.id == job_id).first()
+        if not job or not job.active:
+            raise ApiError("Job listing not found.", 404)
+        return json_success(job.to_dict())
+
+    @app.get("/api/admin/jobs")
+    def list_admin_jobs():
+        authenticate(admin=True)
+        jobs = (
+            db_session()
+            .query(JobListing)
+            .order_by(desc(JobListing.featured), JobListing.created_at.desc())
+            .all()
+        )
+        return json_success([job.to_dict() for job in jobs])
+
+    @app.post("/api/admin/jobs")
+    def create_job():
+        authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+        normalized = normalize_job_payload(payload)
+
+        existing = (
+            db_session()
+            .query(JobListing)
+            .filter(JobListing.slug == normalized["slug"])
+            .first()
+        )
+        if existing:
+            raise ApiError("A job with this slug already exists.", 409)
+
+        job = JobListing(**normalized)
+        db_session().add(job)
+        db_session().commit()
+        return json_success(job.to_dict(), status_code=201, message="Job listing created.")
+
+    @app.put("/api/admin/jobs/<int:job_id>")
+    def update_job(job_id: int):
+        authenticate(admin=True)
+        job = db_session().query(JobListing).filter(JobListing.id == job_id).first()
+        if not job:
+            raise ApiError("Job listing not found.", 404)
+
+        payload = request.get_json(silent=True) or {}
+        normalized = normalize_job_payload(payload, existing=job)
+        duplicate = (
+            db_session()
+            .query(JobListing)
+            .filter(JobListing.slug == normalized["slug"], JobListing.id != job_id)
+            .first()
+        )
+        if duplicate:
+            raise ApiError("Another job with this slug already exists.", 409)
+
+        for field_name, value in normalized.items():
+            setattr(job, field_name, value)
+        db_session().commit()
+        return json_success(job.to_dict(), message="Job listing updated.")
+
+    @app.delete("/api/admin/jobs/<int:job_id>")
+    def delete_job(job_id: int):
+        authenticate(admin=True)
+        job = db_session().query(JobListing).filter(JobListing.id == job_id).first()
+        if not job:
+            raise ApiError("Job listing not found.", 404)
+
+        job.active = False
+        db_session().commit()
+        return json_success({"id": job_id}, message="Job listing deactivated.")
 
     def payment_options_payload() -> dict:
         return {
@@ -1255,6 +1408,15 @@ def create_app() -> Flask:
             BlogSubscriber.is_active.is_(True)
         ).scalar()
 
+        # Jobs
+        jobs_active = db_session().query(func.count(JobListing.id)).filter(
+            JobListing.active.is_(True)
+        ).scalar()
+        jobs_featured = db_session().query(func.count(JobListing.id)).filter(
+            JobListing.active.is_(True),
+            JobListing.featured.is_(True),
+        ).scalar()
+
         # Feedback
         feedback_new = db_session().query(func.count(Feedback.id)).filter(
             Feedback.status == "new"
@@ -1285,6 +1447,9 @@ def create_app() -> Flask:
             # Blog
             "blog_posts": blog_posts_published,
             "blog_subscribers": blog_subscribers,
+            # Jobs
+            "jobs": jobs_active,
+            "jobs_featured": jobs_featured,
             # Feedback
             "feedback_new": feedback_new,
             "feedback_total": feedback_total,

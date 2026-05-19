@@ -459,6 +459,9 @@ export function injectShell(activePage) {
             <!-- Blog -->
             <a class="snav-link ${active("blog")}" href="/blog.html">Blog</a>
 
+            <!-- Careers -->
+            <a class="snav-link ${active("careers")}" href="/careers.html">Careers</a>
+
             <!-- Contact -->
             <a class="snav-link ${active("contact")}" href="/contact.html">Contact</a>
 
@@ -494,6 +497,7 @@ export function injectShell(activePage) {
             <a class="nav-link ${active("products")}" href="/products.html"><i class="fa-solid fa-store" aria-hidden="true"></i><span>Products</span></a>
             <a class="nav-link ${active("about")}" href="/about.html"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>About</span></a>
             <a class="nav-link ${active("blog")}" href="/blog.html"><i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>Blog</span></a>
+            <a class="nav-link ${active("careers")}" href="/careers.html"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>Careers</span></a>
             <a class="nav-link ${active("contact")}" href="/contact.html"><i class="fa-solid fa-headset" aria-hidden="true"></i><span>Contact</span></a>
             <a class="nav-link ${active("feedback")}" href="/feedback.html"><i class="fa-solid fa-star" aria-hidden="true"></i><span>Feedback</span></a>
             <!-- logged-out -->
@@ -532,6 +536,7 @@ export function injectShell(activePage) {
             <a href="/products.html">Products</a>
             <a href="/book-install.html">Book Installation</a>
             <a href="/blog.html">Blog</a>
+            <a href="/careers.html">Careers</a>
             <a href="/about.html">About</a>
             <a href="/contact.html">Contact</a>
             <a href="/feedback.html">Feedback</a>

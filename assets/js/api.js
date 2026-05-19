@@ -116,6 +116,41 @@ export function getProduct(productId) {
   return apiFetch(`/products/${productId}`);
 }
 
+export function listJobs() {
+  return apiFetch("/jobs");
+}
+
+export function getJob(jobId) {
+  return apiFetch(`/jobs/${jobId}`);
+}
+
+export function getAdminJobs() {
+  return apiFetch("/admin/jobs", { authRequired: true });
+}
+
+export function createJob(payload) {
+  return apiFetch("/admin/jobs", {
+    method: "POST",
+    authRequired: true,
+    body: payload
+  });
+}
+
+export function updateJob(jobId, payload) {
+  return apiFetch(`/admin/jobs/${jobId}`, {
+    method: "PUT",
+    authRequired: true,
+    body: payload
+  });
+}
+
+export function deleteJob(jobId) {
+  return apiFetch(`/admin/jobs/${jobId}`, {
+    method: "DELETE",
+    authRequired: true
+  });
+}
+
 export function getPaymentOptions() {
   return apiFetch("/payment-options");
 }

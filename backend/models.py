@@ -134,6 +134,59 @@ class Product(TimestampMixin, Base):
         }
 
 
+class JobListing(TimestampMixin, Base):
+    __tablename__ = "job_listings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    company: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    location: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    salary: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    job_type: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    deadline: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+    categories: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    summary: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    about_company: Mapped[str | None] = mapped_column(Text, nullable=True)
+    responsibilities: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    requirements: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    benefits: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    application_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email_subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    how_to_apply: Mapped[str | None] = mapped_column(Text, nullable=True)
+    featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False, index=True)
+    immediate_start: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "slug": self.slug,
+            "company": self.company,
+            "logo_url": self.logo_url or "/assets/images/hoinam-logo.png",
+            "location": self.location,
+            "salary": self.salary,
+            "job_type": self.job_type,
+            "deadline": self.deadline.isoformat() if self.deadline else None,
+            "categories": self.categories or [],
+            "summary": self.summary,
+            "about_company": self.about_company,
+            "responsibilities": self.responsibilities or [],
+            "requirements": self.requirements or [],
+            "benefits": self.benefits or [],
+            "application_email": self.application_email,
+            "email_subject": self.email_subject,
+            "how_to_apply": self.how_to_apply,
+            "featured": self.featured,
+            "active": self.active,
+            "immediate_start": self.immediate_start,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 class Order(TimestampMixin, Base):
     __tablename__ = "orders"
 

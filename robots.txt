@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Allow: /blog.html
 Allow: /blog-post.html
+Allow: /careers.html
 Disallow: /admin.html
 Disallow: /admin-blog.html
 Disallow: /dashboard.html

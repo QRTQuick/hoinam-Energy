@@ -22,7 +22,7 @@ load_dotenv(ROOT / ".env")
 
 from backend.config import get_settings
 from backend.database import Base, get_engine
-from backend.seed import seed_products
+from backend.seed import seed_jobs, seed_products
 from sqlalchemy.orm import Session
 
 
@@ -44,6 +44,7 @@ def main() -> None:
         print("Seeding products...")
         with Session(engine) as session:
             seed_products(session)
+            seed_jobs(session)
         print("Seed complete.")
 
     print("Done.")

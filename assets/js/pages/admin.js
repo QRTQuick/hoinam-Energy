@@ -5,10 +5,14 @@ import {
   getAdminOrders,
   getAdminStats,
   getAdminUsers,
+  getAdminJobs,
   getAdminFeedback,
   getAdminCoupons,
+  createJob,
   createCoupon,
+  updateJob,
   updateCoupon,
+  deleteJob,
   deleteCoupon,
   getSeason,
   setSeason,
@@ -25,6 +29,7 @@ import { formatDate, formatMoney, productMedia, showToast, statusBadge } from ".
 
 let products = [];
 let installations = [];
+let jobs = [];
 const MAX_PRODUCT_IMAGE_BYTES = 1.5 * 1024 * 1024;
 
 function paymentLabel(order) {
@@ -110,6 +115,66 @@ function populateProductForm(product) {
   setProductImagePreview(form, product?.image_url || "");
 }
 
+function listFieldValue(value = []) {
+  return Array.isArray(value) ? value.join("\n") : "";
+}
+
+function splitLines(value = "") {
+  return String(value || "")
+    .replace(/\r/g, "\n")
+    .split(/\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function jobFormPayload(form) {
+  return {
+    title: field(form, "title").value.trim(),
+    company: field(form, "company").value.trim(),
+    location: field(form, "location").value.trim(),
+    job_type: field(form, "job_type").value.trim(),
+    salary: field(form, "salary").value.trim(),
+    deadline: field(form, "deadline").value,
+    categories: splitLines(field(form, "categories").value),
+    summary: field(form, "summary").value.trim(),
+    about_company: field(form, "about_company").value.trim(),
+    responsibilities: splitLines(field(form, "responsibilities").value),
+    requirements: splitLines(field(form, "requirements").value),
+    benefits: splitLines(field(form, "benefits").value),
+    application_email: field(form, "application_email").value.trim(),
+    email_subject: field(form, "email_subject").value.trim(),
+    how_to_apply: field(form, "how_to_apply").value.trim(),
+    featured: field(form, "featured").checked,
+    immediate_start: field(form, "immediate_start").checked,
+    active: field(form, "active").checked
+  };
+}
+
+function populateJobForm(job) {
+  const form = document.getElementById("job-form");
+  if (!form) return;
+
+  field(form, "job_id").value = job?.id || "";
+  field(form, "title").value = job?.title || "";
+  field(form, "company").value = job?.company || "";
+  field(form, "location").value = job?.location || "";
+  field(form, "job_type").value = job?.job_type || "";
+  field(form, "salary").value = job?.salary || "";
+  field(form, "deadline").value = job?.deadline || "";
+  field(form, "categories").value = (job?.categories || []).join(", ");
+  field(form, "summary").value = job?.summary || "";
+  field(form, "about_company").value = job?.about_company || "";
+  field(form, "responsibilities").value = listFieldValue(job?.responsibilities);
+  field(form, "requirements").value = listFieldValue(job?.requirements);
+  field(form, "benefits").value = listFieldValue(job?.benefits);
+  field(form, "application_email").value = job?.application_email || "";
+  field(form, "email_subject").value = job?.email_subject || "";
+  field(form, "how_to_apply").value = job?.how_to_apply || "";
+  field(form, "featured").checked = Boolean(job?.featured);
+  field(form, "immediate_start").checked = Boolean(job?.immediate_start);
+  field(form, "active").checked = job ? Boolean(job.active) : true;
+}
+
 function renderProducts() {
   const target = document.getElementById("admin-products");
   target.innerHTML = `
@@ -146,6 +211,56 @@ function renderProducts() {
                   <div class="inline-actions">
                     <button class="button button-ghost" type="button" data-edit-product="${product.id}">Edit</button>
                     <button class="button button-danger" type="button" data-archive-product="${product.id}">Archive</button>
+                  </div>
+                </td>
+              </tr>
+            `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderJobs() {
+  const target = document.getElementById("admin-jobs");
+  if (!target) return;
+
+  if (!jobs.length) {
+    target.innerHTML = `<p class="muted">No job vacancies yet. Use the form to post the first opening.</p>`;
+    return;
+  }
+
+  target.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Type</th>
+          <th>Deadline</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${jobs
+          .map(
+            (job) => `
+              <tr>
+                <td>
+                  <strong>${job.title}</strong><br>
+                  <span class="muted">${job.company} - ${job.location}</span>
+                </td>
+                <td>${job.job_type}</td>
+                <td>${job.deadline ? formatDate(job.deadline) : "Open"}</td>
+                <td>
+                  ${job.active ? '<span class="badge">Available</span>' : '<span class="badge" style="background:var(--soft);">Inactive</span>'}
+                  ${job.featured ? '<br><span class="muted">Featured</span>' : ""}
+                </td>
+                <td>
+                  <div class="inline-actions">
+                    <button class="button button-ghost" type="button" data-edit-job="${job.id}">Edit</button>
+                    <button class="button button-danger" type="button" data-delete-job="${job.id}">Deactivate</button>
                   </div>
                 </td>
               </tr>
@@ -492,18 +607,20 @@ function populateCouponForm(coupon) {
 }
 
 async function loadAdminData() {
-  const [stats, loadedProducts, users, orders, loadedInstallations, feedbackItems, coupons] = await Promise.all([
+  const [stats, loadedProducts, users, orders, loadedInstallations, feedbackItems, coupons, loadedJobs] = await Promise.all([
     getAdminStats(),
     listProducts(),
     getAdminUsers(),
     getAdminOrders(),
     getAdminInstallations(),
     getAdminFeedback(),
-    getAdminCoupons()
+    getAdminCoupons(),
+    getAdminJobs()
   ]);
 
   products = loadedProducts;
   installations = loadedInstallations;
+  jobs = loadedJobs;
 
   document.getElementById("admin-stats").innerHTML = `
     <!-- Revenue -->
@@ -584,6 +701,15 @@ async function loadAdminData() {
       <small class="muted">${stats.blog_subscribers} subscribers</small>
     </article>
 
+    <article class="stat-card">
+      <div class="stat-card-head">
+        <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+        <span>Careers</span>
+      </div>
+      <strong>${stats.jobs || 0} jobs</strong>
+      <small class="muted">${stats.jobs_featured || 0} featured vacancies</small>
+    </article>
+
     <!-- Feedback -->
     <article class="stat-card ${stats.feedback_new > 0 ? "stat-card-alert" : ""}">
       <div class="stat-card-head">
@@ -596,6 +722,7 @@ async function loadAdminData() {
   `;
 
   renderProducts();
+  renderJobs();
   renderUsers(users);
   renderPendingDeliveries(orders);
   renderOrders(orders);
@@ -611,6 +738,7 @@ async function init() {
   }
 
   const productForm = document.getElementById("product-form");
+  const jobForm = document.getElementById("job-form");
   const inventoryForm = document.getElementById("inventory-upload-form");
   const imageUrlInput = field(productForm, "image_url");
   const productImageFileInput = field(productForm, "product_image_file");
@@ -618,6 +746,7 @@ async function init() {
   try {
     await loadAdminData();
     populateProductForm(null);
+    populateJobForm(null);
     await loadSeasonData();
   } catch (error) {
     showToast(error.message, "error");
@@ -718,6 +847,31 @@ async function init() {
     populateProductForm(null);
   });
 
+  jobForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      const payload = jobFormPayload(jobForm);
+      const jobId = field(jobForm, "job_id").value;
+      if (jobId) {
+        await updateJob(jobId, payload);
+        showToast("Job listing updated.", "success");
+      } else {
+        await createJob(payload);
+        showToast("Job listing posted.", "success");
+      }
+      jobForm.reset();
+      populateJobForm(null);
+      await loadAdminData();
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
+
+  document.getElementById("clear-job-form")?.addEventListener("click", () => {
+    jobForm.reset();
+    populateJobForm(null);
+  });
+
   // Coupon form
   const couponForm = document.getElementById("coupon-form");
   document.getElementById("show-coupon-form-btn")?.addEventListener("click", () => {
@@ -795,6 +949,35 @@ async function init() {
           await archiveProduct(productId);
           await loadAdminData();
           showToast("Product archived.", "success");
+        } catch (error) {
+          showToast(error.message, "error");
+        }
+      }
+      return;
+    }
+
+    const editJobButton = event.target.closest("[data-edit-job]");
+    if (editJobButton) {
+      const job = jobs.find((item) => item.id === Number(editJobButton.dataset.editJob));
+      if (job) {
+        populateJobForm(job);
+        document.getElementById("jobs-management")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+      return;
+    }
+
+    const deleteJobButton = event.target.closest("[data-delete-job]");
+    if (deleteJobButton) {
+      const jobId = Number(deleteJobButton.dataset.deleteJob);
+      const job = jobs.find((item) => item.id === jobId);
+      if (job && window.confirm(`Deactivate ${job.title}?`)) {
+        try {
+          await deleteJob(jobId);
+          await loadAdminData();
+          showToast("Job listing deactivated.", "success");
         } catch (error) {
           showToast(error.message, "error");
         }

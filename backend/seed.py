@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from .config import get_settings
 from .inventory import parse_stock_inventory
-from .models import Coupon, Product
+from .models import Coupon, JobListing, Product
 from .utils import slugify, to_decimal
 
 
@@ -68,6 +68,49 @@ SEED_PRODUCTS = [
 ]
 
 
+SEED_JOB_LISTINGS = [
+    {
+        "title": "Sales and Marketing Representative",
+        "slug": "sales-and-marketing-representative-hoinam-energy-aba",
+        "company": "Hoinam Energy",
+        "logo_url": "/assets/images/hoinam-logo.png",
+        "location": "Aba, Abia State, Nigeria",
+        "salary": "Competitive base salary + uncapped commissions",
+        "job_type": "Full-time (Immediate Start)",
+        "deadline": "2026-05-15",
+        "categories": ["Full-Time", "Marketing", "Sales", "Engineering"],
+        "summary": "Join Hoinam Energy immediately to expand our Aba market, educate customers about solar solutions, and drive revenue growth.",
+        "about_company": "Hoinam Energy is a fast-growing renewable energy company dedicated to providing affordable, reliable, and sustainable off-grid solar solutions to homes and businesses.",
+        "responsibilities": [
+            "Lead Generation: Identify and generate new sales leads through field canvassing, cold calling, networking, and community outreach within Aba and surrounding areas.",
+            "Customer Education: Guide residential and commercial prospects through the long-term benefits of our solar products, including inverters, solar panels, and battery storage.",
+            "Sales Presentations: Conduct client meetings, assess energy needs, and deliver tailored sales proposals and quotations.",
+            "Deal Closing: Negotiate terms, close sales agreements, and ensure all customer targets are met or exceeded.",
+            "Relationship Management: Build and maintain strong, lasting customer relationships to generate referrals and ensure 100% customer satisfaction.",
+            "Market Intelligence: Gather feedback from the field on competitor activities and customer preferences to help improve marketing strategies.",
+        ],
+        "requirements": [
+            "Education: Minimum of OND/HND/B.Sc. in Marketing, Business Administration, Engineering or a related field.",
+            "Experience: 2+ years of proven experience in sales or business development. Experience in the solar, electrical, or renewable energy sector is a major plus.",
+            "Skills: Outstanding communication, negotiation, and interpersonal skills.",
+            "Drive: Self-motivated, target-driven, and highly comfortable working in the field and on the move.",
+            "Language: Fluency in English, Igbo, and Pidgin is required.",
+        ],
+        "benefits": [
+            "Competitive base salary plus an attractive, uncapped commission structure on every successful sale.",
+            "Comprehensive product and sales training.",
+            "Opportunities for career advancement in the renewable energy industry.",
+        ],
+        "application_email": "admin@hoinamenergy.com",
+        "email_subject": "Solar Sales Rep - Aba",
+        "how_to_apply": "Interested and qualified candidates should send their updated CV to admin@hoinamenergy.com using \"Solar Sales Rep - Aba\" as the subject of the email. This position requires an immediate start. Shortlisted candidates will be contacted for urgent interviews.",
+        "featured": True,
+        "active": True,
+        "immediate_start": True,
+    }
+]
+
+
 def seed_products(session) -> None:
     settings = get_settings()
     inventory_products = parse_stock_inventory()
@@ -113,6 +156,31 @@ def seed_coupons(session) -> None:
         )
         session.add(coupon)
         session.commit()
+
+
+def seed_jobs(session) -> None:
+    """Ensure the default public job listing exists."""
+    for job_data in SEED_JOB_LISTINGS:
+        existing = (
+            session.query(JobListing)
+            .filter(JobListing.slug == job_data["slug"])
+            .first()
+        )
+
+        if existing is None:
+            job = JobListing()
+            session.add(job)
+        else:
+            job = existing
+
+        for key, value in job_data.items():
+            if key == "deadline" and value:
+                from datetime import date
+
+                value = date.fromisoformat(value)
+            setattr(job, key, value)
+
+    session.commit()
 
 
 def upsert_inventory_products(session, inventory_products: list[dict]) -> None:
