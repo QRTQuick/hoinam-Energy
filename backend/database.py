@@ -30,6 +30,14 @@ def _is_serverless() -> bool:
     return bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
 
+def _connect_args_for_url(url: str) -> dict:
+    args = {"connect_timeout": 10}
+    host = urlparse(url).hostname or ""
+    if "pooler" not in host:
+        args["options"] = "-c statement_timeout=30000"
+    return args
+
+
 def get_engine():
     global _engine
 
@@ -47,10 +55,7 @@ def get_engine():
                 future=True,
                 poolclass=NullPool,
                 echo=False,
-                connect_args={
-                    "connect_timeout": 10,
-                    "options": "-c statement_timeout=30000",
-                },
+                connect_args=_connect_args_for_url(clean_url),
             )
         else:
             # Persistent server (local dev, Railway, Render, etc.):
@@ -65,10 +70,7 @@ def get_engine():
                 pool_recycle=300,       # recycle connections every 5 min
                 pool_pre_ping=True,     # test connection before use
                 echo=False,
-                connect_args={
-                    "connect_timeout": 10,
-                    "options": "-c statement_timeout=30000",
-                },
+                connect_args=_connect_args_for_url(clean_url),
             )
         SessionLocal.configure(bind=_engine)
 
