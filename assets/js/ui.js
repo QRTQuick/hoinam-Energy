@@ -119,58 +119,90 @@ export function renderProductCard(product) {
     const category = String(product.category || "Power Solution").trim();
     const stock = Math.max(0, Number(product.stock || 0));
     const price = Number(product.price || 0);
+    const originalPrice = Number(product.originalPrice || 0);
     const currency = String(product.currency || "NGN").trim();
-    const stockLabel = stock > 0 ? `${stock} in stock` : "Out of stock";
     const isFeatured = Boolean(product.featured);
-    const hasDiscount = Boolean(product.originalPrice && product.originalPrice > price);
+    const hasDiscount = Boolean(originalPrice && originalPrice > price);
+    
+    // Calculate discount percentage
+    let discountPercent = 0;
+    let discountAmount = 0;
+    if (hasDiscount) {
+      discountAmount = originalPrice - price;
+      discountPercent = Math.round((discountAmount / originalPrice) * 100);
+    }
     
     const imageUrls = resolveProductImageUrls(product);
     const validImageUrls = imageUrls.filter(url => url && typeof url === "string");
     const imageUrl = validImageUrls[0] || '/assets/images/products/placeholder.svg';
     
+    // Stock status badge
+    let stockBadgeClass = 'premium-product-stock in-stock';
+    let stockText = 'In Stock';
+    if (stock <= 0) {
+      stockBadgeClass = 'premium-product-stock out-of-stock';
+      stockText = 'Out of Stock';
+    } else if (stock < 5) {
+      stockBadgeClass = 'premium-product-stock low-stock';
+      stockText = `Only ${stock} left`;
+    }
+    
     return `
-      <article class="product-card" tabindex="0">
-        ${isFeatured ? '<span class="product-card-featured">Featured</span>' : ''}
-        ${hasDiscount ? '<span class="product-card-sale">Sale</span>' : ''}
-        
-        <img src="${imageUrl}" alt="${productName}" class="product-card-bg" loading="lazy" onerror="const sources=${JSON.stringify(validImageUrls)}; const nextIndex=Number(this.dataset.index||'0')+1; if (sources[nextIndex]) { this.dataset.index=String(nextIndex); this.src=sources[nextIndex]; return; } this.src='/assets/images/products/placeholder.svg';" data-index="0">
-        <div class="product-card-overlay"></div>
-        
-        <div class="product-card-actions">
-          <button class="product-card-action-btn" aria-label="Add to wishlist" onclick="event.stopPropagation(); showToast('Added to wishlist!', 'success');">
-            <i class="fa-regular fa-heart"></i>
-          </button>
-          <button class="product-card-action-btn" aria-label="Quick view" onclick="event.stopPropagation(); window.location.href='/product-detail.html?id=${productId}';">
-            <i class="fa-regular fa-eye"></i>
-          </button>
-          <button class="product-card-action-btn" aria-label="Add to cart" onclick="event.stopPropagation(); addToCart('${productId}');">
-            <i class="fa-solid fa-cart-shopping"></i>
-          </button>
+      <div class="premium-product-card">
+        <div class="premium-product-image">
+          <img src="${imageUrl}" alt="${productName}" class="product-image" loading="lazy">
         </div>
         
-        <div class="product-card-content">
-          <span class="product-card-brand">${brand}</span>
-          <h3 class="product-card-title">${productName}</h3>
-          <p class="product-card-category">${category}</p>
+        <div class="premium-product-details">
+          ${isFeatured ? `
+            <div class="premium-product-badge">
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+              <span class="badge-text">Hot Deal</span>
+            </div>
+          ` : ''}
           
-          <div class="product-card-price">
-            <span class="product-card-price-current">${formatProductPrice(price, currency)}</span>
-            ${hasDiscount ? `<span class="product-card-price-original">${formatProductPrice(product.originalPrice, currency)}</span>` : ''}
+          <h3 class="premium-product-title">${productName}</h3>
+          <p class="premium-product-description">${brand} • ${category}</p>
+          
+          <div class="premium-product-stock ${stockBadgeClass === 'premium-product-stock in-stock' ? 'in-stock' : stockBadgeClass === 'premium-product-stock low-stock' ? 'low-stock' : 'out-of-stock'}">
+            ${stockText}
           </div>
           
-          <div class="product-card-expanded">
-            ${stock > 0 ? `<div class="product-card-stock"><i class="fa-solid fa-check-circle"></i> ${stockLabel}</div>` : `<div class="product-card-stock out-of-stock"><i class="fa-solid fa-times-circle"></i> ${stockLabel}</div>`}
-            
-            <ul class="product-card-features">
-              ${Array.isArray(product.features) && product.features.length ? product.features.slice(0, 3).map(feature => `<li><i class="fa-solid fa-check"></i> ${String(feature || '').trim()}</li>`).join('') : '<li><i class="fa-solid fa-bolt"></i> High efficiency</li><li><i class="fa-solid fa-shield-halved"></i> 2-year warranty</li><li><i class="fa-solid fa-truck-fast"></i> Fast delivery</li>'}
-            </ul>
-            
-            <a href="/product-detail.html?id=${productId}" class="product-card-cta" onclick="event.stopPropagation();">
-              View Details <i class="fa-solid fa-arrow-right"></i>
-            </a>
+          <div class="premium-product-pricing">
+            ${hasDiscount ? `<div class="premium-product-price-old">${formatProductPrice(originalPrice, currency)}</div>` : ''}
+            <div class="premium-product-price-new">
+              <span class="premium-product-price-amount">${formatProductPrice(price, currency).replace('₦', '').trim()}</span>
+              <span class="premium-product-price-currency">${currency}</span>
+            </div>
+            ${hasDiscount ? `
+              <div class="premium-product-discount">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
+                  <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"></path>
+                </svg>
+                <span class="discount-text">Save ${discountPercent}% (₦${discountAmount.toLocaleString()})</span>
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="premium-product-actions">
+            <button class="premium-product-btn premium-product-btn-primary" onclick="event.stopPropagation(); addToCart('${productId}');">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+              </svg>
+              <span>Buy Now</span>
+            </button>
+            <button class="premium-product-btn premium-product-btn-secondary" onclick="event.stopPropagation(); window.location.href='/product-detail.html?id=${productId}';">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>View</span>
+            </button>
           </div>
         </div>
-      </article>
+      </div>
     `;
   } catch (error) {
     console.error("[v0] Error rendering product card:", error, product);
