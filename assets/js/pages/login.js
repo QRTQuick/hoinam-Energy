@@ -39,7 +39,7 @@ function finishAuthNavigation() {
   const guestCart = consumeGuestCartRestore();
   const fallback = !explicitNext && Number(guestCart?.itemCount || 0) > 0
     ? "cart.html?restoredCart=1"
-    : "dashboard.html";
+    : "premium-pricing.html";
 
   beginDashboardNavigation();
   redirectAfterAuth(fallback);

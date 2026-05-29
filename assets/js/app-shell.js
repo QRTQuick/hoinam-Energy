@@ -137,7 +137,7 @@ export function redirectToLogin(nextOverride) {
   window.location.href = `/login.html?next=${encodeURIComponent(next)}`;
 }
 
-export function redirectAfterAuth(fallback = "dashboard.html") {
+export function redirectAfterAuth(fallback = "premium-pricing.html") {
   const search = new URLSearchParams(window.location.search);
   const next = search.get("next") || fallback;
   window.location.href = `/${next.replace(/^\//, "")}`;
