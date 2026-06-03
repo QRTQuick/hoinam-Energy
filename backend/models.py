@@ -98,6 +98,7 @@ class Product(TimestampMixin, Base):
     specs: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     installations = relationship("Installation", back_populates="product")
+    inventory_movements = relationship("InventoryMovement", back_populates="product")
 
     def to_dict(self) -> dict:
         # Resolve image URL with validation
@@ -213,8 +214,26 @@ class Order(TimestampMixin, Base):
     shipping_address: Mapped[dict] = mapped_column(JSON, nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     items: Mapped[list] = mapped_column(JSON, nullable=False)
+    sales_channel: Mapped[str] = mapped_column(
+        String(32), default="website", nullable=False, index=True
+    )
+    created_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
+    sales_order_number: Mapped[str | None] = mapped_column(
+        String(64), unique=True, nullable=True, index=True
+    )
+    invoice_number: Mapped[str | None] = mapped_column(
+        String(64), unique=True, nullable=True, index=True
+    )
+    receipt_number: Mapped[str | None] = mapped_column(
+        String(64), unique=True, nullable=True, index=True
+    )
 
     user = relationship("User", back_populates="orders")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+    documents = relationship("DocumentRecord", back_populates="order")
+    inventory_movements = relationship("InventoryMovement", back_populates="order")
 
     def to_dict(self) -> dict:
         return {
@@ -231,6 +250,11 @@ class Order(TimestampMixin, Base):
             "shipping_address": self.shipping_address,
             "notes": self.notes,
             "items": self.items,
+            "sales_channel": self.sales_channel,
+            "created_by_id": self.created_by_id,
+            "sales_order_number": self.sales_order_number,
+            "invoice_number": self.invoice_number,
+            "receipt_number": self.receipt_number,
             "created_at": self.created_at.isoformat(),
         }
 
@@ -326,6 +350,83 @@ class Payment(TimestampMixin, Base):
             ),
             "transaction_details": self.transaction_details,
             "notes": self.notes,
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+class DocumentRecord(TimestampMixin, Base):
+    __tablename__ = "document_records"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id"), nullable=False, index=True
+    )
+    document_type: Mapped[str] = mapped_column(
+        String(32), nullable=False, index=True
+    )  # sales_order | invoice | payment_receipt
+    document_number: Mapped[str] = mapped_column(
+        String(64), unique=True, nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(
+        String(32), default="generated", nullable=False, index=True
+    )
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, nullable=False
+    )
+
+    order = relationship("Order", back_populates="documents")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "document_type": self.document_type,
+            "document_number": self.document_number,
+            "status": self.status,
+            "generated_at": self.generated_at.isoformat(),
+            "created_at": self.created_at.isoformat(),
+        }
+
+
+class InventoryMovement(TimestampMixin, Base):
+    __tablename__ = "inventory_movements"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id"), nullable=False, index=True
+    )
+    order_id: Mapped[int | None] = mapped_column(
+        ForeignKey("orders.id"), nullable=True, index=True
+    )
+    actor_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
+    movement_type: Mapped[str] = mapped_column(
+        String(32), nullable=False, index=True
+    )  # sale | admin_sale | adjustment | import
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    previous_stock: Mapped[int] = mapped_column(Integer, nullable=False)
+    new_stock: Mapped[int] = mapped_column(Integer, nullable=False)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    product = relationship("Product", back_populates="inventory_movements")
+    order = relationship("Order", back_populates="inventory_movements")
+    actor = relationship("User")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "product_id": self.product_id,
+            "product_name": self.product.name if self.product else None,
+            "order_id": self.order_id,
+            "order_number": self.order.order_number if self.order else None,
+            "actor_user_id": self.actor_user_id,
+            "actor": self.actor.to_dict() if self.actor else None,
+            "movement_type": self.movement_type,
+            "quantity": self.quantity,
+            "previous_stock": self.previous_stock,
+            "new_stock": self.new_stock,
+            "note": self.note,
             "created_at": self.created_at.isoformat(),
         }
 

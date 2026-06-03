@@ -137,6 +137,11 @@ def _ensure_schema_updates(engine) -> None:
         "orders": {
             "payment_method": "VARCHAR(32) NOT NULL DEFAULT 'bank_transfer'",
             "payment_details": "JSON",
+            "sales_channel": "VARCHAR(32) NOT NULL DEFAULT 'website'",
+            "created_by_id": "INTEGER",
+            "sales_order_number": "VARCHAR(64)",
+            "invoice_number": "VARCHAR(64)",
+            "receipt_number": "VARCHAR(64)",
         },
     }
 

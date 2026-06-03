@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import io
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 
-from flask import Flask, g, jsonify, request, send_from_directory
+from flask import Flask, Response, g, jsonify, request, send_from_directory
 from flask_cors import CORS
 from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
@@ -24,7 +25,20 @@ from .emailer import (
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
 from .inventory import parse_stock_inventory
-from .models import Installation, JobListing, Order, Payment, Product, User, BlogPost, BlogSubscriber, Feedback, Coupon
+from .models import (
+    BlogPost,
+    BlogSubscriber,
+    Coupon,
+    DocumentRecord,
+    Feedback,
+    Installation,
+    InventoryMovement,
+    JobListing,
+    Order,
+    Payment,
+    Product,
+    User,
+)
 from .seed import seed_products, seed_coupons, seed_jobs
 from .services import (
     apply_product_payload,
@@ -297,6 +311,350 @@ def create_app() -> Flask:
             "immediate_start": _payload_bool(payload, "immediate_start", existing.immediate_start if existing else False),
         }
 
+    DOCUMENT_LABELS = {
+        "sales_order": ("Sales Order", "SO"),
+        "invoice": ("Invoice", "INV"),
+        "payment_receipt": ("Payment Receipt", "RCT"),
+    }
+
+    def order_document_number(order: Order, document_type: str) -> str:
+        if document_type not in DOCUMENT_LABELS:
+            raise ApiError("Unsupported document type.", 400)
+        field_name = {
+            "sales_order": "sales_order_number",
+            "invoice": "invoice_number",
+            "payment_receipt": "receipt_number",
+        }[document_type]
+        existing = getattr(order, field_name, None)
+        if existing:
+            return existing
+        prefix = DOCUMENT_LABELS[document_type][1]
+        number = f"{prefix}-{order.order_number}"
+        setattr(order, field_name, number)
+        return number
+
+    def ensure_order_documents(order: Order) -> None:
+        required_types = ["sales_order", "invoice"]
+        if order.payment_status == "confirmed":
+            required_types.append("payment_receipt")
+
+        for document_type in required_types:
+            number = order_document_number(order, document_type)
+            existing = (
+                db_session()
+                .query(DocumentRecord)
+                .filter(
+                    DocumentRecord.order_id == order.id,
+                    DocumentRecord.document_type == document_type,
+                )
+                .first()
+            )
+            if existing:
+                existing.document_number = existing.document_number or number
+                continue
+
+            db_session().add(
+                DocumentRecord(
+                    order_id=order.id,
+                    document_type=document_type,
+                    document_number=number,
+                    status="generated",
+                )
+            )
+        db_session().flush()
+
+    def record_inventory_movement(
+        *,
+        product: Product,
+        movement_type: str,
+        quantity: int,
+        previous_stock: int,
+        new_stock: int,
+        order: Order | None = None,
+        actor: User | None = None,
+        note: str | None = None,
+    ) -> None:
+        db_session().add(
+            InventoryMovement(
+                product_id=product.id,
+                order_id=order.id if order else None,
+                actor_user_id=actor.id if actor else None,
+                movement_type=movement_type,
+                quantity=quantity,
+                previous_stock=previous_stock,
+                new_stock=new_stock,
+                note=note,
+            )
+        )
+
+    def _pdf_text(value) -> str:
+        return (
+            str(value if value is not None else "")
+            .replace("\\", "\\\\")
+            .replace("(", "\\(")
+            .replace(")", "\\)")
+        )
+
+    def _wrap_pdf_line(line: str, width: int = 92) -> list[str]:
+        words = str(line).split()
+        if not words:
+            return [""]
+        lines: list[str] = []
+        current = words[0]
+        for word in words[1:]:
+            if len(current) + len(word) + 1 > width:
+                lines.append(current)
+                current = word
+            else:
+                current = f"{current} {word}"
+        lines.append(current)
+        return lines
+
+    def build_simple_pdf(title: str, lines: list[str]) -> bytes:
+        rendered_lines: list[str] = []
+        for line in lines:
+            rendered_lines.extend(_wrap_pdf_line(line))
+
+        text_ops = [
+            "BT",
+            "/F1 18 Tf",
+            "50 760 Td",
+            f"({_pdf_text(title)}) Tj",
+            "/F1 10 Tf",
+        ]
+        line_count = 0
+        for line in rendered_lines:
+            if line_count >= 42:
+                text_ops.append("0 -16 Td")
+                text_ops.append("(Report truncated. Export Excel for the complete data.) Tj")
+                break
+            text_ops.append("0 -16 Td")
+            text_ops.append(f"({_pdf_text(line)}) Tj")
+            line_count += 1
+        text_ops.append("ET")
+        stream = "\n".join(text_ops).encode("latin-1", errors="replace")
+
+        objects = [
+            b"<< /Type /Catalog /Pages 2 0 R >>",
+            b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+            b"<< /Length " + str(len(stream)).encode("ascii") + b" >>\nstream\n" + stream + b"\nendstream",
+        ]
+
+        pdf = bytearray(b"%PDF-1.4\n")
+        offsets = [0]
+        for index, obj in enumerate(objects, start=1):
+            offsets.append(len(pdf))
+            pdf.extend(f"{index} 0 obj\n".encode("ascii"))
+            pdf.extend(obj)
+            pdf.extend(b"\nendobj\n")
+        xref_at = len(pdf)
+        pdf.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
+        pdf.extend(b"0000000000 65535 f \n")
+        for offset in offsets[1:]:
+            pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+        pdf.extend(
+            f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_at}\n%%EOF\n".encode("ascii")
+        )
+        return bytes(pdf)
+
+    def order_document_lines(order: Order, document_type: str) -> list[str]:
+        if document_type == "payment_receipt" and order.payment_status != "confirmed":
+            raise ApiError("Payment receipt is only available after payment confirmation.", 400)
+
+        ensure_order_documents(order)
+        shipping = order.shipping_address or {}
+        payment_details = order.payment_details or {}
+        label = DOCUMENT_LABELS[document_type][0]
+        number = order_document_number(order, document_type)
+        lines = [
+            "Hoinam Energy",
+            "235 Umuocham Road, off Tonimas Junction by Enugu-PHC Express, Osisioma, Aba, Abia.",
+            f"{label} number: {number}",
+            f"Order number: {order.order_number}",
+            f"Date: {order.created_at.strftime('%Y-%m-%d')}",
+            f"Customer: {shipping.get('full_name') or order.user.full_name if order.user else 'Customer'}",
+            f"Phone: {shipping.get('phone') or ''}",
+            f"Address: {', '.join(str(shipping.get(key) or '') for key in ['address', 'city', 'state']).strip(', ')}",
+            f"Payment method: {payment_details.get('label') or order.payment_method}",
+            f"Payment status: {order.payment_status}",
+            f"Payment reference: {order.payment_reference}",
+            "",
+            "Items:",
+        ]
+        for item in order.items or []:
+            lines.append(
+                f"- {item.get('name', 'Product')} | Qty {item.get('quantity', 0)} | Unit {item.get('currency', order.currency)} {float(item.get('unit_price') or 0):,.2f} | Line {item.get('currency', order.currency)} {float(item.get('line_total') or 0):,.2f}"
+            )
+        lines.extend(
+            [
+                "",
+                f"Total: {order.currency} {float(order.total_amount):,.2f}",
+                "Generated by Hoinam Energy admin system.",
+            ]
+        )
+        return lines
+
+    def pdf_response(filename: str, title: str, lines: list[str]):
+        return Response(
+            build_simple_pdf(title, lines),
+            mimetype="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+    def build_admin_report_payload() -> dict:
+        month_start = datetime.now(timezone.utc).replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+
+        def as_utc(value: datetime | None) -> datetime | None:
+            if value is None:
+                return None
+            if value.tzinfo is None:
+                return value.replace(tzinfo=timezone.utc)
+            return value.astimezone(timezone.utc)
+
+        orders = (
+            db_session()
+            .query(Order)
+            .options(joinedload(Order.user))
+            .order_by(Order.created_at.desc())
+            .all()
+        )
+        products = (
+            db_session()
+            .query(Product)
+            .filter(Product.active.is_(True))
+            .order_by(Product.name.asc())
+            .all()
+        )
+        feedback_items = (
+            db_session()
+            .query(Feedback)
+            .order_by(Feedback.created_at.desc())
+            .all()
+        )
+        movements = (
+            db_session()
+            .query(InventoryMovement)
+            .options(joinedload(InventoryMovement.product), joinedload(InventoryMovement.order))
+            .order_by(InventoryMovement.created_at.desc())
+            .limit(250)
+            .all()
+        )
+
+        confirmed_orders = [order for order in orders if order.payment_status == "confirmed"]
+        total_revenue = sum((order.total_amount for order in confirmed_orders), Decimal("0.00"))
+        monthly_revenue = sum(
+            (
+                order.total_amount
+                for order in confirmed_orders
+                if as_utc(order.created_at) and as_utc(order.created_at) >= month_start
+            ),
+            Decimal("0.00"),
+        )
+        outstanding_orders = [
+            order for order in orders if order.payment_status != "confirmed"
+        ]
+
+        product_performance: dict[str, dict] = {}
+        for order in orders:
+            for item in order.items or []:
+                name = item.get("name") or f"Product {item.get('product_id')}"
+                record = product_performance.setdefault(
+                    name,
+                    {
+                        "product_name": name,
+                        "quantity_sold": 0,
+                        "gross_revenue": 0.0,
+                        "confirmed_revenue": 0.0,
+                        "orders": 0,
+                    },
+                )
+                quantity = int(item.get("quantity") or 0)
+                line_total = float(item.get("line_total") or 0)
+                record["quantity_sold"] += quantity
+                record["gross_revenue"] += line_total
+                record["orders"] += 1
+                if order.payment_status == "confirmed":
+                    record["confirmed_revenue"] += line_total
+
+        low_stock = [
+            product
+            for product in products
+            if 0 <= int(product.stock or 0) <= 3
+        ]
+
+        return {
+            "summary": {
+                "total_sales": len(orders),
+                "confirmed_sales": len(confirmed_orders),
+                "total_revenue": float(total_revenue),
+                "monthly_revenue": float(monthly_revenue),
+                "outstanding_invoices": len(outstanding_orders),
+                "customer_enquiries": len(feedback_items),
+                "new_customer_enquiries": len([item for item in feedback_items if item.status == "new"]),
+                "currency": settings.default_currency,
+            },
+            "inventory_status": {
+                "active_products": len(products),
+                "total_units": sum(max(0, int(product.stock or 0)) for product in products),
+                "low_stock": len([product for product in products if 0 < int(product.stock or 0) <= 3]),
+                "out_of_stock": len([product for product in products if int(product.stock or 0) == 0]),
+            },
+            "low_stock": [product.to_dict() for product in low_stock],
+            "inventory_products": [product.to_dict() for product in products],
+            "sales_history": [
+                {
+                    **order.to_dict(),
+                    "user": order.user.to_dict() if order.user else None,
+                }
+                for order in orders[:100]
+            ],
+            "outstanding_invoices": [
+                {
+                    **order.to_dict(),
+                    "user": order.user.to_dict() if order.user else None,
+                }
+                for order in outstanding_orders[:100]
+            ],
+            "customer_enquiries": [item.to_dict() for item in feedback_items[:100]],
+            "inventory_history": [movement.to_dict() for movement in movements],
+            "stock_movements": [movement.to_dict() for movement in movements],
+            "product_performance": sorted(
+                product_performance.values(),
+                key=lambda item: (item["quantity_sold"], item["gross_revenue"]),
+                reverse=True,
+            )[:50],
+        }
+
+    def admin_report_pdf(report: dict) -> bytes:
+        summary = report["summary"]
+        inventory = report["inventory_status"]
+        lines = [
+            f"Total sales: {summary['total_sales']}",
+            f"Confirmed sales: {summary['confirmed_sales']}",
+            f"Total revenue: {summary['currency']} {summary['total_revenue']:,.2f}",
+            f"Monthly revenue: {summary['currency']} {summary['monthly_revenue']:,.2f}",
+            f"Outstanding invoices: {summary['outstanding_invoices']}",
+            f"Customer enquiries: {summary['customer_enquiries']} ({summary['new_customer_enquiries']} new)",
+            "",
+            f"Inventory: {inventory['active_products']} active products, {inventory['total_units']} units",
+            f"Low stock: {inventory['low_stock']} | Out of stock: {inventory['out_of_stock']}",
+            "",
+            "Top products:",
+        ]
+        for item in report["product_performance"][:10]:
+            lines.append(
+                f"- {item['product_name']}: {item['quantity_sold']} sold, gross {summary['currency']} {item['gross_revenue']:,.2f}"
+            )
+        lines.append("")
+        lines.append("Low-stock alerts:")
+        for product in report["low_stock"][:12]:
+            lines.append(f"- {product['name']}: {product['stock']} in stock")
+        return build_simple_pdf("Hoinam Energy Admin Report", lines)
+
     @app.get("/api/health")
     def health_check():
         return json_success({"status": "ok"})
@@ -479,18 +837,28 @@ def create_app() -> Flask:
 
     @app.post("/api/products")
     def create_product():
-        authenticate(admin=True)
+        user = authenticate(admin=True)
         payload = request.get_json(silent=True) or {}
         product = Product()
         apply_product_payload(product, payload)
         db_session().add(product)
+        db_session().flush()
+        record_inventory_movement(
+            product=product,
+            movement_type="adjustment",
+            quantity=int(product.stock or 0),
+            previous_stock=0,
+            new_stock=int(product.stock or 0),
+            actor=user,
+            note="Product created from admin dashboard.",
+        )
         db_session().commit()
         return json_success(product.to_dict(), status_code=201)
 
     @app.put("/api/products")
     @app.put("/api/products/<int:product_id>")
     def update_product(product_id: int | None = None):
-        authenticate(admin=True)
+        user = authenticate(admin=True)
         payload = request.get_json(silent=True) or {}
         target_id = product_id or payload.get("id")
         if not target_id:
@@ -498,7 +866,19 @@ def create_app() -> Flask:
         product = db_session().query(Product).filter(Product.id == target_id).first()
         if not product:
             raise ApiError("Product not found.", 404)
+        previous_stock = int(product.stock or 0)
         apply_product_payload(product, payload)
+        new_stock = int(product.stock or 0)
+        if previous_stock != new_stock:
+            record_inventory_movement(
+                product=product,
+                movement_type="adjustment",
+                quantity=new_stock - previous_stock,
+                previous_stock=previous_stock,
+                new_stock=new_stock,
+                actor=user,
+                note="Stock updated from admin product form.",
+            )
         db_session().commit()
         return json_success(product.to_dict())
 
@@ -687,6 +1067,8 @@ def create_app() -> Flask:
             .first()
         )
         if existing_order:
+            ensure_order_documents(existing_order)
+            db_session().commit()
             return json_success(existing_order.to_dict())
 
         shipping_address = payload.get("shipping_address") or {}
@@ -715,20 +1097,12 @@ def create_app() -> Flask:
                 "discount_code": "SORRY2",
             }), 409
 
+        stock_movements = []
         for item in normalized_items:
             product = locked_products[item["product_id"]]
-            if product.stock > 0 and product.stock < item["quantity"]:
-                return jsonify({
-                    "success": False,
-                    "error_type": "stock_error",
-                    "message": f"Not enough stock for {product.name}.",
-                    "product_name": product.name,
-                    "requested": item["quantity"],
-                    "available": product.stock,
-                    "discount_code": "SORRY2",
-                }), 409
-            if product.stock > 0:
-                product.stock -= item["quantity"]
+            previous_stock = int(product.stock or 0)
+            product.stock = max(0, previous_stock - int(item["quantity"]))
+            stock_movements.append((product, previous_stock, int(product.stock or 0), int(item["quantity"])))
 
         payment_status = (
             "awaiting_transfer"
@@ -801,9 +1175,23 @@ def create_app() -> Flask:
             shipping_address=shipping_address,
             notes=payload.get("notes"),
             items=normalized_items,
+            sales_channel="website",
         )
         db_session().add(order)
         db_session().flush()
+
+        ensure_order_documents(order)
+        for product, previous_stock, new_stock, quantity in stock_movements:
+            record_inventory_movement(
+                product=product,
+                movement_type="sale",
+                quantity=-quantity,
+                previous_stock=previous_stock,
+                new_stock=new_stock,
+                order=order,
+                actor=user,
+                note=f"Website order {order.order_number}.",
+            )
 
         # Increment coupon usage
         if coupon:
@@ -816,7 +1204,7 @@ def create_app() -> Flask:
             payment = Payment(
                 order_id=order.id,
                 verification_code=verification_code,
-                amount=to_decimal(total),
+                amount=to_decimal(final_total),
                 currency=settings.default_currency,
                 payment_method=payment_method,
                 status="pending",
@@ -856,6 +1244,185 @@ def create_app() -> Flask:
             order_payload["verification_code"] = verification_code
         return json_success(order_payload, status_code=201)
 
+    @app.post("/api/admin/sales-orders")
+    def create_admin_sales_order():
+        admin_user = authenticate(admin=True)
+        payload = request.get_json(silent=True) or {}
+
+        raw_items = payload.get("items") or []
+        if not raw_items and payload.get("product_id"):
+            raw_items = [
+                {
+                    "product_id": payload.get("product_id"),
+                    "quantity": payload.get("quantity") or 1,
+                }
+            ]
+
+        customer_payload = payload.get("customer") or {}
+        full_name = (
+            customer_payload.get("full_name")
+            or payload.get("customer_name")
+            or ""
+        ).strip()
+        if not full_name:
+            raise ApiError("Customer name is required.", 400)
+
+        email = (
+            customer_payload.get("email")
+            or payload.get("customer_email")
+            or ""
+        ).strip().lower() or None
+        phone = (
+            customer_payload.get("phone")
+            or payload.get("customer_phone")
+            or ""
+        ).strip() or None
+
+        customer = None
+        if payload.get("user_id"):
+            customer = (
+                db_session()
+                .query(User)
+                .filter(User.id == int(payload["user_id"]))
+                .first()
+            )
+        if customer is None and email:
+            customer = (
+                db_session()
+                .query(User)
+                .filter(User.email == email)
+                .first()
+            )
+        if customer is None:
+            customer = User(
+                firebase_uid=generate_payment_reference("ADMINCUSTOMER"),
+                email=email,
+                full_name=full_name,
+                phone=phone,
+                role="user",
+            )
+            db_session().add(customer)
+            db_session().flush()
+        else:
+            customer.full_name = full_name or customer.full_name
+            customer.phone = phone or customer.phone
+
+        shipping_address = {
+            "full_name": full_name,
+            "phone": phone or customer.phone or "",
+            "address": (
+                customer_payload.get("address")
+                or payload.get("address")
+                or "Admin-created sale"
+            ),
+            "city": customer_payload.get("city") or payload.get("city") or "Aba",
+            "state": customer_payload.get("state") or payload.get("state") or "Abia",
+        }
+
+        payment_method = (payload.get("payment_method") or "bank_transfer").strip()
+        if payment_method not in {"bank_transfer", "pay_on_delivery"}:
+            raise ApiError("Choose bank transfer or pay on delivery.", 400)
+
+        try:
+            normalized_items, total, locked_products = calculate_order_items(
+                db_session(), raw_items, lock_products=True
+            )
+        except StockError as stock_err:
+            return jsonify({
+                "success": False,
+                "error_type": "stock_error",
+                "message": f"Not enough stock for {stock_err.product_name}.",
+                "product_name": stock_err.product_name,
+                "requested": stock_err.requested,
+                "available": stock_err.available,
+            }), 409
+        except ValueError as exc:
+            raise ApiError(str(exc), 400) from exc
+
+        stock_movements = []
+        for item in normalized_items:
+            product = locked_products[item["product_id"]]
+            previous_stock = int(product.stock or 0)
+            product.stock = max(0, previous_stock - int(item["quantity"]))
+            stock_movements.append((product, previous_stock, int(product.stock or 0), int(item["quantity"])))
+
+        payment_confirmed = _payload_bool(payload, "payment_confirmed", False)
+        payment_status = (
+            "confirmed"
+            if payment_confirmed
+            else ("awaiting_transfer" if payment_method == "bank_transfer" else "pay_on_delivery")
+        )
+        order_status = (
+            "delivered"
+            if payment_confirmed
+            else ("payment_pending" if payment_method == "bank_transfer" else "confirmed")
+        )
+        payment_reference = (
+            payload.get("payment_reference") or ""
+        ).strip() or generate_payment_reference("ADMIN")
+
+        order = Order(
+            order_number=generate_order_number(),
+            user_id=customer.id,
+            status=order_status,
+            payment_status=payment_status,
+            payment_method=payment_method,
+            payment_reference=payment_reference,
+            payment_details=payment_details_payload(payment_method),
+            total_amount=to_decimal(total),
+            currency=settings.default_currency,
+            shipping_address=shipping_address,
+            notes=(payload.get("notes") or "").strip() or "Created from admin sales order form.",
+            items=normalized_items,
+            sales_channel="admin",
+            created_by_id=admin_user.id,
+        )
+        db_session().add(order)
+        db_session().flush()
+        ensure_order_documents(order)
+
+        for product, previous_stock, new_stock, quantity in stock_movements:
+            record_inventory_movement(
+                product=product,
+                movement_type="admin_sale",
+                quantity=-quantity,
+                previous_stock=previous_stock,
+                new_stock=new_stock,
+                order=order,
+                actor=admin_user,
+                note=f"Admin sales order {order.order_number}.",
+            )
+
+        if payment_method == "bank_transfer" or payment_confirmed:
+            verification_code = generate_verification_code("ADM")
+            payment = Payment(
+                order_id=order.id,
+                verification_code=verification_code,
+                amount=to_decimal(total),
+                currency=settings.default_currency,
+                payment_method=payment_method,
+                status="confirmed" if payment_confirmed else "pending",
+                notes=(
+                    f"Payment {'confirmed' if payment_confirmed else 'created'} by admin "
+                    f"{admin_user.email or admin_user.id}."
+                ),
+            )
+            db_session().add(payment)
+            details = dict(order.payment_details or {})
+            details["verification_code"] = verification_code
+            order.payment_details = details
+
+        db_session().commit()
+
+        order_payload = order.to_dict()
+        order_payload["user"] = customer.to_dict()
+        order_payload["documents"] = [doc.to_dict() for doc in order.documents]
+        return json_success(
+            order_payload,
+            status_code=201,
+            message=f"Sales order {order.order_number} created.",
+        )
+
     @app.get("/api/orders/user")
     def get_user_orders():
         user = authenticate()
@@ -884,6 +1451,35 @@ def create_app() -> Flask:
             data["user"] = order.user.to_dict() if order.user else None
             payload.append(data)
         return json_success(payload)
+
+    @app.get("/api/orders/<int:order_id>/documents/<document_type>")
+    def download_order_document(order_id: int, document_type: str):
+        user = authenticate()
+        if document_type not in DOCUMENT_LABELS:
+            raise ApiError("Unsupported document type.", 400)
+
+        order = (
+            db_session()
+            .query(Order)
+            .options(joinedload(Order.user))
+            .filter(Order.id == order_id)
+            .first()
+        )
+        if not order:
+            raise ApiError("Order not found.", 404)
+        if user.role != "admin" and order.user_id != user.id:
+            raise ApiError("You do not have access to this order document.", 403)
+
+        label = DOCUMENT_LABELS[document_type][0]
+        number = order_document_number(order, document_type)
+        lines = order_document_lines(order, document_type)
+        db_session().commit()
+        safe_number = number.lower().replace("/", "-")
+        return pdf_response(
+            f"{safe_number}.pdf",
+            f"Hoinam Energy {label}",
+            lines,
+        )
 
     @app.post("/api/payments/<verification_code>/receipt")
     def upload_payment_receipt(verification_code: str):
@@ -1456,9 +2052,128 @@ def create_app() -> Flask:
         }
         return json_success(payload)
 
+    @app.get("/api/admin/reports")
+    def admin_reports():
+        authenticate(admin=True)
+        return json_success(build_admin_report_payload())
+
+    @app.get("/api/admin/reports/export")
+    def export_admin_reports():
+        authenticate(admin=True)
+        export_format = (request.args.get("format") or "xlsx").strip().lower()
+        report = build_admin_report_payload()
+
+        if export_format == "pdf":
+            return Response(
+                admin_report_pdf(report),
+                mimetype="application/pdf",
+                headers={
+                    "Content-Disposition": 'attachment; filename="hoinam-admin-report.pdf"'
+                },
+            )
+
+        if export_format not in {"xlsx", "excel"}:
+            raise ApiError("Supported report export formats are xlsx and pdf.", 400)
+
+        from openpyxl import Workbook
+
+        workbook = Workbook()
+        summary_sheet = workbook.active
+        summary_sheet.title = "Summary"
+        summary_sheet.append(["Metric", "Value"])
+        for key, value in report["summary"].items():
+            summary_sheet.append([key.replace("_", " ").title(), value])
+        summary_sheet.append([])
+        for key, value in report["inventory_status"].items():
+            summary_sheet.append([key.replace("_", " ").title(), value])
+
+        sales_sheet = workbook.create_sheet("Sales History")
+        sales_sheet.append(["Order", "Customer", "Status", "Payment", "Total", "Date"])
+        for order in report["sales_history"]:
+            customer = order.get("user") or {}
+            sales_sheet.append(
+                [
+                    order.get("order_number"),
+                    customer.get("full_name") or customer.get("email") or "Customer",
+                    order.get("status"),
+                    order.get("payment_status"),
+                    order.get("total_amount"),
+                    order.get("created_at"),
+                ]
+            )
+
+        inventory_sheet = workbook.create_sheet("Inventory")
+        inventory_sheet.append(["Product", "SKU", "Stock", "Price", "Category", "Brand"])
+        for product in report["inventory_products"]:
+            inventory_sheet.append(
+                [
+                    product.get("name"),
+                    product.get("sku"),
+                    product.get("stock"),
+                    product.get("price"),
+                    product.get("category"),
+                    product.get("brand"),
+                ]
+            )
+
+        movement_sheet = workbook.create_sheet("Stock Movements")
+        movement_sheet.append(["Date", "Product", "Type", "Quantity", "Previous", "New", "Order", "Note"])
+        for movement in report["stock_movements"]:
+            movement_sheet.append(
+                [
+                    movement.get("created_at"),
+                    movement.get("product_name"),
+                    movement.get("movement_type"),
+                    movement.get("quantity"),
+                    movement.get("previous_stock"),
+                    movement.get("new_stock"),
+                    movement.get("order_number"),
+                    movement.get("note"),
+                ]
+            )
+
+        performance_sheet = workbook.create_sheet("Product Performance")
+        performance_sheet.append(["Product", "Quantity Sold", "Gross Revenue", "Confirmed Revenue", "Order Lines"])
+        for item in report["product_performance"]:
+            performance_sheet.append(
+                [
+                    item.get("product_name"),
+                    item.get("quantity_sold"),
+                    item.get("gross_revenue"),
+                    item.get("confirmed_revenue"),
+                    item.get("orders"),
+                ]
+            )
+
+        enquiries_sheet = workbook.create_sheet("Enquiries")
+        enquiries_sheet.append(["Date", "Name", "Email", "Phone", "Type", "Status", "Message"])
+        for item in report["customer_enquiries"]:
+            enquiries_sheet.append(
+                [
+                    item.get("created_at"),
+                    item.get("name"),
+                    item.get("email"),
+                    item.get("phone"),
+                    item.get("service_type"),
+                    item.get("status"),
+                    item.get("message"),
+                ]
+            )
+
+        output = io.BytesIO()
+        workbook.save(output)
+        output.seek(0)
+        return Response(
+            output.getvalue(),
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": 'attachment; filename="hoinam-admin-report.xlsx"'
+            },
+        )
+
     @app.post("/api/admin/upload-inventory")
     def upload_inventory():
-        authenticate(admin=True)
+        user = authenticate(admin=True)
         file_storage = request.files.get("file")
         if not file_storage:
             raise ApiError("Please attach an Excel file.", 400)
@@ -1497,8 +2212,19 @@ def create_app() -> Flask:
                     active=True,
                 )
                 db_session().add(product)
+                db_session().flush()
+                record_inventory_movement(
+                    product=product,
+                    movement_type="import",
+                    quantity=int(product.stock or 0),
+                    previous_stock=0,
+                    new_stock=int(product.stock or 0),
+                    actor=user,
+                    note="Created from Excel inventory upload.",
+                )
                 created += 1
             else:
+                previous_stock = int(product.stock or 0)
                 product.name = row["name"]
                 product.slug = product_slug
                 product.sku = product_sku
@@ -1515,6 +2241,17 @@ def create_app() -> Flask:
                 )
                 product.summary = row["summary"] or product.summary
                 product.description = row["description"] or product.description
+                new_stock = int(product.stock or 0)
+                if previous_stock != new_stock:
+                    record_inventory_movement(
+                        product=product,
+                        movement_type="import",
+                        quantity=new_stock - previous_stock,
+                        previous_stock=previous_stock,
+                        new_stock=new_stock,
+                        actor=user,
+                        note="Stock synced from Excel inventory upload.",
+                    )
                 updated += 1
 
         db_session().commit()
@@ -1559,7 +2296,6 @@ def create_app() -> Flask:
 
         order.status = "delivered"
         order.payment_status = "confirmed"
-        db_session().commit()
 
         payment = (
             db_session().query(Payment).filter(Payment.order_id == order_id).first()
@@ -1569,7 +2305,9 @@ def create_app() -> Flask:
             payment.notes = (
                 f"Payment confirmed by admin on {datetime.now(timezone.utc).isoformat()}."
             )
-            db_session().commit()
+
+        ensure_order_documents(order)
+        db_session().commit()
 
         # Email the customer their approval notification
         if smtp_is_configured(settings) and order.user and order.user.email:

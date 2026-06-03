@@ -14,4 +14,4 @@ Disallow: /api/
 Disallow: /assets/js/pages/admin.js
 Disallow: /assets/js/pages/admin-blog.js
 
-Sitemap: https://hoinam-energy.vercel.app/sitemap.xml
+Sitemap: https://www.hoinamenergy.com/sitemap.xml

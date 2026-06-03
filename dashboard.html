@@ -1,126 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Hoinam Energy</title>
-    <meta name="description" content="Track orders and installation bookings in your Hoinam Energy dashboard.">
-    <meta name="robots" content="noindex, nofollow">
-    <link rel="canonical" href="https://hoinam-energy.vercel.app/dashboard.html">
-    <meta property="og:title" content="Dashboard | Hoinam Energy">
-    <meta property="og:description" content="Track orders and installation bookings in your customer dashboard.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hoinam-energy.vercel.app/dashboard.html">
-    <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Dashboard | Hoinam Energy">
-    <meta name="twitter:description" content="Track orders and installation bookings in your customer dashboard.">
-    <meta name="twitter:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="theme-color" content="#0055B8">
-    <link rel="stylesheet" href="/assets/css/styles.css">
-    <script>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-  </head>
-  <body>
-    <script>
-      (function () {
-        try {
-          var raw = window.sessionStorage.getItem("hoinam_auth_loading_state");
-          if (!raw) {
-            return;
-          }
 
-          var state = JSON.parse(raw);
-          if (!state || !state.active) {
-            return;
-          }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Hoinam Energy</title>
+  <meta name="description" content="Track orders and installation bookings in your Hoinam Energy dashboard.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://www.hoinamenergy.com/dashboard.html">
+  <meta property="og:title" content="Dashboard | Hoinam Energy">
+  <meta property="og:description" content="Track orders and installation bookings in your customer dashboard.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.hoinamenergy.com/dashboard.html">
+  <meta property="og:image" content="https://www.hoinamenergy.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dashboard | Hoinam Energy">
+  <meta name="twitter:description" content="Track orders and installation bookings in your customer dashboard.">
+  <meta name="twitter:image" content="https://www.hoinamenergy.com/assets/og-image.svg">
+  <meta name="theme-color" content="#0055B8">
+  <meta name="google-site-verification" content="nOpDTpY0chyDt-KeuM77wW8XYFoaz-Uq0OX1Egt6AJ8" />
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
 
-          if (Date.now() - Number(state.startedAt || 0) > 90000) {
-            window.sessionStorage.removeItem("hoinam_auth_loading_state");
-            return;
-          }
-
-          var escapeHtml = function (value) {
-            return String(value || "")
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/"/g, "&quot;")
-              .replace(/'/g, "&#39;");
-          };
-
-          var steps = Array.isArray(state.steps) && state.steps.length
-            ? state.steps
-            : ["Google verified", "Syncing account", "Opening dashboard"];
-
-          document.body.dataset.authLoading = "true";
-          document.body.insertAdjacentHTML(
-            "afterbegin",
-            '<div id="auth-loading-screen" class="auth-loading-screen">' +
-              '<div class="auth-loading-card">' +
-                '<div class="auth-loading-mark">' +
-                  '<img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">' +
-                "</div>" +
-                '<div class="auth-loading-spinner" aria-hidden="true"></div>' +
-                "<h2>" + escapeHtml(state.title || "Opening your dashboard") + "</h2>" +
-                "<p>" + escapeHtml(state.copy || "Your dashboard is being prepared.") + "</p>" +
-                '<div class="auth-loading-steps">' +
-                  steps.map(function (step) {
-                    return "<span>" + escapeHtml(step) + "</span>";
-                  }).join("") +
-                "</div>" +
-              "</div>" +
-            "</div>"
-          );
-        } catch (_error) {
-          // Ignore restore issues and allow the page to continue loading normally.
+<body>
+  <script>
+    (function () {
+      try {
+        var raw = window.sessionStorage.getItem("hoinam_auth_loading_state");
+        if (!raw) {
+          return;
         }
-      })();
-    </script>
-    <div id="site-header"></div>
-    <main>
-      <section class="page-hero">
-        <div class="container">
-          <span class="eyebrow">Customer dashboard</span>
-          <h1 id="profile-name">Your Hoinam account</h1>
-          <p id="profile-email">Track orders, installation requests, and your account activity.</p>
-        </div>
-      </section>
 
-      <section class="section">
-        <div class="container">
-          <div id="profile-completion-slot"></div>
-          <div class="dashboard-grid" id="dashboard-stats"></div>
-        </div>
-      </section>
+        var state = JSON.parse(raw);
+        if (!state || !state.active) {
+          return;
+        }
 
-      <section class="section">
-        <div class="container split-layout">
-          <div>
-            <div class="section-heading">
-              <div>
-                <span class="eyebrow">Orders</span>
-                <h2>Recent orders</h2>
-              </div>
+        if (Date.now() - Number(state.startedAt || 0) > 90000) {
+          window.sessionStorage.removeItem("hoinam_auth_loading_state");
+          return;
+        }
+
+        var escapeHtml = function (value) {
+          return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        };
+
+        var steps = Array.isArray(state.steps) && state.steps.length
+          ? state.steps
+          : ["Google verified", "Syncing account", "Opening dashboard"];
+
+        document.body.dataset.authLoading = "true";
+        document.body.insertAdjacentHTML(
+          "afterbegin",
+          '<div id="auth-loading-screen" class="auth-loading-screen">' +
+          '<div class="auth-loading-card">' +
+          '<div class="auth-loading-mark">' +
+          '<img src="/assets/images/hoinam-logo.png" alt="Hoinam Energy">' +
+          "</div>" +
+          '<div class="auth-loading-spinner" aria-hidden="true"></div>' +
+          "<h2>" + escapeHtml(state.title || "Opening your dashboard") + "</h2>" +
+          "<p>" + escapeHtml(state.copy || "Your dashboard is being prepared.") + "</p>" +
+          '<div class="auth-loading-steps">' +
+          steps.map(function (step) {
+            return "<span>" + escapeHtml(step) + "</span>";
+          }).join("") +
+          "</div>" +
+          "</div>" +
+          "</div>"
+        );
+      } catch (_error) {
+        // Ignore restore issues and allow the page to continue loading normally.
+      }
+    })();
+  </script>
+  <div id="site-header"></div>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow">Customer dashboard</span>
+        <h1 id="profile-name">Your Hoinam account</h1>
+        <p id="profile-email">Track orders, installation requests, and your account activity.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div id="profile-completion-slot"></div>
+        <div class="dashboard-grid" id="dashboard-stats"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container split-layout">
+        <div>
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Orders</span>
+              <h2>Recent orders</h2>
             </div>
-            <div class="dashboard-grid" id="orders-list"></div>
           </div>
-          <div>
-            <div class="section-heading">
-              <div>
-                <span class="eyebrow">Installations</span>
-                <h2>Booking requests</h2>
-              </div>
-            </div>
-            <div class="dashboard-grid" id="installations-list"></div>
-          </div>
+          <div class="dashboard-grid" id="orders-list"></div>
         </div>
-      </section>
-    </main>
-    <div id="site-footer"></div>
-    <script src="/assets/js/site-config.js"></script>
-    <script type="module" src="/assets/js/pages/dashboard.js"></script>
-  </body>
+        <div>
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Installations</span>
+              <h2>Booking requests</h2>
+            </div>
+          </div>
+          <div class="dashboard-grid" id="installations-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script src="/assets/js/site-config.js"></script>
+  <script type="module" src="/assets/js/pages/dashboard.js"></script>
+</body>
+
 </html>

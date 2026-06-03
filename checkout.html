@@ -1,94 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | Hoinam Energy</title>
-    <meta name="description" content="Checkout with bank transfer or pay on delivery for Hoinam Energy orders.">
-    <meta name="robots" content="noindex, nofollow">
-    <link rel="canonical" href="https://hoinam-energy.vercel.app/checkout.html">
-    <meta property="og:title" content="Checkout | Hoinam Energy">
-    <meta property="og:description" content="Confirm your order with bank transfer or pay on delivery.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hoinam-energy.vercel.app/checkout.html">
-    <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Checkout | Hoinam Energy">
-    <meta name="twitter:description" content="Confirm your order with bank transfer or pay on delivery.">
-    <meta name="twitter:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="theme-color" content="#0055B8">
-    <link rel="stylesheet" href="/assets/css/styles.css">
-    <script>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-  </head>
-  <body>
-    <div id="site-header"></div>
-    <main>
-      <section class="page-hero">
-        <div class="container">
-          <span class="eyebrow">Checkout</span>
-          <h1>Confirm delivery details and choose payment</h1>
-          <p>Choose transfer, pick the bank account to pay into, or reserve the order with pay on delivery. Hoinam Energy will confirm every order before dispatch.</p>
-        </div>
-      </section>
 
-      <section class="section">
-        <div class="container">
-          <div id="checkout-status"></div>
-          <div class="checkout-grid">
-            <form class="panel form-grid" id="checkout-form">
-              <h3 class="field-full">Delivery details</h3>
-              <label class="field">
-                <span>Full name</span>
-                <input name="full_name" type="text" required>
-              </label>
-              <label class="field">
-                <span>Phone</span>
-                <input name="phone" type="tel" required>
-              </label>
-              <label class="field field-full">
-                <span>Address</span>
-                <textarea name="address" required></textarea>
-              </label>
-              <label class="field">
-                <span>City</span>
-                <input name="city" type="text" required>
-              </label>
-              <label class="field">
-                <span>State</span>
-                <input name="state" type="text" required>
-              </label>
-              <label class="field field-full">
-                <span>Order notes</span>
-                <textarea name="notes" placeholder="Access notes, preferred call-back time, or installation context"></textarea>
-              </label>
-              <div class="field field-full">
-                <span>Payment method</span>
-                <div class="payment-methods" id="payment-methods"></div>
-                <div class="transfer-account-picker hidden" id="transfer-account-picker"></div>
-              </div>
-              <div class="field field-full">
-                <span>Coupon code <span class="muted">(optional)</span></span>
-                <div class="coupon-input-row">
-                  <input name="coupon_code" type="text" placeholder="Enter coupon code" autocomplete="off" style="text-transform:uppercase">
-                  <button class="button button-ghost" type="button" id="apply-coupon-btn">Apply</button>
-                </div>
-                <div id="coupon-status" class="coupon-status hidden"></div>
-              </div>
-              <div class="field field-full">
-                <button class="button button-full" type="submit"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Place order</button>
-              </div>
-            </form>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Hoinam Energy</title>
+  <meta name="description" content="Checkout with bank transfer or pay on delivery for Hoinam Energy orders.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://www.hoinamenergy.com/checkout.html">
+  <meta property="og:title" content="Checkout | Hoinam Energy">
+  <meta property="og:description" content="Confirm your order with bank transfer or pay on delivery.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.hoinamenergy.com/checkout.html">
+  <meta property="og:image" content="https://www.hoinamenergy.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Checkout | Hoinam Energy">
+  <meta name="twitter:description" content="Confirm your order with bank transfer or pay on delivery.">
+  <meta name="twitter:image" content="https://www.hoinamenergy.com/assets/og-image.svg">
+  <meta name="theme-color" content="#0055B8">
+  <meta name="google-site-verification" content="nOpDTpY0chyDt-KeuM77wW8XYFoaz-Uq0OX1Egt6AJ8" />
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
 
-            <aside id="checkout-summary"></aside>
-          </div>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow">Checkout</span>
+        <h1>Confirm delivery details and choose payment</h1>
+        <p>Choose transfer, pick the bank account to pay into, or reserve the order with pay on delivery. Hoinam Energy
+          will confirm every order before dispatch.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div id="checkout-status"></div>
+        <div class="checkout-grid">
+          <form class="panel form-grid" id="checkout-form">
+            <h3 class="field-full">Delivery details</h3>
+            <label class="field">
+              <span>Full name</span>
+              <input name="full_name" type="text" required>
+            </label>
+            <label class="field">
+              <span>Phone</span>
+              <input name="phone" type="tel" required>
+            </label>
+            <label class="field field-full">
+              <span>Address</span>
+              <textarea name="address" required></textarea>
+            </label>
+            <label class="field">
+              <span>City</span>
+              <input name="city" type="text" required>
+            </label>
+            <label class="field">
+              <span>State</span>
+              <input name="state" type="text" required>
+            </label>
+            <label class="field field-full">
+              <span>Order notes</span>
+              <textarea name="notes"
+                placeholder="Access notes, preferred call-back time, or installation context"></textarea>
+            </label>
+            <div class="field field-full">
+              <span>Payment method</span>
+              <div class="payment-methods" id="payment-methods"></div>
+              <div class="transfer-account-picker hidden" id="transfer-account-picker"></div>
+            </div>
+            <div class="field field-full">
+              <span>Coupon code <span class="muted">(optional)</span></span>
+              <div class="coupon-input-row">
+                <input name="coupon_code" type="text" placeholder="Enter coupon code" autocomplete="off"
+                  style="text-transform:uppercase">
+                <button class="button button-ghost" type="button" id="apply-coupon-btn">Apply</button>
+              </div>
+              <div id="coupon-status" class="coupon-status hidden"></div>
+            </div>
+            <div class="field field-full">
+              <button class="button button-full" type="submit"><i class="fa-solid fa-circle-check"
+                  aria-hidden="true"></i> Place order</button>
+            </div>
+          </form>
+
+          <aside id="checkout-summary"></aside>
         </div>
-      </section>
-    </main>
-    <div id="site-footer"></div>
-    <script src="/assets/js/site-config.js"></script>
-    <script type="module" src="/assets/js/pages/checkout.js"></script>
-  </body>
+      </div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script src="/assets/js/site-config.js"></script>
+  <script type="module" src="/assets/js/pages/checkout.js"></script>
+</body>
+
 </html>

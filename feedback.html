@@ -1,170 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback | Hoinam Energy</title>
-    <meta name="description" content="Share your experience with Hoinam Energy — before or after a product purchase or installation service.">
-    <link rel="canonical" href="https://hoinam-energy.vercel.app/feedback.html">
-    <meta property="og:title" content="Feedback | Hoinam Energy">
-    <meta property="og:description" content="Tell us how we did. Your feedback helps us serve you better.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hoinam-energy.vercel.app/feedback.html">
-    <meta property="og:image" content="https://hoinam-energy.vercel.app/assets/og-image.svg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#0055B8">
-    <link rel="stylesheet" href="/assets/css/styles.css">
-  </head>
-  <body>
-    <div id="site-header"></div>
-    <main>
 
-      <section class="page-hero">
-        <div class="container">
-          <span class="eyebrow"><i class="fa-solid fa-star" aria-hidden="true"></i> Feedback</span>
-          <h1>Tell us how we did</h1>
-          <p>Whether you're about to use our service or just finished — your feedback helps us improve and serve you better.</p>
-        </div>
-      </section>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback | Hoinam Energy</title>
+  <meta name="description"
+    content="Share your experience with Hoinam Energy — before or after a product purchase or installation service.">
+  <link rel="canonical" href="https://www.hoinamenergy.com/feedback.html">
+  <meta property="og:title" content="Feedback | Hoinam Energy">
+  <meta property="og:description" content="Tell us how we did. Your feedback helps us serve you better.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.hoinamenergy.com/feedback.html">
+  <meta property="og:image" content="https://www.hoinamenergy.com/assets/og-image.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0055B8">
+  <meta name="google-site-verification" content="nOpDTpY0chyDt-KeuM77wW8XYFoaz-Uq0OX1Egt6AJ8" />
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
 
-      <section class="section">
-        <div class="container">
-          <div class="feedback-layout">
+<body>
+  <div id="site-header"></div>
+  <main>
 
-            <!-- Form panel -->
-            <div>
-              <div id="feedback-success" class="panel feedback-success-panel hidden">
-                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                <h3>Thank you for your feedback!</h3>
-                <p class="muted">We've received your message. If you left an email address, expect a confirmation shortly.</p>
-                <div class="inline-actions" style="margin-top:1.25rem;">
-                  <a class="button" href="/products.html">Browse products</a>
-                  <a class="button button-ghost" href="/contact.html">Contact us</a>
-                </div>
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow"><i class="fa-solid fa-star" aria-hidden="true"></i> Feedback</span>
+        <h1>Tell us how we did</h1>
+        <p>Whether you're about to use our service or just finished — your feedback helps us improve and serve you
+          better.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="feedback-layout">
+
+          <!-- Form panel -->
+          <div>
+            <div id="feedback-success" class="panel feedback-success-panel hidden">
+              <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+              <h3>Thank you for your feedback!</h3>
+              <p class="muted">We've received your message. If you left an email address, expect a confirmation shortly.
+              </p>
+              <div class="inline-actions" style="margin-top:1.25rem;">
+                <a class="button" href="/products.html">Browse products</a>
+                <a class="button button-ghost" href="/contact.html">Contact us</a>
               </div>
-
-              <form class="panel form-grid" id="feedback-form">
-                <h3 class="field-full">Share your experience</h3>
-
-                <!-- Feedback type -->
-                <div class="field field-full">
-                  <span>What type of feedback is this?</span>
-                  <div class="feedback-type-grid" id="feedback-type-grid">
-                    <label class="feedback-type-card is-selected">
-                      <input type="radio" name="service_type" value="general" checked>
-                      <i class="fa-solid fa-comment" aria-hidden="true"></i>
-                      <span>General</span>
-                    </label>
-                    <label class="feedback-type-card">
-                      <input type="radio" name="service_type" value="pre_service">
-                      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                      <span>Before service</span>
-                    </label>
-                    <label class="feedback-type-card">
-                      <input type="radio" name="service_type" value="post_service">
-                      <i class="fa-solid fa-thumbs-up" aria-hidden="true"></i>
-                      <span>After service</span>
-                    </label>
-                    <label class="feedback-type-card">
-                      <input type="radio" name="service_type" value="product">
-                      <i class="fa-solid fa-box" aria-hidden="true"></i>
-                      <span>Product</span>
-                    </label>
-                    <label class="feedback-type-card">
-                      <input type="radio" name="service_type" value="installation">
-                      <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
-                      <span>Installation</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Star rating -->
-                <div class="field field-full">
-                  <span>Overall rating <span class="muted">(optional)</span></span>
-                  <div class="star-rating" id="star-rating" role="group" aria-label="Star rating">
-                    <button type="button" class="star-btn" data-value="1" aria-label="1 star">★</button>
-                    <button type="button" class="star-btn" data-value="2" aria-label="2 stars">★</button>
-                    <button type="button" class="star-btn" data-value="3" aria-label="3 stars">★</button>
-                    <button type="button" class="star-btn" data-value="4" aria-label="4 stars">★</button>
-                    <button type="button" class="star-btn" data-value="5" aria-label="5 stars">★</button>
-                  </div>
-                  <input type="hidden" name="rating" id="rating-value" value="">
-                </div>
-
-                <!-- Name & email -->
-                <label class="field">
-                  <span>Full name <span class="required">*</span></span>
-                  <input name="name" type="text" required autocomplete="name" placeholder="Your name">
-                </label>
-                <label class="field">
-                  <span>Email <span class="muted">(optional — for our reply)</span></span>
-                  <input name="email" type="email" autocomplete="email" placeholder="you@example.com">
-                </label>
-                <label class="field">
-                  <span>Phone <span class="muted">(optional)</span></span>
-                  <input name="phone" type="tel" autocomplete="tel" placeholder="+2348012345678">
-                </label>
-                <label class="field">
-                  <span>Order number <span class="muted">(optional)</span></span>
-                  <input name="order_number" type="text" placeholder="e.g. HN-20260430-XXXXXXXX">
-                </label>
-
-                <!-- Message -->
-                <label class="field field-full">
-                  <span>Your feedback <span class="required">*</span></span>
-                  <textarea name="message" required rows="5" placeholder="Tell us what went well, what could be better, or anything else on your mind…"></textarea>
-                </label>
-
-                <div class="field field-full">
-                  <button class="button button-full" type="submit" id="feedback-submit-btn">
-                    <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send feedback
-                  </button>
-                </div>
-              </form>
             </div>
 
-            <!-- Side info -->
-            <aside>
-              <div class="panel feedback-info-panel">
-                <span class="badge"><i class="fa-solid fa-envelope" aria-hidden="true"></i> Direct contact</span>
-                <h3>Prefer to email us directly?</h3>
-                <div class="feedback-contact-list">
-                  <div class="feedback-contact-item">
-                    <i class="fa-solid fa-tag" aria-hidden="true"></i>
-                    <div>
-                      <strong>Sales enquiries</strong>
-                      <a href="mailto:sales@hoinamenergy.com">sales@hoinamenergy.com</a>
-                    </div>
-                  </div>
-                  <div class="feedback-contact-item">
-                    <i class="fa-solid fa-headset" aria-hidden="true"></i>
-                    <div>
-                      <strong>Support &amp; after-service</strong>
-                      <a href="mailto:hoinamenergy@gmail.com">hoinamenergy@gmail.com</a>
-                    </div>
-                  </div>
+            <form class="panel form-grid" id="feedback-form">
+              <h3 class="field-full">Share your experience</h3>
+
+              <!-- Feedback type -->
+              <div class="field field-full">
+                <span>What type of feedback is this?</span>
+                <div class="feedback-type-grid" id="feedback-type-grid">
+                  <label class="feedback-type-card is-selected">
+                    <input type="radio" name="service_type" value="general" checked>
+                    <i class="fa-solid fa-comment" aria-hidden="true"></i>
+                    <span>General</span>
+                  </label>
+                  <label class="feedback-type-card">
+                    <input type="radio" name="service_type" value="pre_service">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <span>Before service</span>
+                  </label>
+                  <label class="feedback-type-card">
+                    <input type="radio" name="service_type" value="post_service">
+                    <i class="fa-solid fa-thumbs-up" aria-hidden="true"></i>
+                    <span>After service</span>
+                  </label>
+                  <label class="feedback-type-card">
+                    <input type="radio" name="service_type" value="product">
+                    <i class="fa-solid fa-box" aria-hidden="true"></i>
+                    <span>Product</span>
+                  </label>
+                  <label class="feedback-type-card">
+                    <input type="radio" name="service_type" value="installation">
+                    <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+                    <span>Installation</span>
+                  </label>
                 </div>
               </div>
 
-              <div class="panel feedback-info-panel" style="margin-top:1.5rem;">
-                <span class="badge"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> When to use this form</span>
-                <h3>What kind of feedback can I send?</h3>
-                <ul class="list-reset feedback-tips">
-                  <li><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <span><strong>Before service</strong> — questions about products, pricing, or what to expect.</span></li>
-                  <li><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i> <span><strong>After service</strong> — how your order or installation went.</span></li>
-                  <li><i class="fa-solid fa-box" aria-hidden="true"></i> <span><strong>Product feedback</strong> — performance, quality, or suggestions.</span></li>
-                  <li><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> <span><strong>Installation feedback</strong> — your experience with the installation team.</span></li>
-                </ul>
+              <!-- Star rating -->
+              <div class="field field-full">
+                <span>Overall rating <span class="muted">(optional)</span></span>
+                <div class="star-rating" id="star-rating" role="group" aria-label="Star rating">
+                  <button type="button" class="star-btn" data-value="1" aria-label="1 star">★</button>
+                  <button type="button" class="star-btn" data-value="2" aria-label="2 stars">★</button>
+                  <button type="button" class="star-btn" data-value="3" aria-label="3 stars">★</button>
+                  <button type="button" class="star-btn" data-value="4" aria-label="4 stars">★</button>
+                  <button type="button" class="star-btn" data-value="5" aria-label="5 stars">★</button>
+                </div>
+                <input type="hidden" name="rating" id="rating-value" value="">
               </div>
-            </aside>
 
+              <!-- Name & email -->
+              <label class="field">
+                <span>Full name <span class="required">*</span></span>
+                <input name="name" type="text" required autocomplete="name" placeholder="Your name">
+              </label>
+              <label class="field">
+                <span>Email <span class="muted">(optional — for our reply)</span></span>
+                <input name="email" type="email" autocomplete="email" placeholder="you@example.com">
+              </label>
+              <label class="field">
+                <span>Phone <span class="muted">(optional)</span></span>
+                <input name="phone" type="tel" autocomplete="tel" placeholder="+2348012345678">
+              </label>
+              <label class="field">
+                <span>Order number <span class="muted">(optional)</span></span>
+                <input name="order_number" type="text" placeholder="e.g. HN-20260430-XXXXXXXX">
+              </label>
+
+              <!-- Message -->
+              <label class="field field-full">
+                <span>Your feedback <span class="required">*</span></span>
+                <textarea name="message" required rows="5"
+                  placeholder="Tell us what went well, what could be better, or anything else on your mind…"></textarea>
+              </label>
+
+              <div class="field field-full">
+                <button class="button button-full" type="submit" id="feedback-submit-btn">
+                  <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send feedback
+                </button>
+              </div>
+            </form>
           </div>
-        </div>
-      </section>
 
-    </main>
-    <div id="site-footer"></div>
-    <script src="/assets/js/site-config.js"></script>
-    <script type="module" src="/assets/js/pages/feedback.js"></script>
-  </body>
+          <!-- Side info -->
+          <aside>
+            <div class="panel feedback-info-panel">
+              <span class="badge"><i class="fa-solid fa-envelope" aria-hidden="true"></i> Direct contact</span>
+              <h3>Prefer to email us directly?</h3>
+              <div class="feedback-contact-list">
+                <div class="feedback-contact-item">
+                  <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                  <div>
+                    <strong>Sales enquiries</strong>
+                    <a href="mailto:sales@hoinamenergy.com">sales@hoinamenergy.com</a>
+                  </div>
+                </div>
+                <div class="feedback-contact-item">
+                  <i class="fa-solid fa-headset" aria-hidden="true"></i>
+                  <div>
+                    <strong>Support &amp; after-service</strong>
+                    <a href="mailto:hoinamenergy@gmail.com">hoinamenergy@gmail.com</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel feedback-info-panel" style="margin-top:1.5rem;">
+              <span class="badge"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> When to use this
+                form</span>
+              <h3>What kind of feedback can I send?</h3>
+              <ul class="list-reset feedback-tips">
+                <li><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <span><strong>Before
+                      service</strong> — questions about products, pricing, or what to expect.</span></li>
+                <li><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i> <span><strong>After service</strong> — how
+                    your order or installation went.</span></li>
+                <li><i class="fa-solid fa-box" aria-hidden="true"></i> <span><strong>Product feedback</strong> —
+                    performance, quality, or suggestions.</span></li>
+                <li><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i> <span><strong>Installation
+                      feedback</strong> — your experience with the installation team.</span></li>
+              </ul>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <div id="site-footer"></div>
+  <script src="/assets/js/site-config.js"></script>
+  <script type="module" src="/assets/js/pages/feedback.js"></script>
+</body>
+
 </html>

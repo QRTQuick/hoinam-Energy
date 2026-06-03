@@ -160,11 +160,11 @@ def calculate_order_items(session, raw_items: Iterable[dict], *, lock_products: 
 
     for product_id, quantity in quantities.items():
         product = products[product_id]
-        if lock_products and product.stock > 0 and quantity > product.stock:
+        if lock_products and quantity > max(0, product.stock):
             raise StockError(
                 product_name=product.name,
                 requested=quantity,
-                available=product.stock,
+                available=max(0, product.stock),
             )
 
         line_total = (product.price or Decimal("0.00")) * quantity

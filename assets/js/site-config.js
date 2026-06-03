@@ -28,6 +28,8 @@
         "Hoinam Energy supplies solar panels, backup power systems, portable stations, and installation services for homes, offices, shops, and businesses across Nigeria. We work with multiple brands and help customers from product selection through to installation and after-service support.",
       email: "hoinamenergy@gmail.com",
       salesEmail: "sales@hoinamenergy.com",
+      whatsappNumber: "08140103819",
+      whatsappHref: "https://wa.me/2348140103819?text=Hello%20Hoinam%20Energy%2C%20I%20would%20like%20to%20make%20an%20enquiry.",
       offices: [
         {
           title: "Aba Office",
@@ -53,6 +55,11 @@
         }
       ],
       socials: [
+        {
+          label: "WhatsApp",
+          icon: "fa-brands fa-whatsapp",
+          href: "https://wa.me/2348140103819?text=Hello%20Hoinam%20Energy%2C%20I%20would%20like%20to%20make%20an%20enquiry."
+        },
         {
           label: "LinkedIn",
           icon: "fa-brands fa-linkedin-in",
