@@ -3116,6 +3116,9 @@ p,
 .catalog-hero-video-wrap {
   z-index: 0;
   background: #032349;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .catalog-hero-video {
@@ -3123,7 +3126,14 @@ p,
   height: 100%;
   object-fit: cover;
   opacity: 0.42;
-  filter: saturate(0.95) contrast(1.05);
+}
+
+/* Fallback when video fails to load */
+.catalog-hero-video-wrap video[style*="display: none"] {
+  display: none !important;
+}
+
+filter: saturate(0.95) contrast(1.05);
 }
 
 .catalog-hero-video-tint {

@@ -99,14 +99,42 @@ export async function bootstrapPage(activePage, options = {}) {
   try {
     const user = await waitForAuthReady();
     if (user) {
-      profile = await syncSession();
+      try {
+        profile = await syncSession();
+      } catch (syncError) {
+        // Log error but don't block UI - user may still be able to interact
+        console.error("Session sync error:", syncError);
+        
+        // Check if this is an auth error (401) or temporary network error
+        if (syncError.status === 401) {
+          // Token is invalid, clear session and require re-login
+          clearCachedProfile();
+          profile = null;
+          showToast("Your session has expired. Please sign in again.", "warning");
+        } else if (syncError.status === 400 || syncError.status === 409) {
+          // Client or data validation error, don't retry
+          clearCachedProfile();
+          profile = null;
+          showToast("Sign-in error. Please try again.", "error");
+        } else {
+          // Temporary error (network, 500, etc) - try to use cached profile
+          if (profile) {
+            console.warn("Using cached profile due to sync error:", syncError.message);
+            showToast("Connection issue. Using cached session.", "warning");
+          } else {
+            // No cached profile and sync failed
+            showToast("Unable to verify session. Please refresh the page.", "warning");
+          }
+        }
+      }
     } else {
       clearCachedProfile();
       profile = null;
     }
   } catch (error) {
-    console.error(error);
+    console.error("Auth initialization error:", error);
     showToast(error.message || "Unable to complete sign-in sync.", "error");
+    // Don't clear profile - let user try to continue with cached session
   }
 
   refreshShell();

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import io
+import logging
+import traceback
+import sys
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from pathlib import Path
@@ -24,6 +27,9 @@ from .emailer import (
 )
 from email.message import EmailMessage
 from .firebase_auth import verify_id_token
+
+# Configure logging
+logger = logging.getLogger(__name__)
 from .inventory import parse_stock_inventory
 from .models import (
     BlogPost,
@@ -132,16 +138,29 @@ def create_app() -> Flask:
 
     @app.errorhandler(ApiError)
     def handle_api_error(error):
+        logger.warning(f"API Error [{error.status_code}]: {error.message}")
         return jsonify({"success": False, "message": error.message}), error.status_code
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
         if request.path.startswith("/api/"):
-            app.logger.exception("Unhandled API error")
+            # Log full exception details
+            logger.error(
+                f"Unhandled API Exception [{request.method} {request.path}]: {type(error).__name__}: {str(error)}",
+                exc_info=True,
+                extra={
+                    "method": request.method,
+                    "path": request.path,
+                    "remote_addr": request.remote_addr,
+                    "error_type": type(error).__name__,
+                }
+            )
+            # Return user-friendly error message
             return jsonify(
                 {
                     "success": False,
-                    "message": "The request could not be completed.",
+                    "message": "An unexpected error occurred. Please try again later.",
+                    "error_id": getattr(error, "error_id", None),  # For support debugging
                 }
             ), 500
         raise error
@@ -167,21 +186,31 @@ def create_app() -> Flask:
 
         if not token:
             if required:
+                logger.debug(f"Authentication required but no token provided from {request.remote_addr}")
                 raise ApiError("Authentication token is required.", 401)
             return None
 
         try:
             claims = verify_id_token(token)
+            logger.debug(f"Firebase token verified for user: {claims.get('email')}")
         except Exception as exc:
-            raise ApiError(f"Unable to verify Firebase token: {exc}", 401) from exc
+            logger.warning(f"Firebase token verification failed: {type(exc).__name__}: {str(exc)}")
+            raise ApiError(f"Unable to verify authentication token. Please sign in again.", 401) from exc
 
         try:
             user = sync_user_from_claims(db_session(), claims)
+            logger.debug(f"User synced: {user.email} (ID: {user.id})")
         except ValueError as exc:
+            logger.warning(f"User sync failed: {str(exc)}")
             raise ApiError(str(exc), 409) from exc
+        except Exception as exc:
+            logger.error(f"Unexpected error during user sync: {type(exc).__name__}: {str(exc)}", exc_info=True)
+            raise ApiError("Failed to sync user session. Please sign in again.", 500) from exc
+        
         g.current_user = user
 
         if admin and user.role != "admin":
+            logger.warning(f"Admin action attempted by non-admin user: {user.email}")
             raise ApiError("Admin access is required.", 403)
 
         return user
@@ -2624,6 +2653,10 @@ def create_app() -> Flask:
 
     @app.get("/<path:path>")
     def serve_frontend(path: str):
+        # Don't intercept API routes — let Flask handle them
+        if path.startswith("api/"):
+            raise ApiError("Not found.", 404)
+
         candidate = project_root / path
         if candidate.is_file():
             return send_from_directory(project_root, path)

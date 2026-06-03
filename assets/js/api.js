@@ -3,6 +3,17 @@ import { getCurrentToken } from "./firebase.js";
 
 const apiBase = (window.HOINAM_CONFIG?.apiBaseUrl || `${window.location.origin}/api`).replace(/\/$/, "");
 
+// Simple logger that outputs to console in development
+const apiLogger = {
+  debug: (msg, data) => {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      console.log(`[API Debug] ${msg}`, data || "");
+    }
+  },
+  warn: (msg, data) => console.warn(`[API Warning] ${msg}`, data || ""),
+  error: (msg, data) => console.error(`[API Error] ${msg}`, data || ""),
+};
+
 function buildUrl(path) {
   if (path.startsWith("http")) {
     return path;
@@ -16,7 +27,8 @@ export async function apiFetch(path, options = {}) {
     body,
     authRequired = false,
     formData,
-    headers = {}
+    headers = {},
+    retries = 1,
   } = options;
 
   const requestHeaders = { ...headers };
@@ -26,27 +38,69 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (authRequired && !requestHeaders.Authorization) {
-    throw new Error("You need to sign in to continue.");
+    const error = new Error("You need to sign in to continue.");
+    apiLogger.warn("Auth required but no token available", { path, method });
+    throw error;
   }
 
-  const response = await fetch(buildUrl(path), {
-    method,
-    headers: formData ? requestHeaders : { "Content-Type": "application/json", ...requestHeaders },
-    body: formData ? formData : body ? JSON.stringify(body) : undefined
-  });
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      apiLogger.debug(`API Call [${method}] ${path}${attempt > 0 ? ` (attempt ${attempt + 1})` : ""}`);
+      
+      const response = await fetch(buildUrl(path), {
+        method,
+        headers: formData ? requestHeaders : { "Content-Type": "application/json", ...requestHeaders },
+        body: formData ? formData : body ? JSON.stringify(body) : undefined
+      });
 
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.success === false) {
-    const err = new Error(payload.message || "The request could not be completed.");
-    // Attach structured error data for special cases like stock errors
-    if (payload.error_type) {
-      err.errorType = payload.error_type;
-      err.errorData = payload;
+      const payload = await response.json().catch(() => ({}));
+      
+      if (!response.ok || payload.success === false) {
+        const errorMessage = payload.message || `Request failed with status ${response.status}`;
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        error.payload = payload;
+        
+        // Attach structured error data for special cases like stock errors
+        if (payload.error_type) {
+          error.errorType = payload.error_type;
+          error.errorData = payload;
+        }
+
+        apiLogger.warn(`API Error [${response.status}] ${path}`, {
+          message: errorMessage,
+          payload,
+        });
+
+        // Don't retry on auth/validation errors
+        if (response.status === 401 || response.status === 400 || response.status === 409) {
+          throw error;
+        }
+
+        lastError = error;
+        if (attempt < retries) {
+          // Exponential backoff: 100ms, 200ms, etc.
+          await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+          continue;
+        }
+        throw error;
+      }
+
+      apiLogger.debug(`API Success [${response.status}] ${path}`);
+      return payload.data;
+    } catch (err) {
+      lastError = err;
+      if (attempt < retries && err.status !== 401 && err.status !== 400 && err.status !== 409) {
+        apiLogger.debug(`Retrying ${path} after error...`);
+        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+        continue;
+      }
+      throw err;
     }
-    throw err;
   }
 
-  return payload.data;
+  throw lastError || new Error("Request failed after retries");
 }
 
 // Like apiFetch but returns { data, message } so callers can read the server message.
@@ -77,7 +131,10 @@ export async function apiFetchFull(path, options = {}) {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.success === false) {
-    throw new Error(payload.message || "The request could not be completed.");
+    const error = new Error(payload.message || "The request could not be completed.");
+    error.status = response.status;
+    apiLogger.error(`API Error [${response.status}] ${path}`, { message: payload.message });
+    throw error;
   }
 
   return { data: payload.data, message: payload.message };
@@ -87,15 +144,28 @@ export async function syncSession() {
   const token = await getCurrentToken();
   if (!token) {
     clearCachedProfile();
+    apiLogger.debug("No auth token available, clearing session");
     return null;
   }
 
-  const profile = await apiFetch("/auth/verify", {
-    method: "POST",
-    body: { idToken: token }
-  });
-  setCachedProfile(profile);
-  return profile;
+  try {
+    apiLogger.debug("Syncing session...");
+    const profile = await apiFetch("/auth/verify", {
+      method: "POST",
+      body: { idToken: token },
+      retries: 2, // Retry session verification up to 2 times
+    });
+    apiLogger.debug("Session synced successfully", { email: profile?.email });
+    setCachedProfile(profile);
+    return profile;
+  } catch (error) {
+    apiLogger.error("Session sync failed", {
+      status: error.status,
+      message: error.message,
+    });
+    clearCachedProfile();
+    throw error; // Re-throw so the caller can handle it
+  }
 }
 
 export async function updateProfile(payload) {
