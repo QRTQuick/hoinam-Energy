@@ -230,7 +230,7 @@ class Order(TimestampMixin, Base):
         String(64), unique=True, nullable=True, index=True
     )
 
-    user = relationship("User", back_populates="orders")
+    user = relationship("User", back_populates="orders", foreign_keys=[user_id])
     created_by = relationship("User", foreign_keys=[created_by_id])
     documents = relationship("DocumentRecord", back_populates="order")
     inventory_movements = relationship("InventoryMovement", back_populates="order")
