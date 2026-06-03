@@ -297,6 +297,6 @@ def build_feedback_acknowledgement_message(
     message["Subject"] = "We received your feedback — Hoinam Energy"
     message["From"] = sender
     message["To"] = feedback.email
-    message["Reply-To"] = "hoinamenergy@gmail.com"
+    message["Reply-To"] = "marketing@hoinamenergy.com"
     message.set_content(body)
     return message

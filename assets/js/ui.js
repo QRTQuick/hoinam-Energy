@@ -524,7 +524,7 @@ export function injectShell(activePage) {
 
   if (footer) {
     const office = (window.HOINAM_CONFIG?.company?.offices || [])[0];
-    const email = window.HOINAM_CONFIG?.company?.email || "hoinamenergy@gmail.com";
+    const email = window.HOINAM_CONFIG?.company?.email || "marketing@hoinamenergy.com";
     const socials = window.HOINAM_CONFIG?.company?.socials || [];
 
     footer.innerHTML = `

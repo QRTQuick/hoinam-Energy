@@ -32,7 +32,7 @@ Copy `.env.example` to `.env` and set:
 Optional:
 
 - `ALLOW_DEMO_PAYMENTS=true` for local demo checkout without a live Paystack secret
-- `ORDER_NOTIFICATION_EMAIL=hoinamenergy@gmail.com`
+- `ORDER_NOTIFICATION_EMAIL=marketing@hoinamenergy.com`
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`
 
 ## Required Frontend Config
