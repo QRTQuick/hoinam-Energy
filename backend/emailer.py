@@ -107,6 +107,72 @@ def build_order_notification_message(
     return message
 
 
+def build_sales_order_notification_message(
+    *,
+    settings,
+    user,
+    order,
+    shipping_address: dict | None,
+    verification_code: str | None = None,
+) -> EmailMessage:
+    shipping_address = shipping_address or {}
+    recipient = settings.order_notification_email
+    sender = settings.smtp_from_email or settings.smtp_username or recipient
+    sales_order_number = order.sales_order_number or order.order_number
+    subject = f"New Hoinam sales order: {sales_order_number}"
+
+    user_email = getattr(user, "email", None) or "Not provided"
+    user_phone = getattr(user, "phone", None) or shipping_address.get("phone") or "Not provided"
+    notes = order.notes or "None"
+    verification_line = verification_code or "Not applicable"
+    payment_details = getattr(order, "payment_details", None) or {}
+    payment_label = payment_details.get("label") or order.payment_method
+    selected_bank = payment_details.get("bank_name") or "Not applicable"
+    selected_account_number = payment_details.get("account_number") or "Not applicable"
+    selected_account_name = payment_details.get("account_name") or "Not applicable"
+
+    body = "\n".join(
+        [
+            "A new sales order has been created on Hoinam Energy.",
+            "",
+            f"Sales order number: {sales_order_number}",
+            f"Order number: {order.order_number}",
+            f"Order id: {order.id}",
+            f"Payment method: {payment_label}",
+            f"Payment status: {order.payment_status}",
+            f"Payment reference: {order.payment_reference}",
+            f"Verification code: {verification_line}",
+            f"Selected bank: {selected_bank}",
+            f"Selected account number: {selected_account_number}",
+            f"Selected account name: {selected_account_name}",
+            f"Total amount: {float(order.total_amount):,.2f} {order.currency}",
+            "",
+            "Customer account",
+            f"Name: {getattr(user, 'full_name', None) or shipping_address.get('full_name') or 'Not provided'}",
+            f"Email: {user_email}",
+            f"Phone: {user_phone}",
+            "",
+            "Shipping details",
+            _format_shipping_address(shipping_address),
+            "",
+            "Order items",
+            _format_items(order.items, order.currency),
+            "",
+            "Customer notes",
+            notes,
+        ]
+    )
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = sender
+    message["To"] = recipient
+    if user_email and user_email != "Not provided":
+        message["Reply-To"] = user_email
+    message.set_content(body)
+    return message
+
+
 def send_message_via_smtp(settings, message: EmailMessage) -> None:
     with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=settings.smtp_timeout_seconds) as smtp:
         if settings.smtp_use_tls:

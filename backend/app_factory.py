@@ -17,6 +17,7 @@ from .config import get_settings
 from .database import check_database_url, close_session, get_session, init_database
 from .emailer import (
     build_order_notification_message,
+    build_sales_order_notification_message,
     build_order_approved_message,
     build_subscription_confirmation_message,
     build_new_post_notification_message,
@@ -1442,6 +1443,28 @@ def create_app() -> Flask:
             order.payment_details = details
 
         db_session().commit()
+
+        if smtp_is_configured(settings):
+            try:
+                verification_code = details.get("verification_code") if 'details' in locals() else None
+                message = build_sales_order_notification_message(
+                    settings=settings,
+                    user=customer,
+                    order=order,
+                    shipping_address=shipping_address,
+                    verification_code=verification_code,
+                )
+                send_message_via_smtp(settings, message)
+            except Exception:
+                app.logger.exception(
+                    "Sales order %s was created but the notification email could not be sent.",
+                    order.order_number,
+                )
+        else:
+            app.logger.warning(
+                "SMTP is not configured, so no sales order notification email was sent for %s.",
+                order.order_number,
+            )
 
         order_payload = order.to_dict()
         order_payload["user"] = customer.to_dict()
