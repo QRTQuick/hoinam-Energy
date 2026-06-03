@@ -50,7 +50,7 @@ class User(TimestampMixin, Base):
     )
     monitoring_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    orders = relationship("Order", back_populates="user")
+    orders = relationship("Order", back_populates="user", foreign_keys="Order.user_id")
     installations = relationship("Installation", back_populates="user")
 
     def to_dict(self) -> dict:
